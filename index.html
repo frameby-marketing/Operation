@@ -107,6 +107,7 @@
     .title h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: -0.04em; }
     .title p { margin: 0; color: var(--muted); font-size: 14px; }
     .filters { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+    .dashboard-actions { flex: 0 0 100%; display: flex; gap: 10px; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
     .pill, select, button, input[type="date"] { border: 1px solid var(--panel-line); background: var(--ov05); color: var(--text2); padding: 10px 14px; border-radius: 999px; font-size: 13px; }
     select, input[type="date"] { outline: none; color-scheme: var(--scheme); }
     .custom-date { display: none; gap: 8px; align-items: center; }
@@ -160,6 +161,7 @@
     .simple-bar-chart.many .simple-bar-col { flex: 0 0 58px; min-width: 58px; }
     .simple-bar-wrap { width: 100%; height: 210px; display: flex; align-items: end; background: var(--ov03); border-radius: 14px; overflow: hidden; }
     .simple-bar { width: 100%; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, var(--bar-top), var(--blue)); min-height: 4px; }
+    .simple-bar.danger-threshold { background: linear-gradient(180deg, #fb7185, #dc2626); box-shadow: 0 8px 24px rgba(220,38,38,.24); }
     .simple-bar-wrap.has-issue { border: 1px solid rgba(251,191,36,.38); box-shadow: inset 0 0 0 1px rgba(251,191,36,.12); }
     .issue-marker { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: rgba(251,191,36,.18); color: var(--yellow); border: 1px solid rgba(251,191,36,.42); font-weight: 900; font-size: 12px; z-index: 2; }
     .simple-bar-issue { color: var(--yellow); font-size: 11px; font-weight: 800; margin-top: -4px; }
@@ -392,6 +394,7 @@
       main { padding: 18px; }
       .topbar { flex-direction: column; }
       .filters { justify-content: flex-start; }
+      .dashboard-actions { justify-content: flex-start; }
     }
     @media (max-width: 820px) {
       .period-vertical-grid { grid-template-columns:repeat(2,minmax(0,1fr)); row-gap:30px; }
@@ -420,8 +423,8 @@
     .po-stock-drawer-btn { margin-top: 10px; width: 100%; padding: 7px 0; background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.32); border-radius: 12px; color: var(--yellow); font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; }
 
     .po-month-nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; position: relative; z-index: 1; }
-    .po-cal-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, auto)); gap: 10px 22px; color: var(--muted); font-size: 12px; margin-bottom: 14px; position: relative; z-index: 1; }
-    .po-cal-legend span { display: flex; align-items: center; gap: 8px; }
+    .po-cal-legend { display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 12px; margin-bottom: 14px; position: relative; z-index: 1; }
+    .po-cal-legend span { display: inline-flex; align-items: center; gap: 5px; }
     .po-cal-legend b { display: inline-flex; flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%; color: #08111f; font-size: 10px; font-weight: 800; align-items: center; justify-content: center; }
     .po-cal-legend em { font-style: normal; }
     .po-cal-wrap { border: 1px solid var(--panel-line); border-radius: 18px; overflow: hidden; position: relative; z-index: 1; }
@@ -439,9 +442,11 @@
     .po-event-info { min-width: 0; }
     .po-event-info strong { display: block; color: var(--text2); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .po-event-info span { display: block; color: var(--muted); font-size: 10px; }
-    .po-week-cost { padding: 8px 10px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; border-bottom: 1px solid var(--panel-line); background: var(--ov02); }
+    .po-week-cost { padding: 8px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; border-bottom: 1px solid var(--panel-line); background: var(--ov02); container-type: inline-size; min-width: 0; }
     .po-week-cost span { font-size: 11px; color: var(--muted); }
-    .po-week-cost b { font-size: 14px; color: var(--text); font-family: inherit; }
+    .po-week-cost b { font-size: clamp(9px, 12cqi, 14px); color: var(--text); font-family: inherit; white-space: nowrap; letter-spacing: -.04em; max-width: 100%; }
+    .po-kpi { container-type: inline-size; }
+    .po-kpi .kpi-value { font-size: clamp(20px, 10cqi, 34px); white-space: nowrap; letter-spacing: -.06em; }
     @media (max-width: 1100px) {
       .po-stock-grid { grid-template-columns: repeat(2, 1fr); }
       .po-cal-grid { grid-template-columns: repeat(7, minmax(90px,1fr)) 100px; overflow-x: auto; }
@@ -474,15 +479,17 @@
           <button onclick="refreshDashboard()">라이브 동기화</button>
           <div class="pill" id="periodLabel">기간 계산 중</div>
           <div class="pill" title="Google Sheets 연동">📊 <span id="lastSync">동기화 대기</span></div>
-          <button class="icon-btn" onclick="refreshDashboard()" title="새로고침" aria-label="새로고침">🔄 <span>새로고침</span></button>
-          <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="라이트/다크 모드 전환" aria-label="테마 전환">
-            <span id="themeIcon">🌙</span> <span id="themeLabel">다크모드</span>
-          </button>
-          <div class="sheet-link" id="sheetLinkWrap">
-            <button class="icon-btn" onclick="onSheetButtonClick(event)" title="연동 스프레드시트로 이동" aria-label="연동 스프레드시트로 이동">
-              📊 <span>스프레드시트 바로가기</span> <span class="sheet-menu-arrow" id="sheetMenuArrow">▾</span>
+          <div class="dashboard-actions">
+            <button class="icon-btn" onclick="refreshDashboard()" title="새로고침" aria-label="새로고침">🔄 <span>새로고침</span></button>
+            <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="라이트/다크 모드 전환" aria-label="테마 전환">
+              <span id="themeIcon">🌙</span> <span id="themeLabel">다크모드</span>
             </button>
-            <div class="sheet-menu" id="sheetMenu" style="display:none;"></div>
+            <div class="sheet-link" id="sheetLinkWrap">
+              <button class="icon-btn" onclick="onSheetButtonClick(event)" title="연동 스프레드시트로 이동" aria-label="연동 스프레드시트로 이동">
+                📊 <span>스프레드시트 바로가기</span> <span class="sheet-menu-arrow" id="sheetMenuArrow">▾</span>
+              </button>
+              <div class="sheet-menu" id="sheetMenu" style="display:none;"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -1099,7 +1106,7 @@
           <div class="simple-bar-col">
             <div class="simple-bar-wrap ${issue > 0 ? 'has-issue' : ''}">
               ${issueHtml}
-              <div class="simple-bar" style="height:${height}%"></div>
+              <div class="simple-bar ${Number.isFinite(options.dangerThreshold) && value > options.dangerThreshold ? 'danger-threshold' : ''}" style="height:${height}%"></div>
             </div>
             <div class="simple-bar-value">${fmt(value)}</div>
             ${issueText}
@@ -3974,7 +3981,7 @@
 
     function poMetricCard(title, sub, value, caption, tone = 'good') {
       const cls = tone === 'danger' ? 'danger' : tone === 'warn' ? 'warn' : '';
-      return `<article class="card kpi"><div class="card-head"><div><div class="card-title">${title}</div><div class="card-sub">${sub}</div></div><span class="badge ${cls}">${tone === 'danger' ? '즉시 확인' : tone === 'warn' ? '관리 필요' : '운영 KPI'}</span></div><div class="kpi-value">${value}</div><div class="kpi-caption">${caption}</div></article>`;
+      return `<article class="card kpi po-kpi"><div class="card-head"><div><div class="card-title">${title}</div><div class="card-sub">${sub}</div></div><span class="badge ${cls}">${tone === 'danger' ? '즉시 확인' : tone === 'warn' ? '관리 필요' : '운영 KPI'}</span></div><div class="kpi-value">${value}</div><div class="kpi-caption">${caption}</div></article>`;
     }
 
     function poRenderSimulation() {
@@ -3997,7 +4004,7 @@
 
       const barData = months.map(m => ({ label: m.label, total: Math.round(m.total / 10000) }));
       const avgBar = Math.round(avg / 10000);
-      const barChart = `<article class="card full"><div class="card-head"><div><div class="card-title">월별 지출 금액</div><div class="card-sub">신규 · 추가입고 · 기존 잔금 합계 / 단위: 만원</div></div><span class="badge">AVG ${fmt(avgBar)}만원</span></div>${renderBarChart(barData, 'total', 'label')}</article>`;
+      const barChart = `<article class="card full"><div class="card-head"><div><div class="card-title">월별 지출 금액</div><div class="card-sub">신규 · 추가입고 · 기존 잔금 합계 / 단위: 만원 · 3,500만원 초과 시 빨간색</div></div><span class="badge">AVG ${fmt(avgBar)}만원</span></div>${renderBarChart(barData, 'total', 'label', { dangerThreshold: 3500 })}</article>`;
 
       return kpis + barChart + poRenderStockSection() + poRenderCalendar() + poRenderSupplierTable();
     }
