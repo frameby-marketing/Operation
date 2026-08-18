@@ -43,7 +43,7 @@
         linear-gradient(180deg, rgba(11,16,32,1), rgba(11,16,32,1));
     }
 
-    .app { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; position: relative; z-index: 1; overflow-x: hidden; }
+    .app { display: grid; grid-template-columns: minmax(0, 1fr); min-height: 100vh; position: relative; z-index: 1; overflow-x: hidden; }
     .sidebar { padding: 28px 20px; border-right: 1px solid var(--panel-line); background: rgba(9,14,28,.84); backdrop-filter: blur(18px); }
     .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 34px; }
     .logo { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, var(--blue), var(--cyan)); display: grid; place-items: center; font-weight: 900; }
@@ -395,24 +395,8 @@
   </style>
 </head>
 <body>
+  <script src="https://frameby-marketing.github.io/Dashboard_Hub/nav.js"></script>
   <div class="app">
-    <aside class="sidebar">
-      <div class="brand"><div class="logo">FB</div><div><strong>FRAMEBY</strong><span>Weekly Operation</span></div></div>
-      <div class="nav-title">DASHBOARD</div>
-      <div class="nav-item active" data-tab="overview"><i class="dot"></i> 종합 현황</div>
-      <div class="nav-item" data-tab="shipping"><i class="dot"></i> 택배 / 출고</div>
-      <div class="nav-item" data-tab="production"><i class="dot"></i> 제작 현황</div>
-      <div class="nav-item" data-tab="payment"><i class="dot"></i> 결제 관리</div>
-      <div class="nav-item" data-tab="inbound"><i class="dot"></i> 입고 예정</div>
-      <div class="nav-item" data-tab="inboundManage"><i class="dot"></i> 입고 관리</div>
-      <div class="nav-item" data-tab="inventory"><i class="dot"></i> 재고 관리</div>
-      <div class="nav-item" data-tab="coupang"><i class="dot"></i> 쿠팡 판매</div>
-      <div class="nav-item" data-tab="reorder"><i class="dot"></i> 발주관리</div>
-      <div class="nav-title">DATA SOURCE</div>
-      <div class="nav-item"><i class="dot"></i> Google Sheets</div>
-      <div class="nav-item"><i class="dot"></i> <span id="lastSync">동기화 대기</span></div>
-    </aside>
-
     <main>
       <section class="topbar">
         <div class="title">
@@ -435,6 +419,7 @@
           <button onclick="applyPeriodAndRender()">기간 적용</button>
           <button onclick="refreshDashboard()">라이브 동기화</button>
           <div class="pill" id="periodLabel">기간 계산 중</div>
+          <div class="pill" title="Google Sheets 연동">📊 <span id="lastSync">동기화 대기</span></div>
         </div>
       </section>
       <section class="grid" id="dashboardGrid"></section>
@@ -4121,7 +4106,9 @@
     }
 
     function renderCurrentTab() {
-      document.querySelectorAll('.nav-item[data-tab]').forEach(el => el.classList.toggle('active', el.dataset.tab === state.tab));
+      // 좌측 통합 사이드바(nav.js)가 이 페이지 밖에서 관리되므로, 현재 탭을
+      // location.hash에 반영해 새로고침/공유 링크/사이드바 활성 표시가 맞도록 한다.
+      try { history.replaceState(null, '', '#' + state.tab); } catch (e) { location.hash = state.tab; }
       const [title, desc] = titles[state.tab];
       document.getElementById('pageTitle').textContent = title;
       document.getElementById('pageDesc').textContent = desc;
@@ -4157,12 +4144,19 @@
       }
     }
 
-    document.querySelectorAll('.nav-item[data-tab]').forEach(el => {
-      el.addEventListener('click', () => {
-        state.tab = el.dataset.tab;
-        renderCurrentTab();
-      });
-    });
+    // 좌측 통합 사이드바(nav.js)의 Operation 항목 클릭을 페이지 새로고침 없이 받는 훅.
+    // nav.js가 이 페이지 위에서 Operation 하위 탭을 클릭하면 이 함수를 호출한다.
+    window.__fbOperationSetTab = function (tab) {
+      if (!titles[tab]) return;
+      state.tab = tab;
+      renderCurrentTab();
+    };
+
+    // 다른 대시보드에서 '#reorder' 같은 해시를 달고 넘어온 경우, 처음부터 해당 탭으로 연다.
+    (function applyInitialHashTab() {
+      const hashTab = (location.hash || '').replace('#', '');
+      if (hashTab && titles[hashTab]) state.tab = hashTab;
+    })();
 
     document.getElementById('periodSelect').addEventListener('change', () => {
       const isCustom = document.getElementById('periodSelect').value === 'custom';
