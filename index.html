@@ -104,7 +104,14 @@
 
     main { padding: 28px; min-width: 0; overflow-x: hidden; }
     .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 24px; }
-    .title h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: -0.04em; }
+    .title { min-width: 0; flex: 1 1 auto; }
+    .title h1 {
+      margin: 0 0 8px;
+      font-size: clamp(22px, 2vw, 30px);
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      line-height: 1.15;
+    }
     .title p { margin: 0; color: var(--muted); font-size: 14px; }
     .filters { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
     .dashboard-actions { flex: 0 0 100%; display: flex; gap: 10px; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
@@ -131,6 +138,7 @@
     .kpi.third-kpi { grid-column: span 4; }
     .wide { grid-column: span 8; min-height: 370px; }
     .side { grid-column: span 4; min-height: 370px; }
+    .three-quarter { grid-column: span 9; min-height: 370px; }
     .half { grid-column: span 6; min-height: 300px; }
     .third { grid-column: span 4; min-height: 280px; }
     .full { grid-column: span 12; }
@@ -387,10 +395,17 @@
     .modal-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; }
     .modal-close { border-radius: 999px; padding: 8px 12px; }
 
+    @media (max-width: 1450px) {
+      .title h1 { letter-spacing: -0.065em; }
+    }
+    @media (max-width: 1250px) {
+      .title h1 { letter-spacing: -0.09em; }
+    }
+
     @media (max-width: 1100px) {
       .app { grid-template-columns: 1fr; }
       .sidebar { display: none; }
-      .kpi, .wide, .side, .half, .third { grid-column: span 12; }
+      .kpi, .wide, .side, .three-quarter, .half, .third { grid-column: span 12; }
       main { padding: 18px; }
       .topbar { flex-direction: column; }
       .filters { justify-content: flex-start; }
@@ -1257,8 +1272,8 @@
         ${metricCard('총 제작수량','제작_일별 기준',fmt(productionTotal),productionQtyKey ? `${productionQtyKey} 합계` : '행 개수 기준','good',[productionTotal])}
         ${metricCard('불량 / 폐기','제작 품질 이슈',fmt(productionDefect),`불량·폐기율 ${productionRate}` ,productionDefect > 0 ? 'warn' : 'good',[productionDefect])}
         ${metricCard('쿠팡 판매','수량 + 공급가액 합계',`${fmt(coupangTotal)}개`,`공급가액 ${money(coupangSupplyTotal)}`,'good',coupangAnalysis.dated.slice(-7).map(r=>r.qty))}
-        <article class="card wide"><div class="card-head"><div><div class="card-title">일별 출고 흐름</div><div class="card-sub">선택 기간 전체 출고량 / 누락·오배송 발생일 표시</div></div><span class="badge">MAX ${fmt(maxDay.shipments)}</span></div>${renderBarChart(d,'shipments','date',{hideZero:true})}</article>
-        <article class="card side"><div class="card-head"><div><div class="card-title">즉시 확인 필요</div><div class="card-sub">문제 발생 항목 요약</div></div><span class="badge ${issues > 0 ? 'warn' : ''}">${fmt(issues)}건</span></div><div class="issue-list">
+        <article class="card three-quarter"><div class="card-head"><div><div class="card-title">일별 출고 흐름</div><div class="card-sub">선택 기간 전체 출고량 / 누락·오배송 발생일 표시</div></div><span class="badge">MAX ${fmt(maxDay.shipments)}</span></div>${renderBarChart(d,'shipments','date',{hideZero:true})}</article>
+        <article class="card half"><div class="card-head"><div><div class="card-title">즉시 확인 필요</div><div class="card-sub">문제 발생 항목 요약</div></div><span class="badge ${issues > 0 ? 'warn' : ''}">${fmt(issues)}건</span></div><div class="issue-list">
           <div class="issue"><div class="issue-icon">📦</div><div><strong>누락 발생</strong><span>${d.filter(r=>r.missing>0).length}일 발생</span></div><div class="issue-num">${fmt(missing)}</div></div>
           <div class="issue"><div class="issue-icon">🚚</div><div><strong>오배송 발생</strong><span>${d.filter(r=>r.misdelivery>0).length}일 발생</span></div><div class="issue-num">${fmt(mis)}</div></div>
           <div class="issue"><div class="issue-icon">📊</div><div><strong>최대 출고일</strong><span>${maxDay.dateText || dateStr(maxDay.date)}</span></div><div class="issue-num">${fmt(maxDay.shipments)}</div></div>
@@ -1279,7 +1294,7 @@
         </div></article>
         <article class="card half"><div class="card-head"><div><div class="card-title">운영 섹션 연결 상태</div><div class="card-sub">구글시트 탭 기준 데이터 연결</div></div></div><div class="progress-block">${renderProgressHtml()}</div></article>
         ${overviewPaymentModal}
-        <article class="card half"><div class="card-head"><div><div class="card-title">대표 보고용 핵심 문장</div><div class="card-sub">현재 데이터 기준 자동 생성</div></div></div><div class="issue-list">
+        <article class="card full"><div class="card-head"><div><div class="card-title">대표 보고용 핵심 문장</div><div class="card-sub">현재 데이터 기준 자동 생성</div></div></div><div class="issue-list">
           <div class="issue"><div class="issue-icon">1</div><div><strong>선택 기간 출고는 총 ${fmt(totalShip)}건입니다.</strong><span>출고일 기준 평균은 ${fmt(avgBiz)}건입니다.</span></div><div></div></div>
           <div class="issue"><div class="issue-icon">2</div><div><strong>문제 건수는 총 ${fmt(issues)}건입니다.</strong><span>누락 ${fmt(missing)}건, 오배송 ${fmt(mis)}건, 문제율 ${pct(issues,totalShip)}입니다.</span></div><div></div></div>
           <div class="issue"><div class="issue-icon">3</div><div><strong>선택 기간 쿠팡 판매수량은 ${fmt(coupangTotal)}개, 공급가액 합계는 ${money(coupangSupplyTotal)}입니다.</strong><span>종합현황에서는 상단 기간 선택 기준으로 계산됩니다.</span></div><div></div></div>
@@ -1887,9 +1902,9 @@
       `;
       const summaryCards = `
         ${viewToggle('coupang')}
-        ${metricCard('이번달 판매수량', '전월 대비', fmt(a.thisMonthQty), `전월 ${fmt(a.prevMonthQty)}개 / ${changeRate(a.thisMonthQty, a.prevMonthQty)}`, changeTone(a.thisMonthQty, a.prevMonthQty), [a.prevMonthQty, a.thisMonthQty])}
-        ${metricCard('이번달 공급가액', '전월 대비', money(a.thisMonthSupply), `전월 ${money(a.prevMonthSupply)} / ${changeRate(a.thisMonthSupply, a.prevMonthSupply)}`, changeTone(a.thisMonthSupply, a.prevMonthSupply), [a.prevMonthSupply, a.thisMonthSupply])}
-        ${metricCard('선택기간 판매수량', '상단 기간 선택 기준', fmt(periodA.totalQty), `${document.getElementById('periodLabel').textContent} / 공급가액 ${money(periodA.totalSupply)}`, 'good', periodA.dated.map(r=>r.qty))}
+        ${sizedMetricCard(metricCard('이번달 판매수량', '전월 대비', fmt(a.thisMonthQty), `전월 ${fmt(a.prevMonthQty)}개 / ${changeRate(a.thisMonthQty, a.prevMonthQty)}`, changeTone(a.thisMonthQty, a.prevMonthQty), [a.prevMonthQty, a.thisMonthQty]), 'third-kpi')}
+        ${sizedMetricCard(metricCard('이번달 공급가액', '전월 대비', money(a.thisMonthSupply), `전월 ${money(a.prevMonthSupply)} / ${changeRate(a.thisMonthSupply, a.prevMonthSupply)}`, changeTone(a.thisMonthSupply, a.prevMonthSupply), [a.prevMonthSupply, a.thisMonthSupply]), 'third-kpi')}
+        ${sizedMetricCard(metricCard('선택기간 판매수량', '상단 기간 선택 기준', fmt(periodA.totalQty), `${document.getElementById('periodLabel').textContent} / 공급가액 ${money(periodA.totalSupply)}`, 'good', periodA.dated.map(r=>r.qty)), 'third-kpi')}
       `;
       if (state.viewMode.coupang === 'summary') {
         grid(`${summaryCards}
@@ -2795,7 +2810,7 @@
           </div>
         </article>
 
-        <article class="card side"><div class="card-head"><div><div class="card-title">결제 유형 분석</div><div class="card-sub">선급금 / 잔금 기준</div></div></div>${renderProductRankChart(a.typeRank, 6)}</article>
+        <article class="card half"><div class="card-head"><div><div class="card-title">결제 유형 분석</div><div class="card-sub">선급금 / 잔금 기준</div></div></div>${renderProductRankChart(a.typeRank, 6)}</article>
 
         <article class="card half"><div class="card-head"><div><div class="card-title">거래처별 PO금액</div><div class="card-sub">총 PO금액 기준 / 통화열 기준 환율 적용</div></div></div>${renderProductRankChart(a.vendorRank, 8)}</article>
 
@@ -3199,11 +3214,11 @@
       `).join('');
 
       grid(`
-        ${metricCard('실입고수량','선택 기간 합계',fmt(a.totalActual),`예정 ${fmt(a.totalExpected)}개 / 완료율 ${a.completeRate}`,'good',a.daily.map(r=>r.qty))}
-        ${metricCard('검수 불량','불량/파손 수량',fmt(a.totalDefect),a.defectQtyKey || '불량 컬럼 없음',a.totalDefect > 0 ? 'warn' : 'good',[a.totalDefect])}
-        ${metricCard('입고 금액','U열 최종 입고금액 기준',money(a.totalAmount),`U열 ${a.amountKey || '최종 입고금액'} 합계`,'good',[a.totalAmount])}
+        ${sizedMetricCard(metricCard('실입고수량','선택 기간 합계',fmt(a.totalActual),`예정 ${fmt(a.totalExpected)}개 / 완료율 ${a.completeRate}`,'good',a.daily.map(r=>r.qty)), 'third-kpi')}
+        ${sizedMetricCard(metricCard('검수 불량','불량/파손 수량',fmt(a.totalDefect),a.defectQtyKey || '불량 컬럼 없음',a.totalDefect > 0 ? 'warn' : 'good',[a.totalDefect]), 'third-kpi')}
+        ${sizedMetricCard(metricCard('입고 금액','U열 최종 입고금액 기준',money(a.totalAmount),`U열 ${a.amountKey || '최종 입고금액'} 합계`,'good',[a.totalAmount]), 'third-kpi')}
 
-        <article class="card wide"><div class="card-head"><div><div class="card-title">일별 입고 처리 흐름</div><div class="card-sub">실입고일 기준 수량 흐름</div></div><span class="badge">${a.dateKey || '날짜열 없음'}</span></div>${renderBarChart(a.daily, 'qty', 'label')}</article>
+        <article class="card full"><div class="card-head"><div><div class="card-title">일별 입고 처리 흐름</div><div class="card-sub">실입고일 기준 수량 흐름</div></div><span class="badge">${a.dateKey || '날짜열 없음'}</span></div>${renderBarChart(a.daily, 'qty', 'label')}</article>
         <article class="card half"><div class="card-head"><div><div class="card-title">품목별 실입고 TOP</div><div class="card-sub">금액은 U열 최종 입고금액 / 수량은 실입고수량 기준</div></div></div>${renderProductRankChart(a.productRank, 8)}</article>
         <article class="card half"><div class="card-head"><div><div class="card-title">입고 상태 요약</div><div class="card-sub">상태 컬럼 기준</div></div></div>${renderProductRankChart(a.statusRank, 8)}</article>
         <article class="card half"><div class="card-head"><div><div class="card-title">감지된 입고관리 컬럼</div><div class="card-sub">입고_관리 시트 구조 확인</div></div></div><div class="issue-list">
