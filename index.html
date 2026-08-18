@@ -4082,7 +4082,16 @@
         : `<span class="badge ${status === 'out' ? 'danger' : status === 'preorder' ? 'warn' : ''}" style="font-size:11px;padding:3px 8px;">${badgeTxt}</span>`;
       const dl = poDaysLeftText(item);
       const restockAt = (item.restockAt || '').trim();
-      const restockTxt = (!restockAt || restockAt === '-') ? '재입고 예정 없음' : restockAt;
+      const restockDate = poParseKoreanDate(restockAt);
+      let restockDday = '';
+      if (restockDate) {
+        const today = todayDate();
+        const target = new Date(restockDate);
+        target.setHours(0, 0, 0, 0);
+        const diffDays = Math.round((target - today) / 86400000);
+        restockDday = diffDays > 0 ? ` (D-${diffDays})` : diffDays === 0 ? ' (D-Day)' : ` (D+${Math.abs(diffDays)})`;
+      }
+      const restockTxt = (!restockAt || restockAt === '-') ? '재입고 예정 없음' : `${restockAt}${restockDday}`;
       const inboundQty = parseInt(String(item.restockQty || '').replace(/[^0-9,]/g, '').replace(/,/g, '')) || 0;
       const orderDeadline = poOrderDeadline(item);
       const drawerId = `po-preorder-${item.name.replace(/[\s\-]/g, '_')}`;
