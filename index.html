@@ -10,6 +10,7 @@
       --panel: #131a2e;
       --panel-line: rgba(255,255,255,.08);
       --text: #eef3ff;
+      --text2: #dce5ff;
       --muted: #8f9bb7;
       --blue: #5b7cfa;
       --cyan: #22d3ee;
@@ -17,10 +18,54 @@
       --yellow: #fbbf24;
       --red: #fb7185;
       --radius: 22px;
+      --modal-bg: #10172a;
+      --bar-top: #65e4ff;
+      --scheme: dark;
+      --ov02: rgba(255,255,255,.02);
+      --ov025: rgba(255,255,255,.025);
+      --ov03: rgba(255,255,255,.03);
+      --ov035: rgba(255,255,255,.035);
+      --ov04: rgba(255,255,255,.04);
+      --ov045: rgba(255,255,255,.045);
+      --ov05: rgba(255,255,255,.05);
+      --ov055: rgba(255,255,255,.055);
+      --ov06: rgba(255,255,255,.06);
+      --ov07: rgba(255,255,255,.07);
+      --ov08: rgba(255,255,255,.08);
+      --ov12: rgba(255,255,255,.12);
+    }
+
+    html[data-theme="light"] {
+      --bg: #eef1f8;
+      --panel: #ffffff;
+      --panel-line: rgba(15,23,42,.12);
+      --text: #10162a;
+      --text2: #1f2a44;
+      --muted: #667089;
+      --blue: #3357d6;
+      --cyan: #0891b2;
+      --green: #15803d;
+      --yellow: #a15c00;
+      --red: #c02b3c;
+      --modal-bg: #ffffff;
+      --bar-top: #0ea5c0;
+      --scheme: light;
+      --ov02: rgba(15,23,42,.025);
+      --ov025: rgba(15,23,42,.03);
+      --ov03: rgba(15,23,42,.035);
+      --ov035: rgba(15,23,42,.04);
+      --ov04: rgba(15,23,42,.045);
+      --ov045: rgba(15,23,42,.05);
+      --ov05: rgba(15,23,42,.055);
+      --ov055: rgba(15,23,42,.06);
+      --ov06: rgba(15,23,42,.07);
+      --ov07: rgba(15,23,42,.08);
+      --ov08: rgba(15,23,42,.10);
+      --ov12: rgba(15,23,42,.16);
     }
 
     * { box-sizing: border-box; }
-    html { background: var(--bg); overflow-x: hidden; }
+    html { background: var(--bg); overflow-x: hidden; transition: background .2s ease; }
     body {
       margin: 0;
       background: var(--bg);
@@ -29,6 +74,7 @@
       min-height: 100vh;
       overflow-x: hidden;
       position: relative;
+      transition: background .2s ease, color .2s ease;
     }
 
     body::before {
@@ -38,9 +84,9 @@
       z-index: 0;
       pointer-events: none;
       background:
-        radial-gradient(circle at 10% 0%, rgba(91,124,250,.22), transparent 30%),
-        radial-gradient(circle at 85% 5%, rgba(34,211,238,.14), transparent 25%),
-        linear-gradient(180deg, rgba(11,16,32,1), rgba(11,16,32,1));
+        radial-gradient(circle at 10% 0%, rgba(91,124,250,.16), transparent 30%),
+        radial-gradient(circle at 85% 5%, rgba(34,211,238,.10), transparent 25%),
+        linear-gradient(180deg, var(--bg), var(--bg));
     }
 
     .app { display: grid; grid-template-columns: minmax(0, 1fr); min-height: 100vh; position: relative; z-index: 1; overflow-x: hidden; }
@@ -50,8 +96,8 @@
     .brand strong { display:block; font-size: 18px; }
     .brand span { color: var(--muted); font-size: 12px; }
     .nav-title { font-size: 11px; color: var(--muted); letter-spacing: .12em; margin: 22px 12px 10px; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 13px 14px; color: #cfd7ee; border-radius: 15px; margin-bottom: 8px; font-size: 14px; cursor: pointer; transition: .18s; }
-    .nav-item:hover { background: rgba(255,255,255,.05); }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 13px 14px; color: var(--text2); border-radius: 15px; margin-bottom: 8px; font-size: 14px; cursor: pointer; transition: .18s; }
+    .nav-item:hover { background: var(--ov05); }
     .nav-item.active { background: linear-gradient(135deg, rgba(91,124,250,.24), rgba(34,211,238,.12)); border: 1px solid rgba(91,124,250,.42); color: #fff; }
     .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: 0 0 auto; }
     .active .dot { background: var(--cyan); box-shadow: 0 0 18px var(--cyan); }
@@ -61,16 +107,22 @@
     .title h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: -0.04em; }
     .title p { margin: 0; color: var(--muted); font-size: 14px; }
     .filters { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
-    .pill, select, button, input[type="date"] { border: 1px solid var(--panel-line); background: rgba(255,255,255,.05); color: #d7def4; padding: 10px 14px; border-radius: 999px; font-size: 13px; }
-    select, input[type="date"] { outline: none; color-scheme: dark; }
+    .pill, select, button, input[type="date"] { border: 1px solid var(--panel-line); background: var(--ov05); color: var(--text2); padding: 10px 14px; border-radius: 999px; font-size: 13px; }
+    select, input[type="date"] { outline: none; color-scheme: var(--scheme); }
     .custom-date { display: none; gap: 8px; align-items: center; }
     .custom-date.show { display: flex; }
     button { cursor: pointer; background: linear-gradient(135deg, rgba(91,124,250,.55), rgba(34,211,238,.28)); }
     button.active-mode { background: linear-gradient(135deg, rgba(34,211,238,.45), rgba(52,211,153,.25)); border-color: rgba(52,211,153,.45); color: #fff; font-weight: 800; }
 
+    .icon-btn { width: 38px; height: 38px; padding: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--ov05); border: 1px solid var(--panel-line); color: var(--text2); flex-shrink: 0; }
+    .icon-btn:hover { background: var(--ov08); }
+    .theme-toggle { position: relative; display: flex; align-items: center; width: 52px; height: 28px; padding: 3px; border-radius: 999px; background: var(--ov05); border: 1px solid var(--panel-line); cursor: pointer; flex-shrink: 0; transition: background .2s ease, border-color .2s ease; }
+    .theme-toggle-knob { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--cyan)); display: flex; align-items: center; justify-content: center; font-size: 11px; transform: translateX(0); transition: transform .25s cubic-bezier(.4,0,.2,1); box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+    html[data-theme="light"] .theme-toggle-knob { transform: translateX(24px); }
+
     .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025)); border: 1px solid var(--panel-line); border-radius: var(--radius); padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.22); position: relative; overflow: hidden; min-width: 0; }
-    .card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 85% 0%, rgba(255,255,255,.08), transparent 28%); pointer-events: none; }
+    .card { background: linear-gradient(180deg, var(--ov055), var(--ov025)); border: 1px solid var(--panel-line); border-radius: var(--radius); padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.22); position: relative; overflow: hidden; min-width: 0; }
+    .card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 85% 0%, var(--ov08), transparent 28%); pointer-events: none; }
     .kpi { grid-column: span 3; min-height: 146px; }
     .kpi.double { grid-column: span 6; }
     .kpi.third-kpi { grid-column: span 4; }
@@ -80,7 +132,7 @@
     .third { grid-column: span 4; min-height: 280px; }
     .full { grid-column: span 12; }
     .card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; position: relative; z-index: 1; }
-    .card-title { font-size: 14px; color: #dce5ff; font-weight: 700; }
+    .card-title { font-size: 14px; color: var(--text2); font-weight: 700; }
     .card-sub { color: var(--muted); font-size: 12px; margin-top: 3px; }
     .badge { font-size: 12px; padding: 7px 10px; border-radius: 999px; background: rgba(52,211,153,.12); color: var(--green); border: 1px solid rgba(52,211,153,.24); white-space: nowrap; }
     .badge.warn { background: rgba(251,191,36,.12); color: var(--yellow); border-color: rgba(251,191,36,.24); }
@@ -92,38 +144,38 @@
 
     .chart-area { display: grid; grid-template-columns: 46px repeat(7, 1fr); grid-template-rows: repeat(5, 42px) 38px; gap: 0 10px; position: relative; z-index: 1; margin-top: 22px; }
     .y-label { color: var(--muted); font-size: 11px; text-align: right; padding-right: 8px; }
-    .grid-line { border-top: 1px dashed rgba(255,255,255,.08); grid-column: 2 / -1; }
-    .vbar-wrap { grid-row: 1 / 6; align-self: end; display: flex; align-items: end; height: 210px; background: rgba(255,255,255,.03); border-radius: 14px; overflow: hidden; }
-    .vbar { width: 100%; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, #65e4ff, #5b7cfa); min-height: 3px; }
+    .grid-line { border-top: 1px dashed var(--ov08); grid-column: 2 / -1; }
+    .vbar-wrap { grid-row: 1 / 6; align-self: end; display: flex; align-items: end; height: 210px; background: var(--ov03); border-radius: 14px; overflow: hidden; }
+    .vbar { width: 100%; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, var(--bar-top), var(--blue)); min-height: 3px; }
     .x-label { color: var(--muted); font-size: 11px; text-align: center; align-self: center; line-height: 1.35; }
 
     .simple-bar-scroll { position: relative; z-index: 1; width: 100%; overflow-x: auto; padding-bottom: 4px; }
     .simple-bar-scroll::-webkit-scrollbar { height: 8px; }
-    .simple-bar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 999px; }
-    .simple-bar-chart { position: relative; display: flex; align-items: end; gap: 14px; height: 280px; padding: 18px 0 58px; border-bottom: 1px dashed rgba(255,255,255,.08); min-width: 100%; }
+    .simple-bar-scroll::-webkit-scrollbar-thumb { background: var(--ov12); border-radius: 999px; }
+    .simple-bar-chart { position: relative; display: flex; align-items: end; gap: 14px; height: 280px; padding: 18px 0 58px; border-bottom: 1px dashed var(--ov08); min-width: 100%; }
     .simple-bar-chart.many { gap: 10px; min-width: max-content; }
     .simple-bar-col { flex: 1; min-width: 64px; height: 100%; display: flex; flex-direction: column; justify-content: end; align-items: center; gap: 8px; position: relative; }
     .simple-bar-chart.many .simple-bar-col { flex: 0 0 58px; min-width: 58px; }
-    .simple-bar-wrap { width: 100%; height: 210px; display: flex; align-items: end; background: rgba(255,255,255,.03); border-radius: 14px; overflow: hidden; }
-    .simple-bar { width: 100%; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, #65e4ff, #5b7cfa); min-height: 4px; }
+    .simple-bar-wrap { width: 100%; height: 210px; display: flex; align-items: end; background: var(--ov03); border-radius: 14px; overflow: hidden; }
+    .simple-bar { width: 100%; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, var(--bar-top), var(--blue)); min-height: 4px; }
     .simple-bar-wrap.has-issue { border: 1px solid rgba(251,191,36,.38); box-shadow: inset 0 0 0 1px rgba(251,191,36,.12); }
     .issue-marker { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: rgba(251,191,36,.18); color: var(--yellow); border: 1px solid rgba(251,191,36,.42); font-weight: 900; font-size: 12px; z-index: 2; }
     .simple-bar-issue { color: var(--yellow); font-size: 11px; font-weight: 800; margin-top: -4px; }
     .simple-bar-label { position: absolute; bottom: -46px; left: 50%; transform: translateX(-50%); width: 100%; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.35; }
-    .simple-bar-value { color: #dce5ff; font-size: 12px; font-weight: 800; }
+    .simple-bar-value { color: var(--text2); font-size: 12px; font-weight: 800; }
     .period-compare { position: relative; z-index: 1; display: grid; gap: 16px; margin-top: 18px; }
     .period-compare-legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
     .period-compare-dot { display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 6px; vertical-align: -1px; }
     .period-compare-dot.current { background: var(--cyan); }
     .period-compare-dot.previous { background: var(--yellow); }
     .period-compare-row { display: grid; grid-template-columns: 120px minmax(0, 1fr) 190px; gap: 14px; align-items: center; }
-    .period-compare-label { color: #dce5ff; font-size: 13px; font-weight: 800; }
+    .period-compare-label { color: var(--text2); font-size: 13px; font-weight: 800; }
     .period-compare-bars { display: grid; gap: 7px; min-width: 0; }
-    .period-compare-track { height: 18px; border-radius: 999px; background: rgba(255,255,255,.06); overflow: hidden; }
+    .period-compare-track { height: 18px; border-radius: 999px; background: var(--ov06); overflow: hidden; }
     .period-compare-bar { height: 100%; border-radius: inherit; }
     .period-compare-bar.current { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
     .period-compare-bar.previous { background: linear-gradient(90deg, rgba(251,191,36,.48), rgba(251,191,36,.9)); }
-    .period-compare-value { color: #eef3ff; font-size: 13px; font-weight: 900; text-align: right; }
+    .period-compare-value { color: var(--text); font-size: 13px; font-weight: 900; text-align: right; }
     .period-compare-sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
     .period-compare-delta { font-size: 11px; margin-top: 4px; font-weight: 800; }
     .period-compare-delta.good { color: var(--green); }
@@ -134,34 +186,34 @@
     .period-vertical-legend { display:flex; align-items:center; gap:16px; flex-wrap:wrap; color:var(--muted); font-size:12px; margin-bottom:18px; }
     .period-vertical-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:22px; }
     .period-vertical-facet { min-width:0; }
-    .period-vertical-title { text-align:center; color:#dce5ff; font-size:13px; font-weight:800; }
+    .period-vertical-title { text-align:center; color:var(--text2); font-size:13px; font-weight:800; }
     .period-vertical-delta { min-height:32px; margin:5px 0 10px; text-align:center; font-size:11px; font-weight:800; line-height:1.35; }
     .period-vertical-delta.good { color:var(--green); }
     .period-vertical-delta.warn { color:var(--yellow); }
     .period-vertical-delta.neutral { color:var(--muted); }
-    .period-vertical-plot { height:230px; display:grid; grid-template-columns:repeat(2,minmax(46px,74px)); justify-content:center; align-items:end; gap:14px; border-bottom:1px solid var(--panel-line); background:repeating-linear-gradient(to top, rgba(255,255,255,.055) 0, rgba(255,255,255,.055) 1px, transparent 1px, transparent 25%); }
+    .period-vertical-plot { height:230px; display:grid; grid-template-columns:repeat(2,minmax(46px,74px)); justify-content:center; align-items:end; gap:14px; border-bottom:1px solid var(--panel-line); background:repeating-linear-gradient(to top, var(--ov055) 0, var(--ov055) 1px, transparent 1px, transparent 25%); }
     .period-vertical-column { height:100%; display:flex; flex-direction:column; justify-content:end; align-items:stretch; gap:7px; }
-    .period-vertical-value { text-align:center; color:#eef3ff; font-size:12px; font-weight:900; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .period-vertical-value { text-align:center; color:var(--text); font-size:12px; font-weight:900; font-variant-numeric:tabular-nums; white-space:nowrap; }
     .period-vertical-bar { min-height:4px; border-radius:9px 9px 0 0; background:linear-gradient(180deg,var(--cyan),var(--blue)); }
     .period-vertical-bar.previous { background:linear-gradient(180deg,rgba(251,191,36,.9),rgba(251,191,36,.48)); }
     .period-vertical-axis { display:grid; grid-template-columns:repeat(2,minmax(46px,74px)); justify-content:center; gap:14px; margin-top:8px; color:var(--muted); font-size:11px; text-align:center; }
     .period-vertical-context { color:var(--muted); font-size:11px; text-align:center; margin-top:7px; min-height:15px; }
 
     .issue-list { display: grid; gap: 12px; position: relative; z-index: 1; }
-    .issue { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 13px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); }
+    .issue { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 13px; border-radius: 16px; background: var(--ov04); border: 1px solid var(--ov06); }
     .issue-icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: rgba(91,124,250,.14); }
     .issue strong { display: block; font-size: 14px; margin-bottom: 3px; }
     .issue span { color: var(--muted); font-size: 12px; }
     .issue-num { font-weight: 800; font-size: 18px; }
     .progress-block { position: relative; z-index: 1; display: grid; gap: 16px; }
     .progress-row { display: grid; gap: 8px; }
-    .progress-top { display:flex; justify-content:space-between; font-size:13px; color:#dce5ff; }
-    .track { height: 10px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+    .progress-top { display:flex; justify-content:space-between; font-size:13px; color:var(--text2); }
+    .track { height: 10px; border-radius: 999px; background: var(--ov08); overflow: hidden; }
     .fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
 
     table { width: 100%; border-collapse: collapse; position: relative; z-index: 1; font-size: 13px; }
     th { text-align: left; color: var(--muted); font-weight: 600; padding: 12px 10px; border-bottom: 1px solid var(--panel-line); }
-    td { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,.05); color: #e8eeff; }
+    td { padding: 14px 10px; border-bottom: 1px solid var(--ov05); color: var(--text2); }
     .right { text-align: right; }
     .muted { color: var(--muted); }
     .error { color: var(--red); font-size: 13px; margin-top: 8px; }
@@ -175,7 +227,7 @@
     .rank-row { display: grid; grid-template-columns: minmax(240px, 1.4fr) 2.4fr 120px 80px; gap: 12px; align-items: center; }
     .rank-name {
       font-size: 13px;
-      color: #e8eeff;
+      color: var(--text2);
       line-height: 1.35;
       min-width: 0;
       display: -webkit-box;
@@ -184,9 +236,9 @@
       overflow: hidden;
       word-break: keep-all;
     }
-    .rank-track { height: 16px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+    .rank-track { height: 16px; border-radius: 999px; background: var(--ov08); overflow: hidden; }
     .rank-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
-    .rank-value { text-align: right; font-size: 13px; color: #dce5ff; font-weight: 700; }
+    .rank-value { text-align: right; font-size: 13px; color: var(--text2); font-weight: 700; }
     .rank-qty { text-align: right; font-size: 13px; color: var(--yellow); font-weight: 800; }
     .flow-wrap { position: relative; z-index: 1; margin-top: 20px; }
     .flow-grid {
@@ -197,7 +249,7 @@
       pointer-events: none;
     }
     .flow-grid div {
-      border-top: 1px dashed rgba(255,255,255,.07);
+      border-top: 1px dashed var(--ov07);
     }
     .flow-chart {
       height: 360px;
@@ -227,7 +279,7 @@
     .flow-bar {
       width: 100%;
       border-radius: 18px 18px 8px 8px;
-      background: linear-gradient(180deg, #63e2ff 0%, #5b7cfa 100%);
+      background: linear-gradient(180deg, var(--bar-top) 0%, var(--blue) 100%);
       box-shadow: 0 10px 30px rgba(91,124,250,.28);
       min-height: 6px;
       transition: .2s;
@@ -250,13 +302,13 @@
       margin-top: 18px;
     }
     .flow-summary .pill {
-      background: rgba(255,255,255,.04);
+      background: var(--ov04);
     }
 
     .flow-money {
       font-size: 15px;
       font-weight: 900;
-      color: #eef3ff;
+      color: var(--text);
       letter-spacing: -0.03em;
       margin-top: 6px;
       text-shadow: 0 2px 10px rgba(0,0,0,.25);
@@ -271,7 +323,7 @@
 
     .flow-label {
       font-size: 13px;
-      color: #cfd7ee;
+      color: var(--text2);
       margin-top: 8px;
       font-weight: 700;
       letter-spacing: -0.02em;
@@ -289,35 +341,35 @@
     }
 
     .inventory-list { display:grid; gap:12px; position:relative; z-index:1; }
-    .inventory-group { border:1px solid rgba(255,255,255,.08); border-radius:18px; background:rgba(255,255,255,.035); overflow:hidden; }
+    .inventory-group { border:1px solid var(--ov08); border-radius:18px; background:var(--ov035); overflow:hidden; }
     .inventory-group summary { cursor:pointer; padding:16px 18px; list-style:none; display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .inventory-group summary::-webkit-details-marker { display:none; }
-    .inventory-group-title { font-weight:900; color:#eef3ff; font-size:15px; }
+    .inventory-group-title { font-weight:900; color:var(--text); font-size:15px; }
     .inventory-group-sub { color:var(--muted); font-size:12px; margin-top:4px; }
     .inventory-cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:12px; padding:0 16px 16px; }
-    .inventory-card { border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:14px; background:rgba(255,255,255,.04); }
-    .inventory-name { font-weight:800; color:#eef3ff; font-size:13px; line-height:1.35; margin-bottom:8px; }
+    .inventory-card { border:1px solid var(--ov07); border-radius:16px; padding:14px; background:var(--ov04); }
+    .inventory-name { font-weight:800; color:var(--text); font-size:13px; line-height:1.35; margin-bottom:8px; }
     .inventory-meta { display:grid; gap:6px; color:var(--muted); font-size:12px; }
-    .inventory-meta strong { color:#dce5ff; }
+    .inventory-meta strong { color:var(--text2); }
     .inventory-risk { border-color:rgba(251,113,133,.45); background:rgba(251,113,133,.08); }
     .inventory-warn { border-color:rgba(251,191,36,.4); background:rgba(251,191,36,.07); }
     .inventory-ok { border-color:rgba(52,211,153,.22); }
     .inventory-product-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:14px; position:relative; z-index:1; }
-    .inventory-product-card { cursor:pointer; border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:16px; background:rgba(255,255,255,.04); transition:.18s; }
+    .inventory-product-card { cursor:pointer; border:1px solid var(--ov08); border-radius:20px; padding:16px; background:var(--ov04); transition:.18s; }
     .inventory-product-card:hover { transform:translateY(-2px); border-color:rgba(34,211,238,.35); background:rgba(34,211,238,.06); }
-    .inventory-product-title { font-size:16px; font-weight:900; color:#eef3ff; margin-bottom:10px; line-height:1.35; }
+    .inventory-product-title { font-size:16px; font-weight:900; color:var(--text); margin-bottom:10px; line-height:1.35; }
     .inventory-product-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:12px; }
-    .inventory-stat { padding:10px; border-radius:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); }
+    .inventory-stat { padding:10px; border-radius:14px; background:var(--ov04); border:1px solid var(--ov06); }
     .inventory-stat span { display:block; color:var(--muted); font-size:11px; margin-bottom:4px; }
-    .inventory-stat strong { font-size:16px; color:#eef3ff; }
+    .inventory-stat strong { font-size:16px; color:var(--text); }
     .inventory-risk-list { display:grid; gap:10px; position:relative; z-index:1; }
-    .inventory-risk-row { display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center; padding:12px 14px; border-radius:16px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); }
+    .inventory-risk-row { display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center; padding:12px 14px; border-radius:16px; background:var(--ov04); border:1px solid var(--ov06); }
     .inventory-risk-row.danger { border-color:rgba(251,113,133,.35); background:rgba(251,113,133,.07); }
     .inventory-risk-row.warn { border-color:rgba(251,191,36,.35); background:rgba(251,191,36,.06); }
     .inventory-option-line { color:var(--muted); font-size:12px; margin-top:4px; line-height:1.35; }
 
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.58); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .modal-card { width: min(980px, 100%); max-height: 86vh; overflow: auto; background: #10172a; border: 1px solid var(--panel-line); border-radius: 24px; box-shadow: 0 30px 90px rgba(0,0,0,.45); padding: 22px; }
+    .modal-card { width: min(980px, 100%); max-height: 86vh; overflow: auto; background: var(--modal-bg); border: 1px solid var(--panel-line); border-radius: 24px; box-shadow: 0 30px 90px rgba(0,0,0,.45); padding: 22px; }
     .modal-card.inventory-modal { width: min(1520px, calc(100vw - 48px)); }
     .inventory-modal .table-wrap { overflow-x: auto; }
     .inventory-modal table { min-width: 1380px; table-layout: auto; }
@@ -357,7 +409,7 @@
     .po-stock-summary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 2px; cursor: pointer; position: relative; z-index: 1; }
     .po-stock-badges { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; }
     .po-stock-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; position: relative; z-index: 1; }
-    .po-stock-col-head { text-align: center; font-size: 13px; font-weight: 800; letter-spacing: 0.04em; color: #dce5ff; padding-bottom: 4px; }
+    .po-stock-col-head { text-align: center; font-size: 13px; font-weight: 800; letter-spacing: 0.04em; color: var(--text2); padding-bottom: 4px; }
     .po-stock-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
     .inventory-preorder { border-color: rgba(251,191,36,.4); background: rgba(251,191,36,.07); }
     .inventory-soldout { opacity: .5; }
@@ -371,23 +423,23 @@
     .po-cal-legend b { display: inline-flex; flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%; color: #08111f; font-size: 10px; font-weight: 800; align-items: center; justify-content: center; }
     .po-cal-legend em { font-style: normal; }
     .po-cal-wrap { border: 1px solid var(--panel-line); border-radius: 18px; overflow: hidden; position: relative; z-index: 1; }
-    .po-cal-head-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: rgba(255,255,255,.03); border-bottom: 1px solid var(--panel-line); flex-wrap: wrap; gap: 8px; }
+    .po-cal-head-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--ov03); border-bottom: 1px solid var(--panel-line); flex-wrap: wrap; gap: 8px; }
     .po-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr) 110px; }
-    .po-cal-dow { text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 700; color: var(--muted); border-right: 1px solid var(--panel-line); border-bottom: 1px solid var(--panel-line); background: rgba(255,255,255,.02); }
+    .po-cal-dow { text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 700; color: var(--muted); border-right: 1px solid var(--panel-line); border-bottom: 1px solid var(--panel-line); background: var(--ov02); }
     .po-cal-cell { min-height: 96px; padding: 8px 6px; border-right: 1px solid var(--panel-line); border-bottom: 1px solid var(--panel-line); position: relative; }
     .po-cal-cell.empty { background: rgba(0,0,0,.14); }
     .po-cal-date { font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
     .po-cal-cell.today { box-shadow: inset 0 0 0 2px var(--cyan); border-radius: 2px; }
     .po-cal-cell.today .po-cal-date { color: var(--cyan); }
     .po-today-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 7px; border-radius: 999px; background: var(--cyan); color: #fff; font-size: 10px; font-weight: 800; line-height: 1.5; }
-    .po-event { display: flex; gap: 5px; padding: 4px 6px; border-radius: 8px; margin-bottom: 4px; font-size: 11px; line-height: 1.3; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.06); }
+    .po-event { display: flex; gap: 5px; padding: 4px 6px; border-radius: 8px; margin-bottom: 4px; font-size: 11px; line-height: 1.3; background: var(--ov045); border: 1px solid var(--ov06); }
     .po-event b { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: #08111f; margin-top: 1px; }
     .po-event-info { min-width: 0; }
-    .po-event-info strong { display: block; color: #e8eeff; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .po-event-info strong { display: block; color: var(--text2); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .po-event-info span { display: block; color: var(--muted); font-size: 10px; }
-    .po-week-cost { padding: 8px 10px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; border-bottom: 1px solid var(--panel-line); background: rgba(255,255,255,.02); }
+    .po-week-cost { padding: 8px 10px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; border-bottom: 1px solid var(--panel-line); background: var(--ov02); }
     .po-week-cost span { font-size: 11px; color: var(--muted); }
-    .po-week-cost b { font-size: 14px; color: #eef3ff; font-family: inherit; }
+    .po-week-cost b { font-size: 14px; color: var(--text); font-family: inherit; }
     @media (max-width: 1100px) {
       .po-stock-grid { grid-template-columns: repeat(2, 1fr); }
       .po-cal-grid { grid-template-columns: repeat(7, minmax(90px,1fr)) 100px; overflow-x: auto; }
@@ -420,6 +472,10 @@
           <button onclick="refreshDashboard()">라이브 동기화</button>
           <div class="pill" id="periodLabel">기간 계산 중</div>
           <div class="pill" title="Google Sheets 연동">📊 <span id="lastSync">동기화 대기</span></div>
+          <button class="icon-btn" onclick="refreshDashboard()" title="새로고침" aria-label="새로고침">🔄</button>
+          <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="라이트/다크 모드 전환" aria-label="테마 전환">
+            <span class="theme-toggle-knob" id="themeKnob">🌙</span>
+          </button>
         </div>
       </section>
       <section class="grid" id="dashboardGrid"></section>
@@ -456,6 +512,21 @@
       coupang: ['쿠팡 판매', '쿠팡 판매수량, 매출, 출고 흐름을 확인합니다.'],
       reorder: ['발주관리', '발주 시뮬레이션과 주력 제품 재고/발주 캘린더를 확인합니다.']
     };
+
+    // ── 일반모드 / 다크모드 (나머지 대시보드와 동일한 방식: 메모리에만 유지, 기본값 다크) ──
+    let currentTheme = 'dark';
+    function applyTheme(theme) {
+      currentTheme = theme;
+      const knob = document.getElementById('themeKnob');
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        if (knob) knob.textContent = '☀️';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        if (knob) knob.textContent = '🌙';
+      }
+    }
+    function toggleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
 
     function csvUrl(gid) { return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`; }
     function csvUrlByName(sheetName) { return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`; }
@@ -2619,15 +2690,15 @@
 
         <article class="card full"><div class="card-head"><div><div class="card-title">다가오는 결제 예정</div><div class="card-sub">예정 결제 통합 운영 현황 / 전체 예정건 표시</div></div><span class="badge warn">${fmt(a.upcomingPayments.length)}건 예정</span></div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;position:relative;z-index:1;">
-            <div style="padding:18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);">
+            <div style="padding:18px;border-radius:18px;background:var(--ov04);border:1px solid var(--ov06);">
               <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">총 예정 결제액</div>
               <div style="font-size:28px;font-weight:900;letter-spacing:-0.04em;">${money(a.upcomingKrw)}</div>
             </div>
-            <div style="padding:18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);">
+            <div style="padding:18px;border-radius:18px;background:var(--ov04);border:1px solid var(--ov06);">
               <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">가장 가까운 결제일</div>
               <div style="font-size:28px;font-weight:900;letter-spacing:-0.04em;">${a.nearestPaymentDate}</div>
             </div>
-            <div style="padding:18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);">
+            <div style="padding:18px;border-radius:18px;background:var(--ov04);border:1px solid var(--ov06);">
               <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">예정 건수</div>
               <div style="font-size:28px;font-weight:900;letter-spacing:-0.04em;">${fmt(a.upcomingPayments.length)}건</div>
             </div>
@@ -2674,10 +2745,10 @@
         <article class="card half"><div class="card-head"><div><div class="card-title">PO별 물품대금 지급 진행중</div><div class="card-sub">총선급금 ÷ 총 PO금액 기준 지급율</div></div><span class="badge warn">진행중</span></div>
           <div class="rank-chart">${a.poPaymentRank.map((r,i)=>`
             <div class="rank-row">
-              <div class="rank-name"><div style="font-weight:700; font-size:13px; color:#eef3ff; line-height:1.3;">${r.productName || r.name}</div><div style="font-size:11px; color:var(--muted); margin-top:3px;">${r.poName || r.name}</div></div>
+              <div class="rank-name"><div style="font-weight:700; font-size:13px; color:var(--text); line-height:1.3;">${r.productName || r.name}</div><div style="font-size:11px; color:var(--muted); margin-top:3px;">${r.poName || r.name}</div></div>
               <div class="rank-track"><div class="rank-fill" style="width:${Math.max(r.paymentRate,2)}%"></div></div>
               <div class="rank-value">${r.paymentRate.toFixed(1)}%<br><span style="font-size:11px; color:var(--muted); font-weight:500;">총 ${money(r.value)}</span></div>
-              <div class="rank-qty">잔여 ${fmt(r.remainQty || 0)}개<br><span style="font-size:11px; color:#dce5ff; font-weight:600;">미입고 ${money(r.remainingKrw || 0)}</span></div>
+              <div class="rank-qty">잔여 ${fmt(r.remainQty || 0)}개<br><span style="font-size:11px; color:var(--text2); font-weight:600;">미입고 ${money(r.remainingKrw || 0)}</span></div>
             </div>
           `).join('') || '<div class="empty">진행중인 PO가 없습니다.</div>'}</div>
         </article>
@@ -2685,7 +2756,7 @@
         <article class="card half"><div class="card-head"><div><div class="card-title">거래처별 물품대금 지급율</div><div class="card-sub">총선급금 ÷ 총 PO금액 기준</div></div></div>
           <div class="rank-chart">${a.vendorPaymentRank.slice(0,8).map((r,i)=>`
             <div class="rank-row">
-              <div class="rank-name"><div style="font-weight:700; font-size:13px; color:#eef3ff; line-height:1.3;">${r.productName || r.name}</div><div style="font-size:11px; color:var(--muted); margin-top:3px;">${r.poName || r.name}</div></div>
+              <div class="rank-name"><div style="font-weight:700; font-size:13px; color:var(--text); line-height:1.3;">${r.productName || r.name}</div><div style="font-size:11px; color:var(--muted); margin-top:3px;">${r.poName || r.name}</div></div>
               <div class="rank-track"><div class="rank-fill" style="width:${Math.max(r.paymentRate,2)}%"></div></div>
               <div class="rank-value">${r.paymentRate.toFixed(1)}%</div>
               <div class="rank-qty">${money(r.inboundKrw || 0)}</div>
@@ -3517,7 +3588,7 @@
 
         <article class="card full"><div class="card-head"><div><div class="card-title">재고 검색 / 카테고리 필터</div><div class="card-sub">제품군별로 먼저 나누고, 필요한 제품만 클릭해서 상세 확인</div></div><span class="badge">제품 블록 ${fmt(a.blocks?.length || 0)}개 · 수량매칭 ${fmt(filteredRows.reduce((s,r)=>s+r.qty,0))}개</span></div>
           <div class="table-tools">
-            <div class="tool-left"><input id="inventorySearch" type="search" autocomplete="off" placeholder="제품 / 기종 / 색상 / 재입고 / 품절여부 입력 후 Enter" value="${String(state.inventory.search || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" oncompositionstart="startInventorySearchComposition()" oncompositionend="endInventorySearchComposition(this.value)" oninput="setInventorySearch(this.value)" onkeydown="handleInventorySearchKeydown(event, this.value)" style="border:1px solid var(--panel-line);background:rgba(255,255,255,.05);color:#d7def4;padding:10px 14px;border-radius:999px;min-width:360px;" /><button onclick="submitInventorySearch(document.getElementById('inventorySearch')?.value || '')">검색</button><button onclick="clearInventorySearch()">초기화</button><div class="pill">검색어 입력 후 Enter 또는 검색 버튼</div></div>
+            <div class="tool-left"><input id="inventorySearch" type="search" autocomplete="off" placeholder="제품 / 기종 / 색상 / 재입고 / 품절여부 입력 후 Enter" value="${String(state.inventory.search || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" oncompositionstart="startInventorySearchComposition()" oncompositionend="endInventorySearchComposition(this.value)" oninput="setInventorySearch(this.value)" onkeydown="handleInventorySearchKeydown(event, this.value)" style="border:1px solid var(--panel-line);background:var(--ov05);color:var(--text2);padding:10px 14px;border-radius:999px;min-width:360px;" /><button onclick="submitInventorySearch(document.getElementById('inventorySearch')?.value || '')">검색</button><button onclick="clearInventorySearch()">초기화</button><div class="pill">검색어 입력 후 Enter 또는 검색 버튼</div></div>
           </div>
           <div class="table-tools" style="margin-top:12px;">
             <div class="tool-left">
@@ -3553,8 +3624,8 @@
                 <div class="inventory-product-stats">
                   <div class="inventory-stat"><span>재고</span><strong>${fmt(g.qty)}</strong></div>
                   <div class="inventory-stat"><span>소진시점</span><strong>${g.nearestSellout}</strong></div>
-                  <div class="inventory-stat"><span>위험</span><strong style="color:${g.risk ? 'var(--red)' : '#eef3ff'}">${fmt(g.risk)}</strong></div>
-                  <div class="inventory-stat"><span>주의</span><strong style="color:${g.warn ? 'var(--yellow)' : '#eef3ff'}">${fmt(g.warn)}</strong></div>
+                  <div class="inventory-stat"><span>위험</span><strong style="color:${g.risk ? 'var(--red)' : 'var(--text)'}">${fmt(g.risk)}</strong></div>
+                  <div class="inventory-stat"><span>주의</span><strong style="color:${g.warn ? 'var(--yellow)' : 'var(--text)'}">${fmt(g.warn)}</strong></div>
                 </div>
               </div>
             `).join('') || '<div class="empty">표시할 제품 데이터가 없습니다.</div>'}
@@ -3897,7 +3968,7 @@
 
       const badge = (label, cls, count, muted) => {
         if (!count) return '';
-        if (muted) return `<span style="display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);border:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:700;">${label} <strong>${count}개</strong></span>`;
+        if (muted) return `<span style="display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border-radius:999px;background:var(--ov06);color:var(--muted);border:1px solid var(--ov08);font-size:12px;font-weight:700;">${label} <strong>${count}개</strong></span>`;
         return `<span class="badge ${cls}" style="font-size:12px;">${label} <strong>${count}개</strong></span>`;
       };
       const badges = [
@@ -3935,7 +4006,7 @@
       const cls = status === 'ok' ? 'inventory-ok' : status === 'out' ? 'inventory-risk' : status === 'preorder' ? 'inventory-preorder' : 'inventory-soldout';
       const badgeTxt = status === 'ok' ? '정상' : status === 'out' ? '위험' : status === 'preorder' ? '사전예약' : '품절';
       const badgeHtml = status === 'soldOut'
-        ? `<span style="padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-size:11px;font-weight:700;">${badgeTxt}</span>`
+        ? `<span style="padding:2px 8px;border-radius:999px;background:var(--ov06);color:var(--muted);font-size:11px;font-weight:700;">${badgeTxt}</span>`
         : `<span class="badge ${status === 'out' ? 'danger' : status === 'preorder' ? 'warn' : ''}" style="font-size:11px;padding:3px 8px;">${badgeTxt}</span>`;
       const dl = poDaysLeftText(item);
       const restockAt = (item.restockAt || '').trim();
@@ -3995,7 +4066,7 @@
       const nav = `<div class="po-month-nav">${PO_MONTHS.map(mo => `<button class="${mo.m === moInfo.m ? 'active-mode' : ''}" onclick="poSelectMonth(${mo.m})">${mo.label}</button>`).join('')}</div>`;
       const legend = `<div class="po-cal-legend">${['기', '요', '신', '추'].map(t => `<span><b style="background:${PO_TYPE_COLOR[t]}">${t}</b><em>${PO_TYPE_LABEL[t]}</em></span>`).join('')}</div>`;
 
-      let calHtml = `<div class="po-cal-wrap"><div class="po-cal-head-row"><div style="font-size:18px;font-weight:800;">${moInfo.year}년 ${moInfo.label}</div><div class="muted" style="font-size:13px;">월 합산 지출 <strong style="color:#eef3ff">${money(monthTotal)}</strong></div></div><div class="po-cal-grid">`;
+      let calHtml = `<div class="po-cal-wrap"><div class="po-cal-head-row"><div style="font-size:18px;font-weight:800;">${moInfo.year}년 ${moInfo.label}</div><div class="muted" style="font-size:13px;">월 합산 지출 <strong style="color:var(--text)">${money(monthTotal)}</strong></div></div><div class="po-cal-grid">`;
       DOW.forEach(d => { calHtml += `<div class="po-cal-dow">${d}</div>`; });
       calHtml += `<div class="po-cal-dow" style="color:var(--cyan);">주간 합계</div>`;
 
@@ -4040,7 +4111,7 @@
         <div class="card-head"><div><div class="card-title">업체별 월별 결제 총액</div><div class="card-sub">타이루(맥세이프 킥프레임 · DW 프로 · DW 플러스) / 리디안(PH)</div></div></div>
         <div class="table-wrap"><table><thead><tr><th>월</th><th class="right">타이루 결제 총액</th><th class="right">리디안 결제 총액</th><th class="right">월 합계</th></tr></thead>
           <tbody>${body}
-            <tr style="background:rgba(255,255,255,.03);"><td><strong>전체 합계</strong></td><td class="right"><strong>${money(totalTairu)}</strong></td><td class="right"><strong>${money(totalRidian)}</strong></td><td class="right"><strong>${money(totalTairu + totalRidian)}</strong></td></tr>
+            <tr style="background:var(--ov03);"><td><strong>전체 합계</strong></td><td class="right"><strong>${money(totalTairu)}</strong></td><td class="right"><strong>${money(totalRidian)}</strong></td><td class="right"><strong>${money(totalTairu + totalRidian)}</strong></td></tr>
           </tbody>
         </table></div>
       </article>`;
@@ -4087,7 +4158,7 @@
             <td class="right"><strong>${r.total ? money(r.total) : '—'}</strong></td>
           </tr>`).join('');
         const sumField = f => g.monthRows.reduce((s, r) => s + r[f], 0);
-        const totalTr = `<tr style="background:rgba(255,255,255,.03);">
+        const totalTr = `<tr style="background:var(--ov03);">
           <td colspan="2" class="right muted">월 합계</td>
           <td class="right"><strong>${sumField('기') ? money(sumField('기')) : '—'}</strong></td>
           <td class="right"><strong>${sumField('신') ? money(sumField('신')) : '—'}</strong></td>
