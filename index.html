@@ -335,6 +335,22 @@
     .rank-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
     .rank-value { text-align: right; font-size: 13px; color: var(--text2); font-weight: 700; }
     .rank-qty { text-align: right; font-size: 13px; color: var(--yellow); font-weight: 800; }
+    .category-donut { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(150px, .85fr) minmax(0, 1.15fr); gap: 20px; align-items: center; min-height: 278px; }
+    .category-donut-visual { display: grid; place-items: center; min-width: 0; }
+    .category-donut-ring { width: min(178px, 100%); aspect-ratio: 1; border-radius: 50%; position: relative; display: grid; place-items: center; box-shadow: 0 18px 42px rgba(0,0,0,.24); }
+    .category-donut-ring::after { content: ""; position: absolute; inset: 28px; border-radius: 50%; background: var(--panel); border: 1px solid var(--panel-line); box-shadow: inset 0 0 20px rgba(0,0,0,.14); }
+    .category-donut-center { position: relative; z-index: 1; display: grid; gap: 3px; text-align: center; }
+    .category-donut-center span { color: var(--muted); font-size: 10px; font-weight: 800; }
+    .category-donut-center strong { color: var(--text); font-size: 23px; line-height: 1; letter-spacing: -.03em; }
+    .category-donut-center small { color: var(--text2); font-size: 10px; font-weight: 800; }
+    .category-donut-legend { display: grid; gap: 9px; min-width: 0; }
+    .category-donut-row { display: grid; grid-template-columns: 10px minmax(0,1fr) auto; gap: 8px; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--ov06); }
+    .category-donut-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .category-donut-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 12px currentColor; }
+    .category-donut-name { color: var(--text2); font-size: 11px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .category-donut-stat { text-align: right; white-space: nowrap; }
+    .category-donut-stat strong { display: block; color: var(--text); font-size: 12px; }
+    .category-donut-stat span { display: block; color: var(--muted); font-size: 9px; margin-top: 2px; }
     .flow-wrap { position: relative; z-index: 1; margin-top: 20px; }
     .flow-grid {
       position: absolute;
@@ -502,6 +518,8 @@
     }
     @media (max-width: 520px) {
       .period-vertical-grid { grid-template-columns:1fr; }
+      .category-donut { grid-template-columns:1fr; }
+      .category-donut-ring { width:156px; }
     }
 
     /* ── 발주관리 (Purchase Order) tab ── */
@@ -1535,7 +1553,7 @@
       const paymentAnalysis = getPaymentAnalysis();
       const overviewPaymentModal = renderOverviewPaymentModal(paymentAnalysis);
       const coupangRows = state.raw.coupang || [];
-      const coupangAnalysis = getCoupangAnalysis('period');
+      const coupangAnalysis = getCoupangAnalysis('period', { ignoreDate: true });
       const coupangTotal = coupangAnalysis.totalQty;
       const coupangSupplyTotal = coupangAnalysis.totalSupply;
       const coupangMainKey = coupangAnalysis.qtyKey;
@@ -1786,10 +1804,11 @@
       return normalizeCurrency(currencyKey ? o[currencyKey] : 'USD');
     }
 
-    function getCoupangAnalysis(scope = 'ytd') {
+    function getCoupangAnalysis(scope = 'ytd', options = {}) {
       const rows = state.raw.coupang || [];
       const headers = rows[0] || [];
       const allObjects = rowsToObjects(rows);
+      const activeFlowMode = options.flowMode || state.coupang.flowMode;
 
       const dateKey = findHeader(headers, ['날짜','일자','판매일','출고일','주문일','주문일자','매출일','정산일','date']);
       const qtyKey = findHeader(headers, ['판매수량','출고수량','수량','판매개수','개수']);
@@ -1821,9 +1840,13 @@
       }
 
       const latestCoupangDate = todayDate();
+      const sourceDates = dateKey ? allObjects.map(o => toDate(o[dateKey])).filter(Boolean) : [];
+      const latestCoupangDataDate = sourceDates.length
+        ? new Date(Math.max(...sourceDates.map(date => date.getTime())))
+        : null;
 
-      // 쿠팡 판매 탭은 택배/제작처럼 운영 KPI 기준으로 관리하므로,
-      // 상단 기간 필터가 아니라 최신 판매일이 속한 연도 전체(YTD)를 기본 기준으로 사용한다.
+      // 올해 누적 데이터는 상세 화면의 월별 장기 흐름에만 사용하고,
+      // 요약 KPI·카테고리·원본 목록은 별도의 선택기간 분석값을 사용한다.
       const ytdObjects = dateKey
         ? allObjects.filter(o => {
             const d = toDate(o[dateKey]);
@@ -1831,16 +1854,30 @@
           })
         : allObjects;
 
-      const filteredObjects = dateKey ? filterObjectsByDate(allObjects, dateKey) : allObjects;
-      const periodObjects = scope === 'period' ? filteredObjects : ytdObjects;
+      const currentPeriodRange = getCurrentPeriodRange();
+      const previousPeriodRange = getPreviousPeriodRange(currentPeriodRange.start, currentPeriodRange.end);
+      const filterRange = (items, range) => dateKey
+        ? items.filter(o => {
+            const d = toDate(o[dateKey]);
+            if (!d) return false;
+            const compare = new Date(d);
+            compare.setHours(0,0,0,0);
+            return compare >= range.start && compare <= range.end;
+          })
+        : items;
+      const filteredObjects = filterRange(allObjects, currentPeriodRange);
+      const previousObjects = filterRange(allObjects, previousPeriodRange);
+      const periodObjects = scope === 'period'
+        ? filteredObjects
+        : (scope === 'previous' ? previousObjects : ytdObjects);
       const periodDates = [...new Set(periodObjects.map(o => dateStr(toDate(o[dateKey]))).filter(d => d !== '-'))].sort();
 
-      if (state.coupang.date && !periodDates.includes(state.coupang.date)) {
+      if (!options.ignoreDate && state.coupang.date && !periodDates.includes(state.coupang.date)) {
         state.coupang.date = '';
       }
 
       let objects = periodObjects;
-      if (state.coupang.date && dateKey) {
+      if (!options.ignoreDate && state.coupang.date && dateKey) {
         objects = objects.filter(o => dateStr(toDate(o[dateKey])) === state.coupang.date);
       }
 
@@ -1898,10 +1935,10 @@
 
       function getFlowKey(date) {
         if (!date) return '-';
-        if (state.coupang.flowMode === 'monthly') {
+        if (activeFlowMode === 'monthly') {
           return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         }
-        if (state.coupang.flowMode === 'weekly') {
+        if (activeFlowMode === 'weekly') {
           const temp = new Date(date);
           temp.setHours(0,0,0,0);
           const day = temp.getDay() || 7;
@@ -1999,6 +2036,7 @@
         productKey,
         categoryKey,
         basisKey,
+        flowMode: activeFlowMode,
         totalQty,
         totalBasis,
         totalSupply,
@@ -2015,6 +2053,7 @@
         prevMonthSupply,
         prevMonthPurchase,
         latestCoupangDate,
+        latestCoupangDataDate,
         dates: periodDates,
         dated,
         monthlyFlow,
@@ -2036,6 +2075,61 @@
           <div class="rank-qty">${fmt(r.qty)}개</div>
         </div>
       `).join('')}</div>`;
+    }
+
+    function renderCategoryDonutChart(items, options = {}) {
+      const colors = ['#22d3ee', '#5b7cfa', '#34d399', '#fbbf24', '#fb7185', '#a78bfa'];
+      const safeItems = (Array.isArray(items) ? items : [])
+        .filter(r => r && String(r.name || '').trim() && toNum(r.qty) > 0)
+        .map(r => ({ ...r, name: String(r.name).trim(), qty: toNum(r.qty) }))
+        .sort((a, b) => b.qty - a.qty);
+
+      if (!safeItems.length) {
+        return `<div class="empty">${safeHtml(options.emptyMessage || '표시할 카테고리별 판매 데이터가 없습니다.')}</div>`;
+      }
+
+      const totalQty = safeItems.reduce((sum, item) => sum + item.qty, 0);
+      const limit = Math.max(Number(options.limit) || 5, 2);
+      const shown = safeItems.slice(0, limit);
+      const remainder = safeItems.slice(limit);
+      if (remainder.length) {
+        shown.push({
+          name: `기타 ${remainder.length}개 카테고리`,
+          qty: remainder.reduce((sum, item) => sum + item.qty, 0)
+        });
+      }
+
+      let accumulated = 0;
+      const gradient = shown.map((item, index) => {
+        const start = accumulated;
+        accumulated += (item.qty / totalQty) * 100;
+        const end = index === shown.length - 1 ? 100 : accumulated;
+        return `${colors[index % colors.length]} ${start.toFixed(2)}% ${end.toFixed(2)}%`;
+      }).join(', ');
+      const scopeLabel = safeHtml(options.scopeLabel || '판매수량');
+
+      return `
+        <div class="category-donut">
+          <div class="category-donut-visual">
+            <div class="category-donut-ring" style="background:conic-gradient(${gradient});">
+              <div class="category-donut-center">
+                <span>${scopeLabel}</span>
+                <strong>${fmt(totalQty)}</strong>
+                <small>총 판매수량</small>
+              </div>
+            </div>
+          </div>
+          <div class="category-donut-legend">
+            ${shown.map((item, index) => `
+              <div class="category-donut-row">
+                <span class="category-donut-dot" style="background:${colors[index % colors.length]};color:${colors[index % colors.length]};"></span>
+                <span class="category-donut-name" title="${safeHtml(item.name)}">${safeHtml(item.name)}</span>
+                <span class="category-donut-stat"><strong>${fmt(item.qty)}개</strong><span>${((item.qty / totalQty) * 100).toFixed(1)}%</span></span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
     }
 
     function renderCoupangFlowChart(items, options = {}) {
@@ -2150,57 +2244,71 @@
     }
 
     function renderCoupang() {
-      const a = getCoupangAnalysis('ytd');
-      const periodA = getCoupangAnalysis('period');
+      const selectedRange = getCurrentPeriodRange();
+      const selectedDays = Math.max(1, Math.floor((endOfDay(selectedRange.end) - selectedRange.start) / 86400000) + 1);
+      const summaryFlowMode = selectedDays <= 14 ? 'daily' : (selectedDays <= 90 ? 'weekly' : 'monthly');
+      const a = getCoupangAnalysis('ytd', { ignoreDate: true, flowMode: 'monthly' });
+      const periodA = getCoupangAnalysis('period', { ignoreDate: true, flowMode: summaryFlowMode });
+      const previousA = getCoupangAnalysis('previous', { ignoreDate: true, flowMode: summaryFlowMode });
+      const detailA = getCoupangAnalysis('period', { flowMode: state.coupang.flowMode });
       if (!a.headers.length) {
         grid(`<article class="card full"><div class="card-head"><div><div class="card-title">쿠팡 판매</div><div class="card-sub">데이터 로드 실패</div></div></div><div class="empty">쿠팡_판매 시트 데이터를 불러오지 못했습니다.</div></article>`);
         return;
       }
 
-      const totalPages = Math.max(Math.ceil(a.objects.length / state.coupang.pageSize), 1);
+      const totalPages = Math.max(Math.ceil(detailA.objects.length / state.coupang.pageSize), 1);
       state.coupang.page = Math.min(Math.max(state.coupang.page, 1), totalPages);
       const start = (state.coupang.page - 1) * state.coupang.pageSize;
-      const pageRows = a.objects.slice(start, start + state.coupang.pageSize);
+      const pageRows = detailA.objects.slice(start, start + state.coupang.pageSize);
       const headers = a.headers;
       const basisLabel = state.coupang.basis === 'purchase' ? '매입가 기준' : '공급가 기준';
       const flowLabel = state.coupang.flowMode === 'monthly' ? '월간 집계' : state.coupang.flowMode === 'weekly' ? '주간 집계' : '일별 집계';
+      const summaryFlowLabel = summaryFlowMode === 'monthly' ? '월간 집계' : summaryFlowMode === 'weekly' ? '주간 집계' : '일별 집계';
+      const periodLabel = document.getElementById('periodLabel').textContent;
+      const categoryScopeLabel = state.coupang.date || '선택기간';
+      const latestDataText = a.latestCoupangDataDate ? dateStr(a.latestCoupangDataDate) : '';
+      const categoryEmptyMessage = latestDataText
+        ? `선택기간에 카테고리별 판매 데이터가 없습니다. 쿠팡 원본의 최신 데이터는 ${latestDataText}입니다.`
+        : '선택기간에 카테고리별 판매 데이터가 없습니다.';
+      const periodAverageQty = periodA.dates.length ? periodA.totalQty / periodA.dates.length : 0;
+      const topCategory = [...periodA.categoryRank].sort((x, y) => y.qty - x.qty)[0];
 
-      const dateOptions = ['<option value="">전체 날짜</option>'].concat(a.dates.map(d => `<option value="${d}" ${state.coupang.date === d ? 'selected' : ''}>${d}</option>`)).join('');
+      const dateOptions = ['<option value="">선택기간 전체</option>'].concat(periodA.dates.map(d => `<option value="${d}" ${state.coupang.date === d ? 'selected' : ''}>${d}</option>`)).join('');
       const table = pageRows.map(o => `<tr>${headers.map(h => `<td>${o[h] || '-'}</td>`).join('')}</tr>`).join('');
       const monthDetailModal = renderCoupangMonthDetail(a);
 
       const commonCards = `
         ${viewToggle('coupang')}
-        ${metricCard('올해 누적 쿠팡 판매수량', a.qtyKey || '행 개수 기준', fmt(a.ytdTotalQty), `${a.latestCoupangDate.getFullYear()}년 전체 / 이번달 ${fmt(a.thisMonthQty)}개`, 'good', a.monthlyFlow.map(r=>r.qty))}
-        ${metricCard('올해 누적 공급가액', a.supplyTotalKey || a.supplyUnitKey || '공급가 컬럼 없음', money(a.ytdTotalSupply), `${a.latestCoupangDate.getFullYear()}년 전체 공급가액`, 'good', a.monthlyFlow.map(r=>r.supply))}
-        ${metricCard('이번달 판매수량', '전월 대비', fmt(a.thisMonthQty), `전월 ${fmt(a.prevMonthQty)}개 / ${changeRate(a.thisMonthQty, a.prevMonthQty)}`, changeTone(a.thisMonthQty, a.prevMonthQty), [a.prevMonthQty, a.thisMonthQty])}
-        ${metricCard('이번달 공급가액', '전월 대비', money(a.thisMonthSupply), `전월 ${money(a.prevMonthSupply)} / ${changeRate(a.thisMonthSupply, a.prevMonthSupply)}`, changeTone(a.thisMonthSupply, a.prevMonthSupply), [a.prevMonthSupply, a.thisMonthSupply])}
+        ${metricCard('선택기간 판매수량', periodLabel, fmt(periodA.totalQty), `직전기간 ${fmt(previousA.totalQty)}개 / ${changeRate(periodA.totalQty, previousA.totalQty)}`, changeTone(periodA.totalQty, previousA.totalQty), [previousA.totalQty, periodA.totalQty])}
+        ${metricCard('선택기간 공급가액', periodLabel, money(periodA.totalSupply), `직전기간 ${money(previousA.totalSupply)} / ${changeRate(periodA.totalSupply, previousA.totalSupply)}`, changeTone(periodA.totalSupply, previousA.totalSupply), [previousA.totalSupply, periodA.totalSupply])}
+        ${metricCard('판매 데이터 입력일', `${fmt(selectedDays)}일 중 입력된 날짜`, `${fmt(periodA.dates.length)}일`, `일평균 ${periodAverageQty.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}개 / 직전 ${fmt(previousA.dates.length)}일`, 'good', [previousA.dates.length, periodA.dates.length])}
+        ${metricCard('판매 카테고리', '선택기간 판매수량 기준', `${fmt(periodA.categoryRank.length)}개`, topCategory ? `최다 ${topCategory.name} ${fmt(topCategory.qty)}개` : `최신 원본 데이터 ${latestDataText || '-'}`, periodA.categoryRank.length ? 'good' : 'warn', periodA.categoryRank.map(r => r.qty))}
       `;
       const summaryCards = `
         ${viewToggle('coupang')}
-        ${sizedMetricCard(metricCard('이번달 판매수량', '전월 대비', fmt(a.thisMonthQty), `전월 ${fmt(a.prevMonthQty)}개 / ${changeRate(a.thisMonthQty, a.prevMonthQty)}`, changeTone(a.thisMonthQty, a.prevMonthQty), [a.prevMonthQty, a.thisMonthQty]), 'third-kpi')}
-        ${sizedMetricCard(metricCard('이번달 공급가액', '전월 대비', money(a.thisMonthSupply), `전월 ${money(a.prevMonthSupply)} / ${changeRate(a.thisMonthSupply, a.prevMonthSupply)}`, changeTone(a.thisMonthSupply, a.prevMonthSupply), [a.prevMonthSupply, a.thisMonthSupply]), 'third-kpi')}
-        ${sizedMetricCard(metricCard('선택기간 판매수량', '상단 기간 선택 기준', fmt(periodA.totalQty), `${document.getElementById('periodLabel').textContent} / 공급가액 ${money(periodA.totalSupply)}`, 'good', periodA.dated.map(r=>r.qty)), 'third-kpi')}
+        ${sizedMetricCard(metricCard('선택기간 판매수량', periodLabel, fmt(periodA.totalQty), `직전 ${fmt(previousA.totalQty)}개 / ${changeRate(periodA.totalQty, previousA.totalQty)}`, changeTone(periodA.totalQty, previousA.totalQty), [previousA.totalQty, periodA.totalQty]), 'third-kpi')}
+        ${sizedMetricCard(metricCard('선택기간 공급가액', periodLabel, money(periodA.totalSupply), `직전 ${money(previousA.totalSupply)} / ${changeRate(periodA.totalSupply, previousA.totalSupply)}`, changeTone(periodA.totalSupply, previousA.totalSupply), [previousA.totalSupply, periodA.totalSupply]), 'third-kpi')}
+        ${sizedMetricCard(metricCard('판매 데이터 입력일', `${fmt(selectedDays)}일 중 입력된 날짜`, `${fmt(periodA.dates.length)}일`, `일평균 ${periodAverageQty.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}개 / 직전 ${fmt(previousA.dates.length)}일`, 'good', [previousA.dates.length, periodA.dates.length]), 'third-kpi')}
       `;
       if (state.viewMode.coupang === 'summary') {
         grid(`${summaryCards}
-          <article class="card wide"><div class="card-head"><div><div class="card-title">월별 쿠팡 출고 금액</div><div class="card-sub">${basisLabel} / 월별 공급가액·수량 흐름 / 클릭 시 상세</div></div><span class="badge">월별</span></div>${renderCoupangFlowChart(a.monthlyFlow, { clickFn: 'setCoupangMonthDetail' })}</article>
-          <article class="card side"><div class="card-head"><div><div class="card-title">카테고리별 출고 현황</div><div class="card-sub">선택기간 판매수량 기준</div></div><span class="badge">${periodA.categoryKey || '카테고리 없음'}</span></div>${renderProductRankChart(periodA.categoryRank, 8)}</article>
+          <article class="card wide"><div class="card-head"><div><div class="card-title">선택기간 쿠팡 판매 흐름</div><div class="card-sub">${basisLabel} / ${summaryFlowLabel} / ${periodLabel}</div></div><span class="badge">${fmt(periodA.dates.length)}일 데이터</span></div>${renderCoupangFlowChart(periodA.dated)}</article>
+          <article class="card side"><div class="card-head"><div><div class="card-title">카테고리별 출고 현황</div><div class="card-sub">${periodLabel} 판매수량 기준</div></div><span class="badge">${fmt(periodA.categoryRank.length)}개</span></div>${renderCategoryDonutChart(periodA.categoryRank, { scopeLabel: '선택기간', emptyMessage: categoryEmptyMessage })}</article>
           ${monthDetailModal}
         `);
         return;
       }
       grid(`${commonCards}
-        <article class="card wide"><div class="card-head"><div><div class="card-title">월별 쿠팡 출고 금액</div><div class="card-sub">${basisLabel} / 월별 공급가액·수량 흐름</div></div><span class="badge">월별</span></div>
+        <article class="card wide"><div class="card-head"><div><div class="card-title">올해 월별 쿠팡 출고 금액</div><div class="card-sub">${basisLabel} / ${a.latestCoupangDate.getFullYear()}년 장기 흐름 / 클릭 시 월 상세</div></div><span class="badge">${a.latestCoupangDate.getFullYear()}년</span></div>
           ${renderCoupangFlowChart(a.monthlyFlow, { clickFn: 'setCoupangMonthDetail' })}
         </article>
         ${monthDetailModal}
 
-        <article class="card side"><div class="card-head"><div><div class="card-title">카테고리별 출고 현황</div><div class="card-sub">카테고리별 수량 및 금액</div></div><span class="badge">${a.categoryKey || '카테고리 없음'}</span></div>
-          ${renderProductRankChart(a.categoryRank, 8)}
+        <article class="card side"><div class="card-head"><div><div class="card-title">카테고리별 출고 현황</div><div class="card-sub">${state.coupang.date || periodLabel} 판매수량 기준</div></div><span class="badge">${fmt(detailA.categoryRank.length)}개</span></div>
+          ${renderCategoryDonutChart(detailA.categoryRank, { scopeLabel: categoryScopeLabel, emptyMessage: categoryEmptyMessage })}
         </article>
 
-        <article class="card wide"><div class="card-head"><div><div class="card-title">쿠팡 판매 흐름</div><div class="card-sub">${basisLabel} / ${flowLabel} / 금액+수량 동시 표시</div></div><span class="badge">${a.basisKey || '기준 컬럼 없음'}</span></div>
+        <article class="card wide"><div class="card-head"><div><div class="card-title">선택기간 쿠팡 판매 흐름</div><div class="card-sub">${basisLabel} / ${flowLabel} / ${periodLabel}</div></div><span class="badge">${detailA.basisKey || '기준 컬럼 없음'}</span></div>
           <div class="table-tools">
             <div class="tool-left">
               <select id="coupangFlowMode" onchange="setCoupangFlowMode(this.value)">
@@ -2213,24 +2321,24 @@
               <div class="pill">미니멀 운영 분석형 차트</div>
             </div>
           </div>
-          ${renderCoupangFlowChart(a.dated)}
+          ${renderCoupangFlowChart(detailA.dated)}
         </article>
 
-        <article class="card half"><div class="card-head"><div><div class="card-title">품목별 금액 순위</div><div class="card-sub">${basisLabel} / 선택 기간 기준 상위 10개 품목</div></div><span class="badge">금액 큰 순</span></div>${renderProductRankChart(a.productRank, 10)}</article>
+        <article class="card half"><div class="card-head"><div><div class="card-title">품목별 금액 순위</div><div class="card-sub">${basisLabel} / 선택기간 기준 상위 10개 품목</div></div><span class="badge">금액 큰 순</span></div>${renderProductRankChart(detailA.productRank, 10)}</article>
 
-        <article class="card side"><div class="card-head"><div><div class="card-title">쿠팡 기준 선택</div><div class="card-sub">날짜별 / 금액 기준 전환</div></div></div><div class="issue-list">
-          <div class="issue"><div class="issue-icon">📅</div><div><strong>날짜 선택</strong><span>${a.dateKey || '날짜열 감지 안됨'}</span></div><div></div></div>
+        <article class="card side"><div class="card-head"><div><div class="card-title">쿠팡 기준 선택</div><div class="card-sub">선택기간 내 날짜 / 금액 기준 전환</div></div></div><div class="issue-list">
+          <div class="issue"><div class="issue-icon">📅</div><div><strong>선택기간 내 날짜</strong><span>${detailA.dateKey || '날짜열 감지 안됨'}</span></div><div></div></div>
           <select id="coupangDateSelect" onchange="setCoupangDate(this.value)">${dateOptions}</select>
           <div class="issue"><div class="issue-icon">₩</div><div><strong>금액 기준</strong><span>공급가 / 매입가 전환</span></div><div></div></div>
           <select id="coupangBasisSelect" onchange="setCoupangBasis(this.value)">
             <option value="supply" ${state.coupang.basis === 'supply' ? 'selected' : ''}>공급가 기준</option>
             <option value="purchase" ${state.coupang.basis === 'purchase' ? 'selected' : ''}>매입가 기준</option>
           </select>
-          <div class="issue"><div class="issue-icon">🔎</div><div><strong>감지 컬럼</strong><span>수량: ${a.qtyKey || '-'} / 공급: ${a.supplyTotalKey || a.supplyUnitKey || '-'} / 매입: ${a.purchaseTotalKey || a.purchaseUnitKey || '-'}</span></div><div class="issue-num">확인</div></div>
-          <div class="issue"><div class="issue-icon">🏷️</div><div><strong>카테고리</strong><span>${a.categoryKey || '카테고리 컬럼 감지 안됨'}</span></div><div class="issue-num">${fmt(a.categoryRank.length)}</div></div>
+          <div class="issue"><div class="issue-icon">🔎</div><div><strong>감지 컬럼</strong><span>수량: ${detailA.qtyKey || '-'} / 공급: ${detailA.supplyTotalKey || detailA.supplyUnitKey || '-'} / 매입: ${detailA.purchaseTotalKey || detailA.purchaseUnitKey || '-'}</span></div><div class="issue-num">확인</div></div>
+          <div class="issue"><div class="issue-icon">🏷️</div><div><strong>카테고리</strong><span>${detailA.categoryKey || '카테고리 컬럼 감지 안됨'}</span></div><div class="issue-num">${fmt(detailA.categoryRank.length)}</div></div>
         </div></article>
 
-        <article class="card full"><div class="card-head"><div><div class="card-title">쿠팡 원본 데이터 전체 보기</div><div class="card-sub">기간 내 ${fmt(a.periodObjects.length)}행 / 현재 표시 ${fmt(a.objects.length)}행 / 페이지당 ${fmt(state.coupang.pageSize)}행</div></div></div>
+        <article class="card full"><div class="card-head"><div><div class="card-title">쿠팡 원본 데이터 전체 보기</div><div class="card-sub">선택기간 ${fmt(periodA.objects.length)}행 / 현재 표시 ${fmt(detailA.objects.length)}행 / 페이지당 ${fmt(state.coupang.pageSize)}행</div></div></div>
           <div class="table-tools">
             <div class="tool-left">
               <select id="coupangPageSize" onchange="setCoupangPageSize(this.value)">
@@ -2241,7 +2349,7 @@
               </select>
               <div class="pill">${basisLabel}</div>
             </div>
-            <div class="tool-right"><div class="pill">${document.getElementById('periodLabel').textContent}</div><div class="pill">${a.objects.length ? fmt(start + 1) : 0} - ${fmt(Math.min(start + state.coupang.pageSize, a.objects.length))} / ${fmt(a.objects.length)}</div></div>
+            <div class="tool-right"><div class="pill">${periodLabel}</div><div class="pill">${detailA.objects.length ? fmt(start + 1) : 0} - ${fmt(Math.min(start + state.coupang.pageSize, detailA.objects.length))} / ${fmt(detailA.objects.length)}</div></div>
           </div>
           <div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h || '-'}</th>`).join('')}</tr></thead><tbody>${table}</tbody></table></div>
           <div class="pagination">
