@@ -229,6 +229,12 @@
     .shipping-match-values { display:flex; align-items:baseline; gap:9px; margin:22px 0 10px; color:var(--muted); font-size:14px; }
     .shipping-match-values strong { color:var(--text); font-size:34px; letter-spacing:-.05em; }
     .shipping-match-values b { color:var(--yellow); font-size:20px; }
+    .shipping-match-result { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:16px; }
+    .shipping-match-result .shipping-match-values { margin:0; }
+    .shipping-match-result .shipping-delta { margin-bottom:3px; }
+    .shipping-match-pairs { margin-top:7px; padding:7px 9px; border-radius:9px; background:rgba(34,211,238,.04); border:1px solid rgba(34,211,238,.12); color:var(--muted); font-size:10px; line-height:1.45; max-height:58px; overflow-y:auto; }
+    .shipping-match-pairs span { display:block; color:var(--cyan); font-weight:900; margin-bottom:2px; }
+    .shipping-match-pairs strong { color:var(--text2); font-weight:800; }
     .shipping-delta { display:inline-flex; width:max-content; max-width:100%; border-radius:999px; padding:7px 10px; font-size:12px; font-weight:900; }
     .shipping-delta.good { color:var(--green); background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.22); }
     .shipping-delta.warn { color:var(--yellow); background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.22); }
@@ -274,6 +280,22 @@
     .shipping-day-prev { color:var(--muted); font-size:9px; text-align:center; margin-top:6px; }
     .production-day-issue { min-height:14px; color:var(--yellow); font-size:9px; font-weight:800; text-align:center; margin-top:5px; }
     .production-category-note { color:var(--muted); font-size:11px; line-height:1.5; margin-top:10px; }
+
+    /* ── 생산 입고·검수: 관리번호로 연결된 로트 진행 현황 ── */
+    .inspection-lot-list { position:relative; z-index:1; display:grid; gap:12px; }
+    .inspection-lot { padding:16px; border:1px solid var(--ov08); border-radius:18px; background:var(--ov035); min-width:0; }
+    .inspection-lot-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .inspection-lot-name { min-width:0; }
+    .inspection-lot-name strong { display:block; color:var(--text); font-size:15px; line-height:1.35; word-break:break-word; }
+    .inspection-lot-name span { display:block; color:var(--muted); font-size:11px; margin-top:4px; line-height:1.45; }
+    .inspection-lot-stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:12px; }
+    .inspection-lot-stat { padding:10px; border-radius:13px; background:var(--ov04); border:1px solid var(--ov06); min-width:0; }
+    .inspection-lot-stat span { display:block; color:var(--muted); font-size:10px; margin-bottom:4px; }
+    .inspection-lot-stat strong { display:block; color:var(--text2); font-size:15px; white-space:nowrap; }
+    .inspection-lot-progress { height:9px; border-radius:999px; background:var(--ov08); overflow:hidden; }
+    .inspection-lot-progress div { height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+    .inspection-lot-foot { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; color:var(--muted); font-size:10px; margin-top:9px; line-height:1.45; }
+    .inspection-source-note { position:relative; z-index:1; padding:12px 14px; border-radius:14px; background:rgba(34,211,238,.055); border:1px solid rgba(34,211,238,.15); color:var(--muted); font-size:11px; line-height:1.55; }
 
     .issue-list { display: grid; gap: 12px; position: relative; z-index: 1; }
     .issue { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 13px; border-radius: 16px; background: var(--ov04); border: 1px solid var(--ov06); }
@@ -479,6 +501,7 @@
     @media (max-width: 820px) {
       .period-vertical-grid { grid-template-columns:repeat(2,minmax(0,1fr)); row-gap:30px; }
       .shipping-status-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .inspection-lot-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
     }
     @media (max-width: 520px) {
       .period-vertical-grid { grid-template-columns:1fr; }
@@ -591,6 +614,8 @@
       inventoryStock: { name: '재고관리_재고', gid: null },
       inventoryOut: { name: '재고관리_출고', gid: null },
       production: { name: '제작_일별', gid: '428106612' },
+      productionInbound: { name: '생산입고', gid: '323858150' },
+      inspectionDefects: { name: '검수불량', gid: '780283971' },
       coupang: { name: '쿠팡_판매', gid: '2007402832' },
       reorder: { name: '발주_필요', gid: '164754989' }
     };
@@ -598,12 +623,13 @@
     // 주말 외 회사 휴무일. 필요 시 날짜만 추가하면 택배 집계에서 자동 제외됩니다.
     const SHIPPING_CLOSED_DATES = new Set(['2026-08-14', '2026-08-17']);
 
-    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, coupang: { page: 1, pageSize: 30, basis: 'supply', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' } };
+    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { selectedLot: 'all' }, coupang: { page: 1, pageSize: 30, basis: 'supply', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' } };
 
     const titles = {
       overview: ['주간 운영 대시보드', '전체 운영 상황을 대표 보고용으로 요약합니다.'],
       shipping: ['택배 / 출고 현황', '일별 출고량, 누락, 오배송, 문제율을 확인합니다.'],
       production: ['제작 현황', '제작 일별 데이터를 기준으로 생산/불량/진행 상태를 확인합니다.'],
+      inspection: ['생산 입고 / 검수 현황', '생산입고 로트와 검수불량 내역을 관리번호로 연결해 검수 진행률과 불량 사유를 확인합니다.'],
       payment: ['결제 관리', '결제 예정 및 완료, PO 관련 금액 흐름을 확인합니다.'],
       inbound: ['입고 예정', '입고 예정 건과 지연 가능 항목을 확인합니다.'],
       inboundManage: ['입고 관리', '실제 입고 처리, 검수, 수량 차이, 상태를 관리합니다.'],
@@ -1047,6 +1073,9 @@
       const compareCaption = matchedDays
         ? `입력 완료된 ${matchedDays}개 영업일만 같은 순서의 직전 영업일과 비교`
         : '양쪽 모두 입력 완료된 날짜가 생기면 자동 비교됩니다.';
+      const matchedDatePairs = comparison.completedPairs.length
+        ? comparison.completedPairs.map(pair => `${dateStr(pair.currentDate)} ↔ ${dateStr(pair.previousDate)}`).join(' · ')
+        : '아직 실제 비교에 반영된 날짜가 없습니다.';
 
       return `
         <article class="card wide shipping-hero">
@@ -1064,9 +1093,12 @@
             <section class="shipping-match">
               <div class="shipping-match-title">동일 입력일 비교</div>
               <div class="shipping-match-sub">완료된 날짜 수를 맞춘 공정한 비교</div>
-              <div class="shipping-match-values"><strong>${fmt(comparison.matchedCurrentShip)}</strong><span>vs</span><b>${fmt(comparison.matchedPreviousShip)}</b><span>건</span></div>
-              <div class="shipping-delta ${deltaTone}">${deltaText}</div>
-              <div class="shipping-match-sub" style="margin-top:10px;">${compareCaption}</div>
+              <div class="shipping-match-result">
+                <div class="shipping-match-values"><strong>${fmt(comparison.matchedCurrentShip)}</strong><span>vs</span><b>${fmt(comparison.matchedPreviousShip)}</b><span>건</span></div>
+                <div class="shipping-delta ${deltaTone}">${deltaText}</div>
+              </div>
+              <div class="shipping-match-sub" style="margin-top:8px;">${compareCaption}</div>
+              <div class="shipping-match-pairs"><span>실제 비교 반영일</span><strong>${matchedDatePairs}</strong></div>
             </section>
           </div>
           <div class="shipping-status-grid">
@@ -1150,7 +1182,8 @@
 
     function viewToggle(tab) {
       const current = state.viewMode[tab] || 'summary';
-      return `<article class="card full" style="min-height:auto;padding:14px 18px;"><div class="table-tools" style="margin:0;"><div class="tool-left"><button onclick="setViewMode('${tab}','summary')" class="${current === 'summary' ? 'active-mode' : ''}">요약 비교</button><button onclick="setViewMode('${tab}','detail')" class="${current === 'detail' ? 'active-mode' : ''}">상세 분석</button><div class="pill">요약은 대표 보고용, 상세는 실무 확인용</div></div></div></article>`;
+      const helper = tab === 'shipping' ? '' : '<div class="pill">요약은 대표 보고용, 상세는 실무 확인용</div>';
+      return `<article class="card full" style="min-height:auto;padding:14px 18px;"><div class="table-tools" style="margin:0;"><div class="tool-left"><button onclick="setViewMode('${tab}','summary')" class="${current === 'summary' ? 'active-mode' : ''}">요약 비교</button><button onclick="setViewMode('${tab}','detail')" class="${current === 'detail' ? 'active-mode' : ''}">상세 분석</button>${helper}</div></div></article>`;
     }
 
     function setViewMode(tab, mode) {
@@ -1614,6 +1647,7 @@
       const totalShip = sumShip(ytdShipping);
       const missing = sumMissing(ytdShipping);
       const mis = sumMis(ytdShipping);
+      const ytdIssues = missing + mis;
       const selectedShip = sumShip(d);
       const selectedMissing = sumMissing(d);
       const selectedMis = sumMis(d);
@@ -1656,6 +1690,7 @@
       const commonCards = `
         ${viewToggle('shipping')}
         ${metricCard('올해 누적 출고량','택배_일별 YTD 기준',fmt(totalShip),`${baseDate.getFullYear()}년 전체 / 이번달 ${fmt(monthShip)}건`,'good',ytdShipping.slice(-7).map(r=>r.shipments))}
+        ${metricCard('올해 누적 누락·오배송','택배_일별 YTD 품질 이슈',`${fmt(ytdIssues)}건`,`누락 ${fmt(missing)}건 / 오배송 ${fmt(mis)}건 / 문제율 ${pct(ytdIssues, totalShip)}`,ytdIssues > 0 ? 'warn' : 'good',ytdShipping.slice(-7).map(r=>r.missing+r.misdelivery))}
         ${metricCard('이번달 출고량','전월 대비',fmt(monthShip),`전월 ${fmt(prevShip)}건 / ${changeRate(monthShip, prevShip)}`,changeTone(monthShip, prevShip),thisMonth.slice(-7).map(r=>r.shipments))}
         ${metricCard('누락률','이번달 vs 전월',pct(sumMissing(thisMonth),monthShip),`전월 ${pct(sumMissing(prevMonth),prevShip)} / ${changeRate(monthMissingRate, prevMissingRate)}`,changeTone(monthMissingRate, prevMissingRate, true),thisMonth.slice(-7).map(r=>r.missing))}
         ${metricCard('오배송률','이번달 vs 전월',pct(sumMis(thisMonth),monthShip),`전월 ${pct(sumMis(prevMonth),prevShip)} / ${changeRate(monthMisRate, prevMisRate)}`,changeTone(monthMisRate, prevMisRate, true),thisMonth.slice(-7).map(r=>r.misdelivery))}
@@ -3357,6 +3392,275 @@
       `);
     }
 
+    function extractConnectedTable(rows, requiredHeaders) {
+      const normalized = value => String(value || '').replaceAll(' ', '').toLowerCase();
+      const sourceRows = Array.isArray(rows) ? rows : [];
+      const headerIndex = sourceRows.findIndex(row => requiredHeaders.every(required =>
+        (row || []).some(cell => normalized(cell).includes(normalized(required)))
+      ));
+      if (headerIndex < 0) return { headerIndex: -1, headers: [], objects: [] };
+
+      const rawHeaders = sourceRows[headerIndex] || [];
+      let lastHeaderIndex = rawHeaders.length - 1;
+      while (lastHeaderIndex >= 0 && !String(rawHeaders[lastHeaderIndex] || '').trim()) lastHeaderIndex--;
+      // gviz CSV는 상단 제목/구분 행을 실제 헤더 셀과 합쳐 반환할 수 있으므로
+      // 알려진 열 이름이 포함돼 있으면 대시보드용 표준 헤더로 정규화합니다.
+      const canonicalHeaders = [
+        '검수완료수량','검수진행률','공장약속일','누적불량','불량수량','불량유형','검수수량',
+        '입고수량','관리번호','공급사','발주일','선적일','입고일','불량률','지연일','검수일',
+        'SKU','원인','조치','상태'
+      ];
+      const headers = rawHeaders.slice(0, lastHeaderIndex + 1).map(header => {
+        const raw = String(header || '').trim();
+        const normalizedRaw = normalized(raw);
+        const match = canonicalHeaders.reduce((best, candidate) => {
+          const index = normalizedRaw.lastIndexOf(normalized(candidate));
+          return index > best.index ? { candidate, index } : best;
+        }, { candidate: '', index: -1 });
+        return match.candidate || raw;
+      });
+      const objects = sourceRows.slice(headerIndex + 1).map(row => {
+        const object = {};
+        headers.forEach((header, index) => {
+          if (header) object[header] = row[index] ?? '';
+        });
+        object._row = row;
+        return object;
+      }).filter(object => headers.some(header => header && String(object[header] || '').trim()));
+      return { headerIndex, headers, objects };
+    }
+
+    function getInspectionAnalysis() {
+      const lotTable = extractConnectedTable(state.raw.productionInbound || [], ['관리번호','SKU','입고수량','검수완료수량','누적불량']);
+      const defectTable = extractConnectedTable(state.raw.inspectionDefects || [], ['검수일','관리번호','검수수량','불량수량']);
+
+      const defectRows = defectTable.objects.map(object => ({
+        date: toDate(object['검수일']),
+        dateText: String(object['검수일'] || '').trim(),
+        managementNo: String(object['관리번호'] || '').trim(),
+        inspected: toNum(object['검수수량']),
+        defect: toNum(object['불량수량']),
+        type: String(object['불량유형'] || '').trim(),
+        cause: String(object['원인'] || '').trim(),
+        action: String(object['조치'] || '').trim()
+      })).filter(row => row.managementNo && (row.date || row.inspected || row.defect || row.type || row.cause || row.action));
+
+      const detailByLot = new Map();
+      defectRows.forEach(row => {
+        if (!detailByLot.has(row.managementNo)) detailByLot.set(row.managementNo, []);
+        detailByLot.get(row.managementNo).push(row);
+      });
+
+      const allLots = lotTable.objects.map(object => {
+        const managementNo = String(object['관리번호'] || '').trim();
+        const details = detailByLot.get(managementNo) || [];
+        const inspected = toNum(object['검수완료수량']);
+        const defect = toNum(object['누적불량']);
+        const detailInspected = details.reduce((sum, row) => sum + row.inspected, 0);
+        const detailDefect = details.reduce((sum, row) => sum + row.defect, 0);
+        const inspectionDates = details.map(row => row.date).filter(Boolean);
+        const inboundQty = toNum(object['입고수량']);
+        return {
+          managementNo,
+          sku: String(object['SKU'] || '').trim(),
+          supplier: String(object['공급사'] || '').trim(),
+          orderDate: toDate(object['발주일']),
+          promiseDate: toDate(object['공장약속일']),
+          shipDate: toDate(object['선적일']),
+          inboundDate: toDate(object['입고일']),
+          inboundQty,
+          inspected,
+          defect,
+          remaining: Math.max(inboundQty - inspected, 0),
+          progressRate: inboundQty ? inspected / inboundQty : 0,
+          defectRate: inspected ? defect / inspected : 0,
+          status: String(object['상태'] || '').trim() || (inboundQty && inspected >= inboundQty ? '검수완료' : '검수중'),
+          details,
+          detailInspected,
+          detailDefect,
+          linked: inspected === detailInspected && defect === detailDefect,
+          latestInspectionDate: inspectionDates.length ? new Date(Math.max(...inspectionDates.map(date => date.getTime()))) : null
+        };
+      }).filter(lot => lot.managementNo);
+
+      const availableLots = allLots.map(lot => lot.managementNo);
+      if (state.inspection.selectedLot !== 'all' && !availableLots.includes(state.inspection.selectedLot)) {
+        state.inspection.selectedLot = 'all';
+      }
+      const selectedLot = state.inspection.selectedLot || 'all';
+      const lots = selectedLot === 'all' ? allLots : allLots.filter(lot => lot.managementNo === selectedLot);
+      const selectedLotIds = new Set(lots.map(lot => lot.managementNo));
+      const details = defectRows.filter(row => selectedLotIds.has(row.managementNo));
+      const lotById = new Map(allLots.map(lot => [lot.managementNo, lot]));
+
+      const totalInbound = lots.reduce((sum, lot) => sum + lot.inboundQty, 0);
+      const totalInspected = lots.reduce((sum, lot) => sum + lot.inspected, 0);
+      const totalDefect = lots.reduce((sum, lot) => sum + lot.defect, 0);
+      const remaining = Math.max(totalInbound - totalInspected, 0);
+      const progressRate = totalInbound ? totalInspected / totalInbound : 0;
+      const defectRate = totalInspected ? totalDefect / totalInspected : 0;
+
+      const periodRange = getCurrentPeriodRange();
+      const periodDetails = details.filter(row => {
+        if (!row.date) return false;
+        const date = new Date(row.date);
+        date.setHours(0,0,0,0);
+        return date >= periodRange.start && date <= periodRange.end;
+      });
+      const periodInspected = periodDetails.reduce((sum, row) => sum + row.inspected, 0);
+      const periodDefect = periodDetails.reduce((sum, row) => sum + row.defect, 0);
+      const periodDefectRate = periodInspected ? periodDefect / periodInspected : 0;
+
+      const dailyMap = new Map();
+      periodDetails.forEach(row => {
+        if (!row.date) return;
+        const key = dateStr(row.date);
+        if (!dailyMap.has(key)) dailyMap.set(key, { label: key, date: row.date, inspected: 0, defect: 0 });
+        const day = dailyMap.get(key);
+        day.inspected += row.inspected;
+        day.defect += row.defect;
+      });
+      const daily = [...dailyMap.values()].sort((a, b) => a.date - b.date);
+
+      const defectTypeMap = new Map();
+      details.forEach(row => {
+        if (row.defect <= 0) return;
+        const name = row.type || row.cause || '유형 미입력';
+        defectTypeMap.set(name, (defectTypeMap.get(name) || 0) + row.defect);
+      });
+      const defectTypes = [...defectTypeMap.entries()]
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+
+      const inboundDates = lots.map(lot => lot.inboundDate).filter(Boolean);
+      const latestInboundDate = inboundDates.length ? new Date(Math.max(...inboundDates.map(date => date.getTime()))) : null;
+      const mismatchLots = lots.filter(lot => !lot.linked);
+      const allLotIds = new Set(allLots.map(lot => lot.managementNo));
+      const orphanDetails = defectRows.filter(row => !allLotIds.has(row.managementNo));
+
+      return {
+        lotTable,
+        defectTable,
+        allLots,
+        lots,
+        details,
+        periodDetails,
+        defectRows,
+        availableLots,
+        selectedLot,
+        lotById,
+        totalInbound,
+        totalInspected,
+        totalDefect,
+        remaining,
+        progressRate,
+        defectRate,
+        periodInspected,
+        periodDefect,
+        periodDefectRate,
+        periodDayCount: new Set(periodDetails.map(row => row.date ? dateStr(row.date) : '').filter(Boolean)).size,
+        daily,
+        defectTypes,
+        latestInboundDate,
+        mismatchLots,
+        orphanDetails
+      };
+    }
+
+    function setInspectionLot(value) {
+      state.inspection.selectedLot = value || 'all';
+      renderInspection();
+    }
+
+    function renderInspectionLotProgress(lots) {
+      if (!lots.length) return '<div class="empty">표시할 생산입고 로트가 없습니다.</div>';
+      return `<div class="inspection-lot-list">${lots.map(lot => {
+        const progress = Math.min(Math.max(lot.progressRate * 100, 0), 100);
+        const statusClass = lot.remaining > 0 || lot.defect > 0 ? 'warn' : '';
+        return `<div class="inspection-lot">
+          <div class="inspection-lot-top">
+            <div class="inspection-lot-name"><strong>${safeHtml(lot.sku || lot.managementNo)}</strong><span>${safeHtml(lot.managementNo)} · ${safeHtml(lot.supplier || '공급사 미입력')}</span></div>
+            <span class="badge ${statusClass}">${safeHtml(lot.status)}</span>
+          </div>
+          <div class="inspection-lot-stats">
+            <div class="inspection-lot-stat"><span>입고</span><strong>${fmt(lot.inboundQty)}개</strong></div>
+            <div class="inspection-lot-stat"><span>검수 완료</span><strong>${fmt(lot.inspected)}개</strong></div>
+            <div class="inspection-lot-stat"><span>잔여</span><strong>${fmt(lot.remaining)}개</strong></div>
+            <div class="inspection-lot-stat"><span>불량률</span><strong>${pct(lot.defect, lot.inspected)}</strong></div>
+          </div>
+          <div class="inspection-lot-progress"><div style="width:${progress}%"></div></div>
+          <div class="inspection-lot-foot"><span>검수진행률 ${pct(lot.inspected, lot.inboundQty)} · 누적불량 ${fmt(lot.defect)}개</span><span>입고 ${dateStr(lot.inboundDate)} · 최근 검수 ${dateStr(lot.latestInspectionDate)} · ${lot.linked ? '연동 일치' : '연동값 확인 필요'}</span></div>
+        </div>`;
+      }).join('')}</div>`;
+    }
+
+    function renderInspectionDailyChart(items) {
+      if (!items.length) return '<div class="empty">검수일별 데이터가 없습니다.</div>';
+      const max = Math.max(...items.map(item => item.inspected), 1);
+      return `<div class="simple-bar-scroll"><div class="simple-bar-chart ${items.length > 12 ? 'many' : ''}">${items.map(item => {
+        const height = item.inspected > 0 ? Math.max((item.inspected / max) * 100, 2) : 1;
+        return `<div class="simple-bar-col">
+          <div class="simple-bar-wrap ${item.defect > 0 ? 'has-issue' : ''}">
+            ${item.defect > 0 ? `<div class="issue-marker" title="불량 ${fmt(item.defect)}개">!</div>` : ''}
+            <div class="simple-bar" style="height:${height}%"></div>
+          </div>
+          <div class="simple-bar-value">${fmt(item.inspected)}</div>
+          ${item.defect > 0 ? `<div class="simple-bar-issue">불량 ${fmt(item.defect)}</div>` : '<div class="simple-bar-issue">불량 0</div>'}
+          <div class="simple-bar-label">${item.date.getMonth()+1}/${item.date.getDate()}</div>
+        </div>`;
+      }).join('')}</div></div>`;
+    }
+
+    function renderInspection() {
+      const a = getInspectionAnalysis();
+      const missingSources = [];
+      if (!a.lotTable.headers.length) missingSources.push('생산입고');
+      if (!a.defectTable.headers.length) missingSources.push('검수불량');
+      if (missingSources.length) {
+        grid(`<article class="card full"><div class="card-head"><div><div class="card-title">생산 입고 / 검수 현황</div><div class="card-sub">데이터 로드 실패</div></div></div><div class="empty">${missingSources.join(', ')} 시트의 헤더 또는 데이터를 불러오지 못했습니다.</div></article>`);
+        return;
+      }
+
+      const scopeLabel = a.selectedLot === 'all' ? '전체 로트' : a.selectedLot;
+      const lotOptions = a.allLots.map(lot => `<option value="${safeHtml(lot.managementNo)}" ${a.selectedLot === lot.managementNo ? 'selected' : ''}>${safeHtml(lot.sku || lot.managementNo)} · ${safeHtml(lot.managementNo)}</option>`).join('');
+      const linkTone = a.mismatchLots.length || a.orphanDetails.length ? 'warn' : '';
+      const dailySpark = a.daily.map(day => day.inspected);
+      const defectSpark = a.daily.map(day => day.defect);
+      const detailRows = [...a.details].sort((x, y) => (y.date?.getTime() || 0) - (x.date?.getTime() || 0));
+
+      grid(`
+        <article class="card full" style="min-height:auto;padding:14px 18px;">
+          <div class="table-tools" style="margin:0;">
+            <div class="tool-left"><strong style="font-size:13px;">관리번호</strong><select onchange="setInspectionLot(this.value)"><option value="all" ${a.selectedLot === 'all' ? 'selected' : ''}>전체 로트</option>${lotOptions}</select><div class="pill">생산입고 ↔ 검수불량 · 관리번호 연결</div></div>
+            <span class="badge ${linkTone}">${a.mismatchLots.length || a.orphanDetails.length ? `연동 확인 ${fmt(a.mismatchLots.length + a.orphanDetails.length)}건` : `연동 일치 ${fmt(a.lots.length)}개 로트`}</span>
+          </div>
+        </article>
+
+        ${metricCard('총 입고수량',`${scopeLabel} · 생산입고 기준`,`${fmt(a.totalInbound)}개`,`로트 ${fmt(a.lots.length)}건 / 최근 입고 ${dateStr(a.latestInboundDate)}`,'good',a.lots.map(lot => lot.inboundQty))}
+        ${metricCard('검수 완료',`${scopeLabel} · 누적`,`${fmt(a.totalInspected)}개`,`입고 ${fmt(a.totalInbound)}개 대비 ${pct(a.totalInspected, a.totalInbound)}`,a.remaining > 0 ? 'warn' : 'good',dailySpark)}
+        ${metricCard('잔여 검수수량','입고수량 - 검수완료',`${fmt(a.remaining)}개`,a.remaining > 0 ? `검수 완료까지 ${fmt(a.remaining)}개` : '전체 검수 완료',a.remaining > 0 ? 'warn' : 'good',a.lots.map(lot => lot.remaining))}
+        ${metricCard('누적 불량',`${scopeLabel} · 검수불량 기준`,`${fmt(a.totalDefect)}개`,`검수 ${fmt(a.totalInspected)}개 중 ${pct(a.totalDefect, a.totalInspected)}`,a.totalDefect > 0 ? 'warn' : 'good',defectSpark)}
+
+        <article class="card wide"><div class="card-head"><div><div class="card-title">로트별 검수 진행</div><div class="card-sub">입고수량 대비 검수완료·잔여·불량률</div></div><span class="badge ${a.remaining > 0 ? 'warn' : ''}">전체 진행률 ${pct(a.totalInspected, a.totalInbound)}</span></div>${renderInspectionLotProgress(a.lots)}</article>
+
+        <article class="card side"><div class="card-head"><div><div class="card-title">선택기간 검수 요약</div><div class="card-sub">상단 기간 필터 · 검수일 기준</div></div><span class="badge">${safeHtml(document.getElementById('periodLabel').textContent)}</span></div><div class="issue-list">
+          <div class="issue"><div class="issue-icon">📅</div><div><strong>검수 진행일</strong><span>검수불량 시트의 입력 날짜</span></div><div class="issue-num">${fmt(a.periodDayCount)}일</div></div>
+          <div class="issue"><div class="issue-icon">🔍</div><div><strong>검수수량</strong><span>선택기간 합계</span></div><div class="issue-num">${fmt(a.periodInspected)}</div></div>
+          <div class="issue"><div class="issue-icon">!</div><div><strong>불량수량</strong><span>선택기간 합계</span></div><div class="issue-num">${fmt(a.periodDefect)}</div></div>
+          <div class="issue"><div class="issue-icon">%</div><div><strong>불량률</strong><span>불량수량 ÷ 검수수량</span></div><div class="issue-num">${pct(a.periodDefect, a.periodInspected)}</div></div>
+        </div><div class="inspection-source-note" style="margin-top:14px;">누적 KPI와 로트 카드는 선택한 관리번호의 전체 데이터 기준이며, 이 카드와 검수일별 흐름은 상단 선택기간 기준입니다.</div></article>
+
+        <article class="card half"><div class="card-head"><div><div class="card-title">검수일별 흐름</div><div class="card-sub">검수수량 막대 · 불량 발생일 표시</div></div><span class="badge">${fmt(a.daily.length)}일</span></div>${renderInspectionDailyChart(a.daily)}</article>
+
+        <article class="card half"><div class="card-head"><div><div class="card-title">불량 사유 구성</div><div class="card-sub">불량유형별 누적 수량</div></div><span class="badge ${a.totalDefect > 0 ? 'warn' : ''}">${fmt(a.totalDefect)}개</span></div><div class="issue-list">${a.defectTypes.map(item => `<div class="issue"><div class="issue-icon">!</div><div><strong>${safeHtml(item.name)}</strong><span>전체 불량의 ${pct(item.value, a.totalDefect)}</span></div><div class="issue-num">${fmt(item.value)}</div></div>`).join('') || '<div class="empty">입력된 불량 사유가 없습니다.</div>'}</div></article>
+
+        <article class="card full"><div class="card-head"><div><div class="card-title">검수 상세 내역</div><div class="card-sub">검수불량 시트 · 최신 검수일 순</div></div><span class="badge">${fmt(detailRows.length)}행</span></div><div class="table-wrap"><table><thead><tr><th>검수일</th><th>관리번호</th><th>SKU</th><th class="right">검수수량</th><th class="right">불량수량</th><th class="right">불량률</th><th>불량유형</th><th>원인</th><th>조치</th></tr></thead><tbody>${detailRows.map(row => {
+          const lot = a.lotById.get(row.managementNo);
+          return `<tr><td>${safeHtml(row.dateText || dateStr(row.date))}</td><td>${safeHtml(row.managementNo)}</td><td>${safeHtml(lot?.sku || '-')}</td><td class="right">${fmt(row.inspected)}</td><td class="right">${fmt(row.defect)}</td><td class="right">${pct(row.defect, row.inspected)}</td><td>${safeHtml(row.type || '-')}</td><td>${safeHtml(row.cause || '-')}</td><td>${safeHtml(row.action || '-')}</td></tr>`;
+        }).join('') || '<tr><td colspan="9" class="muted">표시할 검수 상세 데이터가 없습니다.</td></tr>'}</tbody></table></div></article>
+      `);
+    }
+
     function getInboundAnalysis() {
       // 입고_예정 탭이 비어 있거나 gid 연결이 안 된 경우,
       // 현재 실제로 로드되고 있는 결제_PO관리 데이터를 기준으로 입고 예정 정보를 구성한다.
@@ -4647,6 +4951,8 @@
       // 좌측 통합 사이드바(nav.js)가 이 페이지 밖에서 관리되므로, 현재 탭을
       // location.hash에 반영해 새로고침/공유 링크/사이드바 활성 표시가 맞도록 한다.
       try { history.replaceState(null, '', '#' + state.tab); } catch (e) { location.hash = state.tab; }
+      ensureInspectionNavItem();
+      syncOperationNavActive();
       const [title, desc] = titles[state.tab];
       document.getElementById('pageTitle').textContent = title;
       document.getElementById('pageDesc').textContent = desc;
@@ -4655,6 +4961,7 @@
       else if (state.tab === 'shipping') renderShipping();
       else if (state.tab === 'coupang') renderCoupang();
       else if (state.tab === 'production') renderProduction();
+      else if (state.tab === 'inspection') renderInspection();
       else if (state.tab === 'payment') renderPayment();
       else if (state.tab === 'inbound') renderInbound();
       else if (state.tab === 'inboundManage') renderInboundManage();
@@ -4690,15 +4997,36 @@
       renderCurrentTab();
     };
 
+    function ensureInspectionNavItem() {
+      if (document.querySelector?.('a.fb-item[data-dept="operation"][data-item="inspection"]')) return;
+      const productionLink = document.querySelector?.('a.fb-item[data-dept="operation"][data-item="production"]');
+      if (!productionLink || !document.createElement) return;
+      const link = document.createElement('a');
+      link.className = 'fb-item';
+      link.dataset.dept = 'operation';
+      link.dataset.item = 'inspection';
+      link.setAttribute('href', '#inspection');
+      link.innerHTML = '<span class="fb-item-dot"></span><span>생산 입고·검수</span>';
+      productionLink.after(link);
+    }
+
+    function syncOperationNavActive() {
+      document.querySelectorAll?.('a.fb-item[data-dept="operation"][data-item]').forEach(link => {
+        link.classList.toggle('active', link.dataset.item === state.tab);
+      });
+    }
+
     // 로컬 HTML 미리보기에서도 Operation 메뉴가 배포 사이트로 이동하지 않도록
     // 공통 사이드바의 절대주소를 현재 파일 내부 해시 링크로 바꿉니다.
     function keepOperationLinksLocal(root = document) {
+      ensureInspectionNavItem();
       root.querySelectorAll?.('a.fb-item[data-dept="operation"][data-item]').forEach(link => {
         const tab = link.dataset.item;
         if (!titles[tab]) return;
         link.setAttribute('href', `#${tab}`);
         link.removeAttribute('target');
       });
+      syncOperationNavActive();
     }
 
     document.addEventListener('click', event => {
