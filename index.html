@@ -374,6 +374,19 @@
     .inspection-kpi-card.tone-remaining .inspection-lot-chart-bar { background:linear-gradient(180deg,var(--yellow),rgba(251,191,36,.48)); }
     .inspection-kpi-card.tone-defect .inspection-lot-chart-bar { background:linear-gradient(180deg,var(--red),rgba(220,38,38,.58)); box-shadow:0 8px 20px rgba(220,38,38,.18); }
     .inspection-chart-empty { position:relative; z-index:1; min-height:218px; display:grid; place-items:center; text-align:center; color:var(--muted); font-size:12px; }
+    .inspection-kpi-card.is-clickable { cursor:pointer; transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
+    .inspection-kpi-card.is-clickable:hover { transform:translateY(-2px); border-color:rgba(251,113,133,.42); box-shadow:0 22px 64px rgba(220,38,38,.16); }
+    .inspection-kpi-card.is-clickable:focus-visible { outline:2px solid var(--red); outline-offset:3px; }
+    .inspection-kpi-card.is-clickable .inspection-chart-scale { color:var(--red); font-weight:900; }
+    .inspection-detail-card.is-collapsed .card-head { margin-bottom:0; }
+    .inspection-detail-actions { display:flex; align-items:center; gap:8px; }
+    .inspection-detail-toggle { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; background:var(--ov05); border-color:var(--panel-line); }
+    .inspection-detail-toggle-arrow { display:inline-block; font-size:10px; transition:transform .18s ease; }
+    .inspection-detail-toggle[aria-expanded="true"] .inspection-detail-toggle-arrow { transform:rotate(180deg); }
+    .inspection-defect-backdrop { z-index:500; }
+    .inspection-defect-modal { width:min(880px,100%); }
+    .inspection-defect-summary { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .inspection-defect-note { color:var(--muted); font-size:11px; line-height:1.55; padding:11px 13px; border-radius:13px; background:rgba(251,113,133,.055); border:1px solid rgba(251,113,133,.16); margin-top:14px; }
 
     .issue-list { display: grid; gap: 12px; position: relative; z-index: 1; }
     .issue { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 13px; border-radius: 16px; background: var(--ov04); border: 1px solid var(--ov06); }
@@ -736,7 +749,7 @@
     // 주말 외 회사 휴무일. 필요 시 날짜만 추가하면 택배 집계에서 자동 제외됩니다.
     const SHIPPING_CLOSED_DATES = new Set(['2026-08-14', '2026-08-17']);
 
-    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { selectedLots: null, lotFilterOpen: false }, coupang: { page: 1, pageSize: 30, basis: 'supply', categoryMetric: 'qty', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' } };
+    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { selectedLots: null, lotFilterOpen: false, defectDetailOpen: false, detailExpanded: false }, coupang: { page: 1, pageSize: 30, basis: 'supply', categoryMetric: 'qty', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' } };
 
     const titles = {
       overview: ['주간 운영 대시보드', '전체 운영 상황을 대표 보고용으로 요약합니다.'],
@@ -2292,7 +2305,9 @@
     }
 
     function renderCategoryDonutChart(items, options = {}) {
-      const colors = ['#22d3ee', '#5b7cfa', '#34d399', '#fbbf24', '#fb7185', '#a78bfa'];
+      const colors = Array.isArray(options.colors) && options.colors.length
+        ? options.colors
+        : ['#22d3ee', '#5b7cfa', '#34d399', '#fbbf24', '#fb7185', '#a78bfa'];
       const metric = options.metric === 'amount' ? 'amount' : 'qty';
       const metricValue = item => metric === 'amount' ? toNum(item.value) : toNum(item.qty);
       const safeItems = (Array.isArray(items) ? items : [])
@@ -2328,7 +2343,7 @@
       const amountLabel = safeHtml(options.amountLabel || '판매금액');
       const exactTotal = metric === 'amount' ? money(totalMetric) : `${fmt(totalMetric)}개`;
       const centerValue = metric === 'amount' ? compactKrw(totalMetric) : fmt(totalMetric);
-      const centerLabel = metric === 'amount' ? `${amountLabel} 합계` : '총 판매수량';
+      const centerLabel = metric === 'amount' ? `${amountLabel} 합계` : safeHtml(options.quantityLabel || '총 판매수량');
 
       return `
         <div class="category-donut">
@@ -3971,6 +3986,61 @@
       renderInspection();
     }
 
+    function openInspectionDefectDetail(event) {
+      if (event) event.stopPropagation();
+      state.inspection.lotFilterOpen = false;
+      state.inspection.defectDetailOpen = true;
+      renderInspection();
+    }
+
+    function closeInspectionDefectDetail() {
+      state.inspection.defectDetailOpen = false;
+      renderInspection();
+    }
+
+    function toggleInspectionDetails() {
+      state.inspection.detailExpanded = !state.inspection.detailExpanded;
+      renderInspection();
+    }
+
+    function renderInspectionDefectModal(a, scopeLabel) {
+      if (!state.inspection.defectDetailOpen) return '';
+      const reasonItems = a.defectTypes.map(item => ({ name:item.name, qty:item.value, value:0 }));
+      const reasonSourceTotal = reasonItems.reduce((sum, item) => sum + item.qty, 0);
+      const unlinked = Math.max(a.totalDefect - reasonSourceTotal, 0);
+      if (unlinked > 0) reasonItems.push({ name:'사유 미연동', qty:unlinked, value:0 });
+      const chartTotal = reasonItems.reduce((sum, item) => sum + item.qty, 0);
+      const mismatchNote = reasonSourceTotal === a.totalDefect
+        ? '불량 사유 비율은 각 사유의 불량수량 ÷ 선택 로트 누적 불량수량으로 계산합니다.'
+        : reasonSourceTotal < a.totalDefect
+          ? `누적 불량 ${fmt(a.totalDefect)}개에서 검수불량 상세의 사유 합계 ${fmt(reasonSourceTotal)}개를 뺀 ${fmt(unlinked)}개를 ‘사유 미연동’으로 구분했습니다.`
+          : `검수불량 상세의 사유 합계 ${fmt(reasonSourceTotal)}개가 누적 불량 ${fmt(a.totalDefect)}개보다 ${fmt(reasonSourceTotal - a.totalDefect)}개 많습니다. 원형그래프는 상세 사유 합계 기준이며 연동값 확인이 필요합니다.`;
+
+      return `
+        <div class="modal-backdrop inspection-defect-backdrop" onclick="closeInspectionDefectDetail()">
+          <div class="modal-card inspection-defect-modal" onclick="event.stopPropagation()">
+            <div class="modal-head">
+              <div><div class="card-title">누적 불량 사유 구성</div><div class="card-sub">${safeHtml(scopeLabel)} · 선택한 관리번호의 전체 누적 기준</div></div>
+              <button class="modal-close" onclick="closeInspectionDefectDetail()">닫기</button>
+            </div>
+            <div class="inspection-defect-summary">
+              <div class="pill">누적 불량 ${fmt(a.totalDefect)}개</div>
+              <div class="pill">사유 집계 ${fmt(chartTotal)}개</div>
+              <div class="pill">불량률 ${pct(a.totalDefect,a.totalInspected)}</div>
+            </div>
+            ${renderCategoryDonutChart(reasonItems, {
+              metric:'qty',
+              limit:8,
+              scopeLabel:'불량 사유',
+              quantityLabel:'사유 집계 합계',
+              emptyMessage:'입력된 불량 사유가 없습니다.',
+              colors:['#fb7185','#ef4444','#f97316','#fbbf24','#a78bfa','#f43f5e','#dc2626','#fb923c']
+            })}
+            <div class="inspection-defect-note">${safeHtml(mismatchNote)}</div>
+          </div>
+        </div>`;
+    }
+
     document.addEventListener('click', event => {
       if (!state.inspection.lotFilterOpen) return;
       if (event.target?.closest?.('[data-inspection-lot-filter]')) return;
@@ -3979,7 +4049,13 @@
     });
 
     document.addEventListener('keydown', event => {
-      if (event.key !== 'Escape' || !state.inspection.lotFilterOpen) return;
+      if (event.key !== 'Escape') return;
+      if (state.inspection.defectDetailOpen) {
+        state.inspection.defectDetailOpen = false;
+        if (state.tab === 'inspection') renderInspection();
+        return;
+      }
+      if (!state.inspection.lotFilterOpen) return;
       state.inspection.lotFilterOpen = false;
       if (state.tab === 'inspection') renderInspection();
     });
@@ -3989,7 +4065,7 @@
       return text.length > 13 ? `${text.slice(0, 6)}…${text.slice(-5)}` : text;
     }
 
-    function renderInspectionKpiCard({ title, sub, value, caption, tone, badge, badgeClass = '', lots, valueKey, maxValue, scaleLabel }) {
+    function renderInspectionKpiCard({ title, sub, value, caption, tone, badge, badgeClass = '', lots, valueKey, maxValue, scaleLabel, onClick = '' }) {
       const count = lots.length;
       const gap = count <= 4 ? 10 : count <= 8 ? 7 : count <= 14 ? 4 : count <= 24 ? 2 : 1;
       const labelStep = count > 24 ? 4 : count > 14 ? 3 : count > 8 ? 2 : 1;
@@ -4014,7 +4090,11 @@
       const chart = count
         ? `<div class="inspection-lot-chart ${showFullLotLabels ? 'labels-full' : ''}" style="--lot-gap:${gap}px" role="img" aria-label="${safeHtml(title)} 로트별 세로 막대그래프">${bars}</div>`
         : '<div class="inspection-chart-empty">선택된 로트가 없습니다.<br>위의 관리번호 필터에서 로트를 선택해 주세요.</div>';
-      return `<article class="card kpi inspection-kpi-card tone-${tone}">
+      const interactiveClass = onClick ? ' is-clickable' : '';
+      const interactiveAttrs = onClick
+        ? ` role="button" tabindex="0" onclick="${onClick}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${onClick}}" title="클릭해서 불량 사유 구성 보기"`
+        : '';
+      return `<article class="card kpi inspection-kpi-card tone-${tone}${interactiveClass}"${interactiveAttrs}>
         <div class="card-head"><div><div class="card-title">${safeHtml(title)}</div><div class="card-sub">${safeHtml(sub)}</div></div><span class="badge ${badgeClass}">${safeHtml(badge)}</span></div>
         <div class="kpi-value">${safeHtml(value)}</div>
         <div class="kpi-caption">${safeHtml(caption)}</div>
@@ -4043,23 +4123,6 @@
           <div class="inspection-lot-foot"><span>검수진행률 ${pct(lot.inspected, lot.inboundQty)} · 누적불량 ${fmt(lot.defect)}개</span><span>입고 ${dateStr(lot.inboundDate)} · 최근 검수 ${dateStr(lot.latestInspectionDate)} · ${lot.linked ? '연동 일치' : '연동값 확인 필요'}</span></div>
         </div>`;
       }).join('')}</div>`;
-    }
-
-    function renderInspectionDailyChart(items) {
-      if (!items.length) return '<div class="empty">검수일별 데이터가 없습니다.</div>';
-      const max = Math.max(...items.map(item => item.inspected), 1);
-      return `<div class="simple-bar-scroll"><div class="simple-bar-chart ${items.length > 12 ? 'many' : ''}">${items.map(item => {
-        const height = item.inspected > 0 ? Math.max((item.inspected / max) * 100, 2) : 1;
-        return `<div class="simple-bar-col">
-          <div class="simple-bar-wrap ${item.defect > 0 ? 'has-issue' : ''}">
-            ${item.defect > 0 ? `<div class="issue-marker" title="불량 ${fmt(item.defect)}개">!</div>` : ''}
-            <div class="simple-bar" style="height:${height}%"></div>
-          </div>
-          <div class="simple-bar-value">${fmt(item.inspected)}</div>
-          ${item.defect > 0 ? `<div class="simple-bar-issue">불량 ${fmt(item.defect)}</div>` : '<div class="simple-bar-issue">불량 0</div>'}
-          <div class="simple-bar-label">${item.date.getMonth()+1}/${item.date.getDate()}</div>
-        </div>`;
-      }).join('')}</div></div>`;
     }
 
     function renderInspection() {
@@ -4095,6 +4158,10 @@
       const detailRows = [...a.details].sort((x, y) => (y.date?.getTime() || 0) - (x.date?.getTime() || 0));
       const sharedLotMax = Math.max(...a.lots.map(lot => lot.inboundQty), 1);
       const defectLotMax = Math.max(...a.lots.map(lot => lot.defect), 1);
+      const inspectionDetailTable = `<div class="table-wrap"><table><thead><tr><th>검수일</th><th>관리번호</th><th>SKU</th><th class="right">검수수량</th><th class="right">불량수량</th><th class="right">불량률</th><th>불량유형</th><th>원인</th><th>조치</th></tr></thead><tbody>${detailRows.map(row => {
+        const lot = a.lotById.get(row.managementNo);
+        return `<tr><td>${safeHtml(row.dateText || dateStr(row.date))}</td><td>${safeHtml(row.managementNo)}</td><td>${safeHtml(lot?.sku || '-')}</td><td class="right">${fmt(row.inspected)}</td><td class="right">${fmt(row.defect)}</td><td class="right">${pct(row.defect, row.inspected)}</td><td>${safeHtml(row.type || '-')}</td><td>${safeHtml(row.cause || '-')}</td><td>${safeHtml(row.action || '-')}</td></tr>`;
+      }).join('') || '<tr><td colspan="9" class="muted">표시할 검수 상세 데이터가 없습니다.</td></tr>'}</tbody></table></div>`;
 
       grid(`
         <article class="card full inspection-filter-toolbar" style="min-height:auto;padding:14px 18px;">
@@ -4127,7 +4194,7 @@
         ${renderInspectionKpiCard({ title:'총 입고수량', sub:`${scopeLabel} · 생산입고 기준`, value:`${fmt(a.totalInbound)}개`, caption:`로트 ${fmt(a.lots.length)}건 · 최근 입고 ${dateStr(a.latestInboundDate)}`, tone:'inbound', badge:'운영 KPI', lots:a.lots, valueKey:'inboundQty', maxValue:sharedLotMax, scaleLabel:'공통 수량 축' })}
         ${renderInspectionKpiCard({ title:'검수 완료', sub:`${scopeLabel} · 누적`, value:`${fmt(a.totalInspected)}개`, caption:`입고 ${fmt(a.totalInbound)}개 대비 ${pct(a.totalInspected,a.totalInbound)}`, tone:'complete', badge:`진행 ${pct(a.totalInspected,a.totalInbound)}`, lots:a.lots, valueKey:'inspected', maxValue:sharedLotMax, scaleLabel:'입고와 같은 축' })}
         ${renderInspectionKpiCard({ title:'잔여 검수수량', sub:'입고수량 - 검수완료', value:`${fmt(a.remaining)}개`, caption:a.remaining > 0 ? `선택 로트의 남은 검수 ${fmt(a.remaining)}개` : '선택 로트 전체 검수 완료', tone:'remaining', badge:`잔여 ${pct(a.remaining,a.totalInbound)}`, badgeClass:a.remaining > 0 ? 'warn' : '', lots:a.lots, valueKey:'remaining', maxValue:sharedLotMax, scaleLabel:'입고와 같은 축' })}
-        ${renderInspectionKpiCard({ title:'누적 불량', sub:`${scopeLabel} · 검수불량 기준`, value:`${fmt(a.totalDefect)}개`, caption:`검수 ${fmt(a.totalInspected)}개 중 ${pct(a.totalDefect,a.totalInspected)}`, tone:'defect', badge:`불량률 ${pct(a.totalDefect,a.totalInspected)}`, badgeClass:a.totalDefect > 0 ? 'danger' : '', lots:a.lots, valueKey:'defect', maxValue:defectLotMax, scaleLabel:'불량 전용 축' })}
+        ${renderInspectionKpiCard({ title:'누적 불량', sub:`${scopeLabel} · 검수불량 기준`, value:`${fmt(a.totalDefect)}개`, caption:`검수 ${fmt(a.totalInspected)}개 중 ${pct(a.totalDefect,a.totalInspected)}`, tone:'defect', badge:`불량률 ${pct(a.totalDefect,a.totalInspected)}`, badgeClass:a.totalDefect > 0 ? 'danger' : '', lots:a.lots, valueKey:'defect', maxValue:defectLotMax, scaleLabel:'클릭: 사유 구성 보기', onClick:'openInspectionDefectDetail(event)' })}
 
         <article class="card wide"><div class="card-head"><div><div class="card-title">로트별 검수 진행</div><div class="card-sub">입고수량 대비 검수완료·잔여·불량률</div></div><span class="badge ${a.remaining > 0 ? 'warn' : ''}">전체 진행률 ${pct(a.totalInspected, a.totalInbound)}</span></div>${renderInspectionLotProgress(a.lots)}</article>
 
@@ -4136,16 +4203,17 @@
           <div class="issue"><div class="issue-icon">🔍</div><div><strong>검수수량</strong><span>선택기간 합계</span></div><div class="issue-num">${fmt(a.periodInspected)}</div></div>
           <div class="issue"><div class="issue-icon">!</div><div><strong>불량수량</strong><span>선택기간 합계</span></div><div class="issue-num">${fmt(a.periodDefect)}</div></div>
           <div class="issue"><div class="issue-icon">%</div><div><strong>불량률</strong><span>불량수량 ÷ 검수수량</span></div><div class="issue-num">${pct(a.periodDefect, a.periodInspected)}</div></div>
-        </div><div class="inspection-source-note" style="margin-top:14px;">누적 KPI와 로트 카드는 선택한 관리번호의 전체 데이터 기준이며, 이 카드와 검수일별 흐름은 상단 선택기간 기준입니다.</div></article>
+        </div><div class="inspection-source-note" style="margin-top:14px;">누적 KPI와 로트 카드는 선택한 관리번호의 전체 데이터 기준이며, 이 요약 카드는 상단 선택기간의 검수일 기준입니다.</div></article>
 
-        <article class="card half"><div class="card-head"><div><div class="card-title">검수일별 흐름</div><div class="card-sub">검수수량 막대 · 불량 발생일 표시</div></div><span class="badge">${fmt(a.daily.length)}일</span></div>${renderInspectionDailyChart(a.daily)}</article>
+        <article class="card full inspection-detail-card ${state.inspection.detailExpanded ? '' : 'is-collapsed'}">
+          <div class="card-head">
+            <div><div class="card-title">검수 상세 내역</div><div class="card-sub">검수불량 시트 · 최신 검수일 순</div></div>
+            <div class="inspection-detail-actions"><span class="badge">${fmt(detailRows.length)}행</span><button type="button" class="inspection-detail-toggle" aria-expanded="${state.inspection.detailExpanded}" onclick="toggleInspectionDetails()">${state.inspection.detailExpanded ? '접기' : '펼치기'} <span class="inspection-detail-toggle-arrow">▾</span></button></div>
+          </div>
+          ${state.inspection.detailExpanded ? inspectionDetailTable : ''}
+        </article>
 
-        <article class="card half"><div class="card-head"><div><div class="card-title">불량 사유 구성</div><div class="card-sub">불량유형별 누적 수량</div></div><span class="badge ${a.totalDefect > 0 ? 'warn' : ''}">${fmt(a.totalDefect)}개</span></div><div class="issue-list">${a.defectTypes.map(item => `<div class="issue"><div class="issue-icon">!</div><div><strong>${safeHtml(item.name)}</strong><span>전체 불량의 ${pct(item.value, a.totalDefect)}</span></div><div class="issue-num">${fmt(item.value)}</div></div>`).join('') || '<div class="empty">입력된 불량 사유가 없습니다.</div>'}</div></article>
-
-        <article class="card full"><div class="card-head"><div><div class="card-title">검수 상세 내역</div><div class="card-sub">검수불량 시트 · 최신 검수일 순</div></div><span class="badge">${fmt(detailRows.length)}행</span></div><div class="table-wrap"><table><thead><tr><th>검수일</th><th>관리번호</th><th>SKU</th><th class="right">검수수량</th><th class="right">불량수량</th><th class="right">불량률</th><th>불량유형</th><th>원인</th><th>조치</th></tr></thead><tbody>${detailRows.map(row => {
-          const lot = a.lotById.get(row.managementNo);
-          return `<tr><td>${safeHtml(row.dateText || dateStr(row.date))}</td><td>${safeHtml(row.managementNo)}</td><td>${safeHtml(lot?.sku || '-')}</td><td class="right">${fmt(row.inspected)}</td><td class="right">${fmt(row.defect)}</td><td class="right">${pct(row.defect, row.inspected)}</td><td>${safeHtml(row.type || '-')}</td><td>${safeHtml(row.cause || '-')}</td><td>${safeHtml(row.action || '-')}</td></tr>`;
-        }).join('') || '<tr><td colspan="9" class="muted">표시할 검수 상세 데이터가 없습니다.</td></tr>'}</tbody></table></div></article>
+        ${renderInspectionDefectModal(a, scopeLabel)}
       `);
       const allLotsCheckbox = document.getElementById('inspectionAllLots');
       if (allLotsCheckbox) allLotsCheckbox.indeterminate = !allLotsSelected && a.lots.length > 0;
