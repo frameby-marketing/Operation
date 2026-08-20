@@ -153,6 +153,56 @@
     .spark { display: flex; align-items: end; gap: 5px; height: 42px; margin-top: 18px; position: relative; z-index: 1; }
     .bar { flex: 1; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, var(--cyan), var(--blue)); opacity: .8; min-height: 2px; }
 
+    /* ── 대시보드 모션: 기존 레이아웃과 데이터 로직은 유지 ── */
+    .card { transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease; }
+    .card.card-enter { animation:dashboard-card-enter .72s cubic-bezier(.2,.8,.24,1) both; animation-delay:var(--enter-delay,0ms); }
+    .card.data-updated::after { content:""; position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:inherit; animation:dashboard-data-flash 1.2s ease-out both; }
+    .number-counting { color:var(--cyan) !important; transition:color .22s ease; }
+    .dashboard-bar-animate { transform-origin:50% 100%; animation:dashboard-bar-grow .86s cubic-bezier(.2,.8,.24,1) both; animation-delay:var(--motion-delay,0ms); }
+    .dashboard-progress-animate { transform-origin:0 50%; animation:dashboard-progress-grow .78s cubic-bezier(.2,.8,.24,1) both; animation-delay:var(--motion-delay,0ms); }
+    .category-donut-ring.donut-animate { animation:dashboard-donut-enter .92s cubic-bezier(.2,.8,.24,1) both; animation-delay:160ms; }
+    .category-donut-row.legend-enter { animation:dashboard-legend-enter .48s ease-out both; animation-delay:var(--motion-delay,0ms); }
+    .badge.motion-alert { animation:dashboard-badge-pulse .78s ease-out 2; animation-delay:420ms; }
+
+    @keyframes dashboard-card-enter {
+      0% { opacity:0; transform:translateY(18px) scale(.985); }
+      100% { opacity:1; transform:translateY(0) scale(1); }
+    }
+    @keyframes dashboard-bar-grow {
+      0% { opacity:.2; transform:scaleY(.02); }
+      100% { opacity:1; transform:scaleY(1); }
+    }
+    @keyframes dashboard-progress-grow {
+      0% { opacity:.3; transform:scaleX(.02); }
+      100% { opacity:1; transform:scaleX(1); }
+    }
+    @keyframes dashboard-donut-enter {
+      0% { opacity:0; transform:scale(.72) rotate(-24deg); }
+      70% { opacity:1; transform:scale(1.035) rotate(2deg); }
+      100% { opacity:1; transform:scale(1) rotate(0); }
+    }
+    @keyframes dashboard-legend-enter {
+      0% { opacity:0; transform:translateX(10px); }
+      100% { opacity:1; transform:translateX(0); }
+    }
+    @keyframes dashboard-data-flash {
+      0% { box-shadow:inset 0 0 0 1px rgba(34,211,238,.72); background:rgba(34,211,238,.13); }
+      100% { box-shadow:inset 0 0 0 1px rgba(34,211,238,0); background:rgba(34,211,238,0); }
+    }
+    @keyframes dashboard-badge-pulse {
+      0% { box-shadow:0 0 0 0 currentColor; }
+      70% { box-shadow:0 0 0 7px transparent; }
+      100% { box-shadow:0 0 0 0 transparent; }
+    }
+
+    @media (hover:hover) and (pointer:fine) {
+      .card.kpi:hover, .summary-kpi-card:hover, .inspection-kpi-card:hover { transform:translateY(-3px); border-color:rgba(34,211,238,.24); box-shadow:0 24px 66px rgba(0,0,0,.28); }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      .card, .card.card-enter, .dashboard-bar-animate, .dashboard-progress-animate, .category-donut-ring.donut-animate, .category-donut-row.legend-enter, .badge.motion-alert { animation:none !important; transition:none !important; transform:none !important; }
+    }
+
     .chart-area { display: grid; grid-template-columns: 46px repeat(7, 1fr); grid-template-rows: repeat(5, 42px) 38px; gap: 0 10px; position: relative; z-index: 1; margin-top: 22px; }
     .y-label { color: var(--muted); font-size: 11px; text-align: right; padding-right: 8px; }
     .grid-line { border-top: 1px dashed var(--ov08); grid-column: 2 / -1; }
@@ -939,7 +989,120 @@
       return endOfDay(new Date(d.getFullYear(), d.getMonth() + 1, 0));
     }
 
-    function grid(html) { document.getElementById('dashboardGrid').innerHTML = html; }
+    const dashboardMotionState = {
+      snapshots: new Map(),
+      reduced: Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+    };
+
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', event => {
+      dashboardMotionState.reduced = event.matches;
+    });
+
+    function dashboardNumericTextNode(element) {
+      if (!element) return null;
+      const walker = document.createTreeWalker(element, window.NodeFilter?.SHOW_TEXT || 4);
+      let node = walker.nextNode();
+      while (node) {
+        if (/[-+]?\d[\d,]*(?:\.\d+)?/.test(node.nodeValue || '')) return node;
+        node = walker.nextNode();
+      }
+      return null;
+    }
+
+    function animateDashboardNumber(element, delay = 0) {
+      const node = dashboardNumericTextNode(element);
+      if (!node) return;
+      const source = node.nodeValue || '';
+      const match = source.match(/[-+]?\d[\d,]*(?:\.\d+)?/);
+      if (!match) return;
+      const target = Number(match[0].replaceAll(',', ''));
+      if (!Number.isFinite(target) || target === 0) return;
+      const decimals = (match[0].split('.')[1] || '').length;
+      const prefix = source.slice(0, match.index);
+      const suffix = source.slice((match.index || 0) + match[0].length);
+      const format = value => Number(value).toLocaleString('ko-KR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+      const duration = 760;
+      const startedAt = performance.now() + delay;
+      element.classList.add('number-counting');
+      node.nodeValue = `${prefix}${format(0)}${suffix}`;
+
+      const tick = now => {
+        if (!node.isConnected) return;
+        if (now < startedAt) {
+          requestAnimationFrame(tick);
+          return;
+        }
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = decimals ? target * eased : Math.round(target * eased);
+        node.nodeValue = `${prefix}${format(current)}${suffix}`;
+        if (progress < 1) requestAnimationFrame(tick);
+        else {
+          node.nodeValue = source;
+          element.classList.remove('number-counting');
+        }
+      };
+      requestAnimationFrame(tick);
+    }
+
+    function highlightDashboardUpdates(root) {
+      const mode = state.viewMode?.[state.tab] || '';
+      root.querySelectorAll('.card').forEach(card => {
+        const title = card.querySelector('.card-title')?.textContent?.trim();
+        const value = card.querySelector('.summary-kpi-value, .kpi-value, .shipping-total, .volume-compare-values')?.textContent?.trim();
+        if (!title || !value) return;
+        const key = `${state.tab}|${mode}|${title}`;
+        const previous = dashboardMotionState.snapshots.get(key);
+        dashboardMotionState.snapshots.set(key, value);
+        if (previous !== undefined && previous !== value) {
+          card.classList.add('data-updated');
+          window.setTimeout(() => card.classList.remove('data-updated'), 1300);
+        }
+      });
+    }
+
+    function runDashboardAnimations(root) {
+      if (!root || dashboardMotionState.reduced) return;
+      highlightDashboardUpdates(root);
+
+      Array.from(root.children).filter(node => node.classList?.contains('card')).forEach((card, index) => {
+        card.style.setProperty('--enter-delay', `${Math.min(index, 12) * 48}ms`);
+        card.classList.add('card-enter');
+        card.addEventListener('animationend', event => {
+          if (event.target === card && event.animationName === 'dashboard-card-enter') card.classList.remove('card-enter');
+        });
+      });
+
+      root.querySelectorAll('.bar, .vbar, .simple-bar, .flow-bar, .period-vertical-bar, .shipping-day-bar, .volume-compare-bar, .inspection-lot-chart-bar').forEach((bar, index) => {
+        bar.style.setProperty('--motion-delay', `${140 + Math.min(index, 14) * 28}ms`);
+        bar.classList.add('dashboard-bar-animate');
+      });
+
+      root.querySelectorAll('.fill, .rank-fill, .period-compare-bar, .shipping-progress-fill, .inspection-lot-progress > div').forEach((bar, index) => {
+        bar.style.setProperty('--motion-delay', `${150 + Math.min(index, 12) * 30}ms`);
+        bar.classList.add('dashboard-progress-animate');
+      });
+
+      root.querySelectorAll('.summary-kpi-value, .kpi-value, .shipping-total, .volume-compare-values strong, .volume-compare-values b, .category-donut-center strong').forEach((element, index) => {
+        animateDashboardNumber(element, 120 + Math.min(index, 8) * 38);
+      });
+
+      root.querySelectorAll('.category-donut-ring').forEach(ring => ring.classList.add('donut-animate'));
+      root.querySelectorAll('.category-donut-row').forEach((row, index) => {
+        row.style.setProperty('--motion-delay', `${360 + Math.min(index, 8) * 52}ms`);
+        row.classList.add('legend-enter');
+      });
+      root.querySelectorAll('.badge.warn, .badge.danger').forEach(badge => badge.classList.add('motion-alert'));
+    }
+
+    function grid(html) {
+      const root = document.getElementById('dashboardGrid');
+      root.innerHTML = html;
+      requestAnimationFrame(() => runDashboardAnimations(root));
+    }
 
     function rowsToObjects(rows) {
       const header = rows[0] || [];
