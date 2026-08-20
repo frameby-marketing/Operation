@@ -434,9 +434,56 @@
     .inspection-detail-toggle-arrow { display:inline-block; font-size:10px; transition:transform .18s ease; }
     .inspection-detail-toggle[aria-expanded="true"] .inspection-detail-toggle-arrow { transform:rotate(180deg); }
     .inspection-defect-backdrop { z-index:500; }
-    .inspection-defect-modal { width:min(880px,100%); }
+    .inspection-defect-modal { width:min(920px,100%); }
     .inspection-defect-summary { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
     .inspection-defect-note { color:var(--muted); font-size:11px; line-height:1.55; padding:11px 13px; border-radius:13px; background:rgba(251,113,133,.055); border:1px solid rgba(251,113,133,.16); margin-top:14px; }
+
+    /* 생산 입고·검수: 불량 사진 갤러리 */
+    .inspection-photo-card { overflow:hidden; }
+    .inspection-photo-toolbar { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+    .inspection-photo-filters { display:flex; gap:7px; flex-wrap:wrap; min-width:0; }
+    .inspection-photo-filter { padding:7px 11px; border-radius:999px; background:var(--ov04); border-color:var(--ov08); color:var(--muted); font-size:11px; }
+    .inspection-photo-filter:hover { color:var(--text2); border-color:rgba(251,113,133,.34); }
+    .inspection-photo-filter.active { color:#fff; background:rgba(251,113,133,.2); border-color:rgba(251,113,133,.48); box-shadow:0 8px 24px rgba(220,38,38,.12); }
+    .inspection-photo-grid { position:relative; z-index:1; display:grid; grid-template-columns:repeat(auto-fill,minmax(205px,1fr)); gap:12px; }
+    .inspection-photo-tile { display:block; min-width:0; padding:0; overflow:hidden; border-radius:17px; text-align:left; background:var(--ov035); border:1px solid var(--ov08); color:inherit; transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
+    .inspection-photo-tile:hover { transform:translateY(-2px); border-color:rgba(251,113,133,.42); box-shadow:0 16px 36px rgba(0,0,0,.2); }
+    .inspection-photo-tile:focus-visible { outline:2px solid var(--red); outline-offset:3px; }
+    .inspection-photo-media { position:relative; aspect-ratio:4/3; overflow:hidden; display:grid; place-items:center; background:linear-gradient(135deg,rgba(251,113,133,.09),var(--ov04)); }
+    .inspection-photo-media img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .26s ease; }
+    .inspection-photo-tile:hover .inspection-photo-media img { transform:scale(1.035); }
+    .inspection-photo-fallback { width:100%; height:100%; display:grid; place-items:center; padding:18px; text-align:center; color:var(--muted); font-size:11px; line-height:1.55; }
+    .inspection-photo-fallback strong { display:block; color:var(--text2); font-size:13px; margin-bottom:4px; }
+    .inspection-photo-count { position:absolute; right:9px; bottom:9px; padding:5px 8px; border-radius:999px; color:#fff; background:rgba(8,15,31,.78); border:1px solid rgba(255,255,255,.16); font-size:9px; font-weight:900; backdrop-filter:blur(8px); }
+    .inspection-photo-copy { min-width:0; padding:12px 13px 13px; }
+    .inspection-photo-copy strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); font-size:13px; }
+    .inspection-photo-copy span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:10px; margin-top:5px; }
+    .inspection-photo-copy em { display:inline-flex; margin-top:8px; padding:4px 7px; border-radius:999px; color:var(--red); background:rgba(251,113,133,.08); border:1px solid rgba(251,113,133,.16); font-size:9px; font-style:normal; font-weight:900; }
+    .inspection-photo-empty { position:relative; z-index:1; min-height:180px; display:grid; place-items:center; padding:24px; border:1px dashed var(--ov12); border-radius:17px; background:var(--ov025); text-align:center; color:var(--muted); font-size:12px; line-height:1.65; }
+    .inspection-photo-empty strong { display:block; color:var(--text2); font-size:14px; margin-bottom:7px; }
+    .inspection-photo-help { position:relative; z-index:1; margin-top:13px; padding:11px 13px; border-radius:13px; color:var(--muted); background:rgba(34,211,238,.055); border:1px solid rgba(34,211,238,.15); font-size:10px; line-height:1.55; }
+    .inspection-photo-more { position:relative; z-index:1; display:flex; justify-content:center; margin-top:14px; }
+    .inspection-photo-more button { background:var(--ov05); border-color:var(--panel-line); }
+    .inspection-photo-table-button { padding:6px 9px; border-radius:999px; color:var(--red); background:rgba(251,113,133,.07); border-color:rgba(251,113,133,.22); white-space:nowrap; font-size:10px; }
+
+    .inspection-photo-viewer-backdrop { position:fixed; inset:0; z-index:800; display:grid; place-items:center; padding:24px; background:rgba(0,0,0,.78); backdrop-filter:blur(8px); }
+    .inspection-photo-viewer { width:min(1120px,100%); max-height:92vh; overflow:auto; border:1px solid var(--panel-line); border-radius:24px; background:var(--modal-bg); box-shadow:0 34px 110px rgba(0,0,0,.58); }
+    .inspection-photo-viewer-head { position:sticky; top:0; z-index:3; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:16px 18px; background:var(--modal-bg); border-bottom:1px solid var(--panel-line); }
+    .inspection-photo-viewer-title { min-width:0; }
+    .inspection-photo-viewer-title strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); font-size:15px; }
+    .inspection-photo-viewer-title span { display:block; color:var(--muted); font-size:10px; margin-top:5px; }
+    .inspection-photo-stage { position:relative; min-height:min(66vh,720px); display:grid; place-items:center; background:#080d18; }
+    .inspection-photo-stage img { display:block; width:100%; height:min(66vh,720px); object-fit:contain; }
+    .inspection-photo-stage iframe { display:block; width:100%; height:min(66vh,720px); border:0; background:#fff; }
+    .inspection-photo-stage-fallback { min-height:300px; display:grid; place-items:center; gap:12px; padding:30px; text-align:center; color:#b7c0d7; font-size:12px; line-height:1.6; }
+    .inspection-photo-stage-fallback a { display:inline-flex; justify-content:center; padding:9px 13px; border-radius:999px; color:#fff; background:rgba(91,124,250,.25); border:1px solid rgba(91,124,250,.45); text-decoration:none; }
+    .inspection-photo-nav { position:absolute; top:50%; transform:translateY(-50%); width:42px; height:42px; display:grid; place-items:center; padding:0; border-radius:999px; color:#fff; background:rgba(8,15,31,.78); border-color:rgba(255,255,255,.2); font-size:20px; backdrop-filter:blur(8px); }
+    .inspection-photo-nav.prev { left:14px; }
+    .inspection-photo-nav.next { right:14px; }
+    .inspection-photo-viewer-meta { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; padding:14px 18px 18px; }
+    .inspection-photo-viewer-meta strong { display:block; color:var(--text2); font-size:13px; }
+    .inspection-photo-viewer-meta span { display:block; color:var(--muted); font-size:10px; line-height:1.55; margin-top:4px; }
+    .inspection-photo-viewer-meta a { padding:8px 11px; border-radius:999px; color:var(--cyan); background:rgba(34,211,238,.06); border:1px solid rgba(34,211,238,.18); text-decoration:none; font-size:10px; font-weight:900; white-space:nowrap; }
 
     .issue-list { display: grid; gap: 12px; position: relative; z-index: 1; }
     .issue { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; padding: 13px; border-radius: 16px; background: var(--ov04); border: 1px solid var(--ov06); }
@@ -677,6 +724,12 @@
       .inspection-lot-panel { width:calc(100vw - 36px); }
       .inspection-kpi-card { min-height:370px; }
       .inspection-lot-chart { height:228px; }
+      .inspection-photo-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+      .inspection-photo-copy { padding:10px; }
+      .inspection-photo-viewer-backdrop { padding:10px; }
+      .inspection-photo-viewer { border-radius:18px; }
+      .inspection-photo-stage, .inspection-photo-stage img, .inspection-photo-stage iframe { min-height:58vh; height:58vh; }
+      .inspection-photo-viewer-meta { grid-template-columns:1fr; }
       .summary-kpi-card { grid-column:span 12; }
       .volume-compare-chart { grid-template-columns:repeat(2,minmax(76px,110px)); gap:22px; }
       .volume-compare-axis { grid-template-columns:repeat(2,minmax(76px,110px)); gap:22px; }
@@ -799,7 +852,7 @@
     // 주말 외 회사 휴무일. 필요 시 날짜만 추가하면 택배 집계에서 자동 제외됩니다.
     const SHIPPING_CLOSED_DATES = new Set(['2026-08-14', '2026-08-17']);
 
-    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { selectedLots: null, lotFilterOpen: false, defectDetailOpen: false, detailExpanded: false }, coupang: { page: 1, pageSize: 30, basis: 'supply', categoryMetric: 'qty', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' } };
+    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { selectedLots: null, lotFilterOpen: false, defectDetailOpen: false, detailExpanded: false, photoReason: 'all', photoExpanded: false, photoViewerOpen: false, photoViewerIndex: 0 }, coupang: { page: 1, pageSize: 30, basis: 'supply', categoryMetric: 'qty', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' } };
 
     const titles = {
       overview: ['주간 운영 대시보드', '전체 운영 상황을 대표 보고용으로 요약합니다.'],
@@ -991,7 +1044,8 @@
 
     const dashboardMotionState = {
       snapshots: new Map(),
-      reduced: Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+      reduced: Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches),
+      lastAnimatedTab: null
     };
 
     window.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', event => {
@@ -1101,6 +1155,11 @@
     function grid(html) {
       const root = document.getElementById('dashboardGrid');
       root.innerHTML = html;
+      // 카드/사진/필터처럼 같은 탭 안에서 다시 렌더링될 때는 모션을 반복하지 않습니다.
+      // 첫 데이터 표시와 실제 탭 전환 때만 현재 탭을 새 모션 대상으로 기록합니다.
+      const shouldAnimate = state.loaded && dashboardMotionState.lastAnimatedTab !== state.tab;
+      if (!shouldAnimate) return;
+      dashboardMotionState.lastAnimatedTab = state.tab;
       requestAnimationFrame(() => runDashboardAnimations(root));
     }
 
@@ -3960,6 +4019,8 @@
       // gviz CSV는 상단 제목/구분 행을 실제 헤더 셀과 합쳐 반환할 수 있으므로
       // 알려진 열 이름이 포함돼 있으면 대시보드용 표준 헤더로 정규화합니다.
       const canonicalHeaders = [
+        '검수불량사진URL','불량사진URL','불량사진링크','검수사진URL','사진URL','사진링크',
+        '첨부사진','불량사진','검수사진','이미지URL','이미지','사진',
         '검수완료수량','검수진행률','공장약속일','누적불량','불량수량','불량유형','검수수량',
         '입고수량','관리번호','공급사','발주일','선적일','입고일','불량률','지연일','검수일',
         'SKU','원인','조치','상태'
@@ -3984,11 +4045,54 @@
       return { headerIndex, headers, objects };
     }
 
+    function splitInspectionPhotoLinks(value) {
+      return String(value || '')
+        .replace(/,\s*(?=https?:\/\/)/gi, '\n')
+        .split(/[\n\r|;]+/)
+        .map(url => url.trim())
+        .filter(url => /^https:\/\//i.test(url));
+    }
+
+    function getInspectionDriveFileId(url) {
+      const value = String(url || '');
+      const patterns = [
+        /\/file\/d\/([a-zA-Z0-9_-]+)/i,
+        /[?&]id=([a-zA-Z0-9_-]+)/i,
+        /\/d\/([a-zA-Z0-9_-]+)/i
+      ];
+      for (const pattern of patterns) {
+        const match = value.match(pattern);
+        if (match) return match[1];
+      }
+      return '';
+    }
+
+    function normalizeInspectionPhoto(url) {
+      const originalUrl = String(url || '').trim();
+      const driveId = getInspectionDriveFileId(originalUrl);
+      if (driveId) {
+        const safeId = encodeURIComponent(driveId);
+        return {
+          kind: 'drive',
+          originalUrl,
+          thumbnailUrl: `https://drive.google.com/thumbnail?id=${safeId}&sz=w1200`,
+          viewerUrl: `https://drive.google.com/file/d/${safeId}/preview`,
+          openUrl: `https://drive.google.com/file/d/${safeId}/view`
+        };
+      }
+      return { kind: 'image', originalUrl, thumbnailUrl: originalUrl, viewerUrl: originalUrl, openUrl: originalUrl };
+    }
+
     function getInspectionAnalysis() {
       const lotTable = extractConnectedTable(state.raw.productionInbound || [], ['관리번호','SKU','입고수량','검수완료수량','누적불량']);
       const defectTable = extractConnectedTable(state.raw.inspectionDefects || [], ['검수일','관리번호','검수수량','불량수량']);
+      const photoKey = findHeader(defectTable.headers, [
+        '검수불량사진URL','불량사진URL','불량사진링크','검수사진URL','사진URL','사진링크',
+        '첨부사진','불량사진','검수사진','이미지URL','이미지','사진'
+      ]);
 
-      const defectRows = defectTable.objects.map(object => ({
+      const defectRows = defectTable.objects.map((object, sourceIndex) => ({
+        sourceIndex,
         date: toDate(object['검수일']),
         dateText: String(object['검수일'] || '').trim(),
         managementNo: String(object['관리번호'] || '').trim(),
@@ -3996,8 +4100,10 @@
         defect: toNum(object['불량수량']),
         type: String(object['불량유형'] || '').trim(),
         cause: String(object['원인'] || '').trim(),
-        action: String(object['조치'] || '').trim()
-      })).filter(row => row.managementNo && (row.date || row.inspected || row.defect || row.type || row.cause || row.action));
+        action: String(object['조치'] || '').trim(),
+        photoLinks: photoKey ? splitInspectionPhotoLinks(object[photoKey]) : [],
+        photoIndexes: []
+      })).filter(row => row.managementNo && (row.date || row.inspected || row.defect || row.type || row.cause || row.action || row.photoLinks.length));
 
       const detailByLot = new Map();
       defectRows.forEach(row => {
@@ -4050,6 +4156,29 @@
       const selectedLotIds = new Set(lots.map(lot => lot.managementNo));
       const details = defectRows.filter(row => selectedLotIds.has(row.managementNo));
       const lotById = new Map(allLots.map(lot => [lot.managementNo, lot]));
+      const photos = [];
+      details.forEach(row => {
+        row.photoIndexes = row.photoLinks.map((url, photoOrder) => {
+          const asset = normalizeInspectionPhoto(url);
+          const index = photos.length;
+          photos.push({
+            ...asset,
+            index,
+            photoOrder,
+            sourceIndex: row.sourceIndex,
+            managementNo: row.managementNo,
+            date: row.date,
+            dateText: row.dateText,
+            inspected: row.inspected,
+            defect: row.defect,
+            type: row.type,
+            cause: row.cause,
+            action: row.action,
+            reason: row.type || row.cause || '유형 미입력'
+          });
+          return index;
+        });
+      });
 
       const totalInbound = lots.reduce((sum, lot) => sum + lot.inboundQty, 0);
       const totalInspected = lots.reduce((sum, lot) => sum + lot.inspected, 0);
@@ -4099,6 +4228,8 @@
       return {
         lotTable,
         defectTable,
+        photoKey,
+        photos,
         allLots,
         lots,
         details,
@@ -4166,6 +4297,130 @@
       renderInspection();
     }
 
+    function getInspectionPhotoSelection(a) {
+      const reasons = [...new Set((a.photos || []).map(photo => photo.reason).filter(Boolean))]
+        .sort((left, right) => left.localeCompare(right, 'ko'));
+      if (state.inspection.photoReason !== 'all' && !reasons.includes(state.inspection.photoReason)) {
+        state.inspection.photoReason = 'all';
+      }
+      const photos = state.inspection.photoReason === 'all'
+        ? (a.photos || [])
+        : (a.photos || []).filter(photo => photo.reason === state.inspection.photoReason);
+      return { reasons, photos };
+    }
+
+    function setInspectionPhotoReason(reason) {
+      state.inspection.photoReason = String(reason || 'all');
+      state.inspection.photoExpanded = false;
+      renderInspection();
+    }
+
+    function toggleInspectionPhotoGallery() {
+      state.inspection.photoExpanded = !state.inspection.photoExpanded;
+      renderInspection();
+    }
+
+    function openInspectionPhoto(index, event) {
+      if (event) event.stopPropagation();
+      const analysis = getInspectionAnalysis();
+      if (!analysis.photos.length) return;
+      state.inspection.photoViewerIndex = Math.min(Math.max(Number(index) || 0, 0), analysis.photos.length - 1);
+      state.inspection.photoViewerOpen = true;
+      state.inspection.lotFilterOpen = false;
+      renderInspection();
+    }
+
+    function closeInspectionPhoto(event) {
+      if (event) event.stopPropagation();
+      state.inspection.photoViewerOpen = false;
+      renderInspection();
+    }
+
+    function stepInspectionPhoto(direction, event) {
+      if (event) event.stopPropagation();
+      const analysis = getInspectionAnalysis();
+      const count = analysis.photos.length;
+      if (!count) {
+        state.inspection.photoViewerOpen = false;
+        renderInspection();
+        return;
+      }
+      state.inspection.photoViewerIndex = (state.inspection.photoViewerIndex + Number(direction) + count) % count;
+      renderInspection();
+    }
+
+    function renderInspectionPhotoGallery(a, scopeLabel) {
+      const selection = getInspectionPhotoSelection(a);
+      const visibleLimit = 10;
+      const visiblePhotos = state.inspection.photoExpanded ? selection.photos : selection.photos.slice(0, visibleLimit);
+      const filterButtons = [
+        `<button type="button" class="inspection-photo-filter ${state.inspection.photoReason === 'all' ? 'active' : ''}" data-reason="all" onclick="setInspectionPhotoReason(this.dataset.reason)">전체 ${fmt(a.photos.length)}</button>`,
+        ...selection.reasons.map(reason => {
+          const count = a.photos.filter(photo => photo.reason === reason).length;
+          return `<button type="button" class="inspection-photo-filter ${state.inspection.photoReason === reason ? 'active' : ''}" data-reason="${safeHtml(reason)}" onclick="setInspectionPhotoReason(this.dataset.reason)">${safeHtml(reason)} ${fmt(count)}</button>`;
+        })
+      ].join('');
+
+      const photoTiles = visiblePhotos.map((photo, visibleIndex) => {
+        const label = `${photo.reason} · ${photo.managementNo} · ${photo.dateText || dateStr(photo.date)}`;
+        return `<button type="button" class="inspection-photo-tile" onclick="openInspectionPhoto(${photo.index},event)" aria-label="${safeHtml(label)} 사진 크게 보기">
+          <div class="inspection-photo-media">
+            <img src="${safeHtml(photo.thumbnailUrl)}" alt="${safeHtml(label)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+            <div class="inspection-photo-fallback" hidden><div><strong>미리보기 열기</strong>이미지를 불러오지 못했습니다.<br>눌러서 원본을 확인하세요.</div></div>
+            <span class="inspection-photo-count">${visibleIndex + 1} / ${selection.photos.length}</span>
+          </div>
+          <div class="inspection-photo-copy">
+            <strong>${safeHtml(photo.reason)}</strong>
+            <span>${safeHtml(photo.managementNo)} · ${safeHtml(photo.dateText || dateStr(photo.date))}</span>
+            <em>불량 ${fmt(photo.defect)}개</em>
+          </div>
+        </button>`;
+      }).join('');
+
+      let galleryBody = '';
+      if (!a.photoKey) {
+        galleryBody = `<div class="inspection-photo-empty"><div><strong>사진 열을 찾지 못했습니다.</strong><code>검수불량</code> 시트에 <code>불량사진</code> 또는 <code>사진URL</code> 열을 추가하고<br>공유된 Google Drive 사진 링크를 입력하면 여기에 자동 표시됩니다.</div></div>`;
+      } else if (!a.photos.length) {
+        galleryBody = `<div class="inspection-photo-empty"><div><strong>등록된 불량 사진이 없습니다.</strong>${safeHtml(scopeLabel)}에 해당하는 <code>${safeHtml(a.photoKey)}</code> 열의 링크를 확인해 주세요.<br>링크는 <code>https://</code>로 시작해야 합니다.</div></div>`;
+      } else if (!selection.photos.length) {
+        galleryBody = '<div class="inspection-photo-empty"><div><strong>선택한 불량유형의 사진이 없습니다.</strong>위 필터에서 다른 불량유형을 선택해 주세요.</div></div>';
+      } else {
+        galleryBody = `<div class="inspection-photo-grid">${photoTiles}</div>${selection.photos.length > visibleLimit ? `<div class="inspection-photo-more"><button type="button" onclick="toggleInspectionPhotoGallery()">${state.inspection.photoExpanded ? '사진 접기' : `나머지 ${fmt(selection.photos.length - visibleLimit)}장 더보기`}</button></div>` : ''}`;
+      }
+
+      return `<article class="card full inspection-photo-card">
+        <div class="card-head"><div><div class="card-title">불량 사진</div><div class="card-sub">${safeHtml(scopeLabel)} · 검수불량 시트의 사진 링크</div></div><span class="badge ${a.photos.length ? 'danger' : ''}">${fmt(selection.photos.length)}장</span></div>
+        ${a.photos.length ? `<div class="inspection-photo-toolbar"><div class="inspection-photo-filters">${filterButtons}</div><span class="pill">불량유형별 필터</span></div>` : ''}
+        ${galleryBody}
+        <div class="inspection-photo-help">지원 열 이름: 불량사진, 사진URL, 사진링크, 검수사진, 이미지. 한 셀에 여러 장을 넣을 때는 링크를 줄바꿈·세미콜론·<strong>|</strong>로 구분하세요. Google Drive 사진은 공유 권한을 ‘링크가 있는 사용자’로 설정해야 대시보드 안에서 열립니다.</div>
+      </article>`;
+    }
+
+    function renderInspectionPhotoViewer(a) {
+      if (!state.inspection.photoViewerOpen || !a.photos.length) return '';
+      state.inspection.photoViewerIndex = Math.min(Math.max(state.inspection.photoViewerIndex, 0), a.photos.length - 1);
+      const photo = a.photos[state.inspection.photoViewerIndex];
+      const label = `${photo.reason} · ${photo.managementNo}`;
+      const stage = photo.kind === 'drive'
+        ? `<iframe src="${safeHtml(photo.viewerUrl)}" title="${safeHtml(label)} 사진 미리보기" loading="lazy" allow="fullscreen"></iframe>`
+        : `<img src="${safeHtml(photo.viewerUrl)}" alt="${safeHtml(label)}" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+           <div class="inspection-photo-stage-fallback" hidden><div>이 링크는 이미지로 바로 표시할 수 없습니다.<br><a href="${safeHtml(photo.openUrl)}" target="_blank" rel="noopener noreferrer">원본 링크 열기</a></div></div>`;
+      const navigation = a.photos.length > 1
+        ? `<button type="button" class="inspection-photo-nav prev" onclick="stepInspectionPhoto(-1,event)" aria-label="이전 사진">‹</button><button type="button" class="inspection-photo-nav next" onclick="stepInspectionPhoto(1,event)" aria-label="다음 사진">›</button>`
+        : '';
+
+      return `<div class="inspection-photo-viewer-backdrop" role="dialog" aria-modal="true" aria-label="불량 사진 크게 보기" onclick="closeInspectionPhoto(event)">
+        <div class="inspection-photo-viewer" onclick="event.stopPropagation()">
+          <div class="inspection-photo-viewer-head">
+            <div class="inspection-photo-viewer-title"><strong>${safeHtml(photo.reason)}</strong><span>${safeHtml(photo.managementNo)} · ${safeHtml(photo.dateText || dateStr(photo.date))} · ${state.inspection.photoViewerIndex + 1}/${a.photos.length}</span></div>
+            <button type="button" class="modal-close" onclick="closeInspectionPhoto(event)">닫기</button>
+          </div>
+          <div class="inspection-photo-stage">${stage}${navigation}</div>
+          <div class="inspection-photo-viewer-meta"><div><strong>불량 ${fmt(photo.defect)}개${photo.cause ? ` · 원인 ${safeHtml(photo.cause)}` : ''}</strong><span>${photo.action ? `조치: ${safeHtml(photo.action)}` : '조치 내용 미입력'}</span></div><a href="${safeHtml(photo.openUrl)}" target="_blank" rel="noopener noreferrer">원본 열기</a></div>
+        </div>
+      </div>`;
+    }
+
     function renderInspectionDefectModal(a, scopeLabel) {
       if (!state.inspection.defectDetailOpen) return '';
       const reasonItems = a.defectTypes.map(item => ({ name:item.name, qty:item.value, value:0 }));
@@ -4190,6 +4445,7 @@
               <div class="pill">누적 불량 ${fmt(a.totalDefect)}개</div>
               <div class="pill">사유 집계 ${fmt(chartTotal)}개</div>
               <div class="pill">불량률 ${pct(a.totalDefect,a.totalInspected)}</div>
+              <div class="pill">등록 사진 ${fmt(a.photos.length)}장</div>
             </div>
             ${renderCategoryDonutChart(reasonItems, {
               metric:'qty',
@@ -4212,7 +4468,16 @@
     });
 
     document.addEventListener('keydown', event => {
+      if (state.inspection.photoViewerOpen && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+        stepInspectionPhoto(event.key === 'ArrowLeft' ? -1 : 1, event);
+        return;
+      }
       if (event.key !== 'Escape') return;
+      if (state.inspection.photoViewerOpen) {
+        state.inspection.photoViewerOpen = false;
+        if (state.tab === 'inspection') renderInspection();
+        return;
+      }
       if (state.inspection.defectDetailOpen) {
         state.inspection.defectDetailOpen = false;
         if (state.tab === 'inspection') renderInspection();
@@ -4321,10 +4586,13 @@
       const detailRows = [...a.details].sort((x, y) => (y.date?.getTime() || 0) - (x.date?.getTime() || 0));
       const sharedLotMax = Math.max(...a.lots.map(lot => lot.inboundQty), 1);
       const defectLotMax = Math.max(...a.lots.map(lot => lot.defect), 1);
-      const inspectionDetailTable = `<div class="table-wrap"><table><thead><tr><th>검수일</th><th>관리번호</th><th>SKU</th><th class="right">검수수량</th><th class="right">불량수량</th><th class="right">불량률</th><th>불량유형</th><th>원인</th><th>조치</th></tr></thead><tbody>${detailRows.map(row => {
+      const inspectionDetailTable = `<div class="table-wrap"><table><thead><tr><th>검수일</th><th>관리번호</th><th>SKU</th><th class="right">검수수량</th><th class="right">불량수량</th><th class="right">불량률</th><th>불량유형</th><th>원인</th><th>조치</th><th>사진</th></tr></thead><tbody>${detailRows.map(row => {
         const lot = a.lotById.get(row.managementNo);
-        return `<tr><td>${safeHtml(row.dateText || dateStr(row.date))}</td><td>${safeHtml(row.managementNo)}</td><td>${safeHtml(lot?.sku || '-')}</td><td class="right">${fmt(row.inspected)}</td><td class="right">${fmt(row.defect)}</td><td class="right">${pct(row.defect, row.inspected)}</td><td>${safeHtml(row.type || '-')}</td><td>${safeHtml(row.cause || '-')}</td><td>${safeHtml(row.action || '-')}</td></tr>`;
-      }).join('') || '<tr><td colspan="9" class="muted">표시할 검수 상세 데이터가 없습니다.</td></tr>'}</tbody></table></div>`;
+        const photoButton = row.photoIndexes.length
+          ? `<button type="button" class="inspection-photo-table-button" onclick="openInspectionPhoto(${row.photoIndexes[0]},event)">사진 ${fmt(row.photoIndexes.length)}장</button>`
+          : '<span class="muted">-</span>';
+        return `<tr><td>${safeHtml(row.dateText || dateStr(row.date))}</td><td>${safeHtml(row.managementNo)}</td><td>${safeHtml(lot?.sku || '-')}</td><td class="right">${fmt(row.inspected)}</td><td class="right">${fmt(row.defect)}</td><td class="right">${pct(row.defect, row.inspected)}</td><td>${safeHtml(row.type || '-')}</td><td>${safeHtml(row.cause || '-')}</td><td>${safeHtml(row.action || '-')}</td><td>${photoButton}</td></tr>`;
+      }).join('') || '<tr><td colspan="10" class="muted">표시할 검수 상세 데이터가 없습니다.</td></tr>'}</tbody></table></div>`;
 
       grid(`
         <article class="card full inspection-filter-toolbar" style="min-height:auto;padding:14px 18px;">
@@ -4368,6 +4636,8 @@
           <div class="issue"><div class="issue-icon">%</div><div><strong>불량률</strong><span>불량수량 ÷ 검수수량</span></div><div class="issue-num">${pct(a.periodDefect, a.periodInspected)}</div></div>
         </div><div class="inspection-source-note" style="margin-top:14px;">누적 KPI와 로트 카드는 선택한 관리번호의 전체 데이터 기준이며, 이 요약 카드는 상단 선택기간의 검수일 기준입니다.</div></article>
 
+        ${renderInspectionPhotoGallery(a, scopeLabel)}
+
         <article class="card full inspection-detail-card ${state.inspection.detailExpanded ? '' : 'is-collapsed'}">
           <div class="card-head">
             <div><div class="card-title">검수 상세 내역</div><div class="card-sub">검수불량 시트 · 최신 검수일 순</div></div>
@@ -4377,6 +4647,7 @@
         </article>
 
         ${renderInspectionDefectModal(a, scopeLabel)}
+        ${renderInspectionPhotoViewer(a)}
       `);
       const allLotsCheckbox = document.getElementById('inspectionAllLots');
       if (allLotsCheckbox) allLotsCheckbox.indeterminate = !allLotsSelected && a.lots.length > 0;
