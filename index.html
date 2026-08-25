@@ -5816,21 +5816,76 @@
     async function poDownloadExcel() {
       const data = poState.data;
       if (!data || !data.length) { alert('데이터가 없습니다. 먼저 데이터를 불러와주세요.'); return; }
+      if (!window.XLSX) { alert('엑셀 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
 
-      // SheetJS 동적 로드
-      if (!window.XLSX) {
-        await new Promise((res, rej) => {
-          const s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-          s.onload = res; s.onerror = rej;
-          document.head.appendChild(s);
-        });
-      }
       const XLSX = window.XLSX;
       const wb = XLSX.utils.book_new();
 
+      // ── 스타일 정의 ─────────────────────────────
+      const border = {
+        top:    { style: 'thin', color: { rgb: 'CCCCCC' } },
+        bottom: { style: 'thin', color: { rgb: 'CCCCCC' } },
+        left:   { style: 'thin', color: { rgb: 'CCCCCC' } },
+        right:  { style: 'thin', color: { rgb: 'CCCCCC' } },
+      };
+      const borderBold = {
+        top:    { style: 'medium', color: { rgb: '999999' } },
+        bottom: { style: 'medium', color: { rgb: '999999' } },
+        left:   { style: 'medium', color: { rgb: '999999' } },
+        right:  { style: 'medium', color: { rgb: '999999' } },
+      };
+
+      const S = {
+        // 제목
+        title: { font: { bold: true, sz: 16, color: { rgb: '1A1A2E' } }, fill: { fgColor: { rgb: 'E8F4FD' } }, alignment: { horizontal: 'center', vertical: 'center' }, border },
+        // 요일 헤더
+        dowHeader: (isSun, isSat) => ({
+          font: { bold: true, sz: 11, color: { rgb: isSun ? 'E53E3E' : isSat ? '3182CE' : '2D3748' } },
+          fill: { fgColor: { rgb: isSun ? 'FFF5F5' : isSat ? 'EBF8FF' : 'F7FAFC' } },
+          alignment: { horizontal: 'center', vertical: 'center' },
+          border: borderBold,
+        }),
+        // 주간합계 헤더
+        weekSumHeader: { font: { bold: true, sz: 11, color: { rgb: '2B6CB0' } }, fill: { fgColor: { rgb: 'EBF8FF' } }, alignment: { horizontal: 'center', vertical: 'center' }, border: borderBold },
+        // 날짜 숫자 셀
+        dateNum: (isSun, isSat, isToday) => ({
+          font: { bold: true, sz: 12, color: { rgb: isToday ? 'FFFFFF' : isSun ? 'E53E3E' : isSat ? '3182CE' : '2D3748' } },
+          fill: { fgColor: { rgb: isToday ? '4299E1' : isSun ? 'FFF5F5' : isSat ? 'EBF8FF' : 'FFFFFF' } },
+          alignment: { horizontal: 'left', vertical: 'top', indent: 1 },
+          border,
+        }),
+        // 빈 날짜 셀
+        emptyCell: { fill: { fgColor: { rgb: 'F7FAFC' } }, border },
+        // 이벤트 셀 (유형별 배경)
+        eventCell: (type) => {
+          const bg = { '신': 'EBF8FF', '추': 'FFFFF0', '요': 'F0FFF4', '기': 'FFF5F5' }[type] || 'FAFAFA';
+          const fc = { '신': '2B6CB0', '추': '744210', '요': '276749', '기': '9B2C2C' }[type] || '333333';
+          return {
+            font: { sz: 9, color: { rgb: fc } },
+            fill: { fgColor: { rgb: bg } },
+            alignment: { horizontal: 'left', vertical: 'top', wrapText: true },
+            border,
+          };
+        },
+        // 주간합계 셀
+        weekSum: { font: { bold: true, sz: 10, color: { rgb: '2B6CB0' } }, fill: { fgColor: { rgb: 'EBF8FF' } }, alignment: { horizontal: 'right', vertical: 'center', indent: 1 }, border },
+        weekSumEmpty: { fill: { fgColor: { rgb: 'EBF8FF' } }, border },
+        // 월합산
+        monthTotal: { font: { bold: true, sz: 12, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '2B6CB0' } }, alignment: { horizontal: 'right', vertical: 'center', indent: 1 }, border: borderBold },
+        monthTotalLabel: { font: { bold: true, sz: 12, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '2B6CB0' } }, alignment: { horizontal: 'left', vertical: 'center', indent: 1 }, border: borderBold },
+        // 빈 행 구분
+        separator: { fill: { fgColor: { rgb: 'EDF2F7' } }, border },
+      };
+
+      // 셀 쓰기 헬퍼
+      function setCell(ws, r, c, value, style) {
+        const addr = XLSX.utils.encode_cell({ r, c });
+        ws[addr] = { v: value ?? '', t: typeof value === 'number' ? 'n' : 's', s: style };
+      }
+
       const DOW_KR   = ['일', '월', '화', '수', '목', '금', '토'];
       const TYPE_LBL = PO_TYPE_LABEL;
+      const today    = new Date();
 
       PO_MONTHS.forEach(moInfo => {
         const monthData = data.filter(r => r.month === moInfo.m);
@@ -5840,110 +5895,110 @@
         const firstDow = new Date(moInfo.year, moInfo.m - 1, 1).getDay();
         const days     = moInfo.days;
         const numWeeks = Math.ceil((firstDow + days) / 7);
+        const ws       = {};
+        const merges   = [];
+        let rowIdx     = 0;
 
-        // ── 시트 데이터 구성 ──────────────────────────
-        // 각 셀은 { v: 값, s: 스타일 } 형태로 aoa(array of arrays)로 구성
-        const aoa = [];
+        // ── 제목 행 ──
+        for (let c = 0; c < 8; c++) setCell(ws, rowIdx, c, c === 0 ? `${moInfo.year}년 ${moInfo.label} 발주 캘린더` : '', S.title);
+        merges.push({ s: { r: rowIdx, c: 0 }, e: { r: rowIdx, c: 7 } });
+        rowIdx++;
 
-        // 행0: 월 제목
-        const titleRow = Array(8).fill(null);
-        titleRow[0] = `${moInfo.year}년 ${moInfo.label} 발주 캘린더`;
-        aoa.push(titleRow);
+        // ── 요일 헤더 행 ──
+        DOW_KR.forEach((d, c) => setCell(ws, rowIdx, c, d, S.dowHeader(c === 0, c === 6)));
+        setCell(ws, rowIdx, 7, '주간 합계', S.weekSumHeader);
+        rowIdx++;
 
-        // 행1: 빈 행
-        aoa.push(Array(8).fill(null));
-
-        // 행2: 헤더 (일~토 + 주간합계)
-        aoa.push([...DOW_KR, '주간합계']);
-
-        // 행3~: 주차별 달력
+        // ── 주차별 달력 ──
         for (let week = 0; week < numWeeks; week++) {
-          // 셀 내용 행 (날짜)
-          const dateRow  = Array(8).fill(null);
-          // 내용 행들 (이벤트가 여러 개일 수 있으므로 최대 행 수 계산)
-          let maxEvents = 0;
+          const weekDateRow = rowIdx;
           let weekCost = 0;
+          let maxEvents = 0;
 
+          // 날짜 숫자 행
           for (let dow = 0; dow < 7; dow++) {
             const dayNum = week * 7 + dow - firstDow + 1;
-            if (dayNum < 1 || dayNum > days) { dateRow[dow] = ''; continue; }
-            dateRow[dow] = dayNum;
-            const events = byDay[dayNum] || [];
-            maxEvents = Math.max(maxEvents, events.length);
-            events.forEach(e => { weekCost += (e.amount || 0); });
+            if (dayNum < 1 || dayNum > days) {
+              setCell(ws, rowIdx, dow, '', S.emptyCell);
+            } else {
+              const isToday = moInfo.year === today.getFullYear() && moInfo.m === today.getMonth() + 1 && dayNum === today.getDate();
+              setCell(ws, rowIdx, dow, dayNum, S.dateNum(dow === 0, dow === 6, isToday));
+              const events = byDay[dayNum] || [];
+              maxEvents = Math.max(maxEvents, events.length);
+              events.forEach(e => { weekCost += (e.amount || 0); });
+            }
           }
-          dateRow[7] = ''; // 주간합계 열은 날짜 행에서 비움
-          aoa.push(dateRow);
+          setCell(ws, rowIdx, 7, '', S.weekSumEmpty);
+          rowIdx++;
 
-          // 이벤트 내용 행들
-          for (let ei = 0; ei < Math.max(maxEvents, 1); ei++) {
-            const evRow = Array(8).fill(null);
+          // 이벤트 행들
+          const eventRows = Math.max(maxEvents, 1);
+          for (let ei = 0; ei < eventRows; ei++) {
             for (let dow = 0; dow < 7; dow++) {
               const dayNum = week * 7 + dow - firstDow + 1;
-              if (dayNum < 1 || dayNum > days) { evRow[dow] = ''; continue; }
+              if (dayNum < 1 || dayNum > days) {
+                setCell(ws, rowIdx, dow, '', S.emptyCell);
+                continue;
+              }
               const events = byDay[dayNum] || [];
               const e = events[ei];
-              if (!e) { evRow[dow] = ''; continue; }
-
-              const typeLbl = TYPE_LBL[e.type] || e.type;
-              let cellText = `[${e.type}] ${e.product}`;
-              if (e.qty)    cellText += `\n수량: ${e.qty.toLocaleString()}개`;
-              if (e.amount) cellText += `\n금액: ${e.amount.toLocaleString()}원`;
-              if (e.memo)   cellText += `\n※ ${e.memo}`;
-              evRow[dow] = cellText;
+              if (!e) {
+                setCell(ws, rowIdx, dow, '', { fill: { fgColor: { rgb: 'FFFFFF' } }, border });
+                continue;
+              }
+              let txt = `[${TYPE_LBL[e.type]||e.type}] ${e.product}`;
+              if (e.qty)    txt += `\n수량: ${e.qty.toLocaleString()}개`;
+              if (e.amount) txt += `\n금액: ${e.amount.toLocaleString()}원`;
+              if (e.memo)   txt += `\n※ ${e.memo}`;
+              setCell(ws, rowIdx, dow, txt, S.eventCell(e.type));
             }
-            // 마지막 이벤트 행에 주간합계 표시
-            if (ei === Math.max(maxEvents, 1) - 1) {
-              evRow[7] = weekCost ? `${weekCost.toLocaleString()}원` : '—';
+            // 주간합계: 마지막 이벤트 행에만
+            if (ei === eventRows - 1) {
+              setCell(ws, rowIdx, 7, weekCost ? `${weekCost.toLocaleString()}원` : '—', S.weekSum);
             } else {
-              evRow[7] = '';
+              setCell(ws, rowIdx, 7, '', S.weekSumEmpty);
             }
-            aoa.push(evRow);
+            rowIdx++;
           }
 
-          // 주차 구분 빈 행
-          aoa.push(Array(8).fill(null));
+          // 날짜행 + 이벤트행 세로 병합 (주간합계 열)
+          if (eventRows > 1) {
+            merges.push({ s: { r: weekDateRow, c: 7 }, e: { r: rowIdx - 1, c: 7 } });
+          }
+
+          // 주차 구분선 행
+          for (let c = 0; c < 8; c++) setCell(ws, rowIdx, c, '', S.separator);
+          rowIdx++;
         }
 
-        // 월 합산 행
+        // ── 월 합산 행 ──
         const monthTotal = monthData.reduce((s, r) => s + (r.amount || 0), 0);
-        const totalRow = Array(8).fill(null);
-        totalRow[0] = `${moInfo.label} 합산 지출`;
-        totalRow[7] = monthTotal ? `${monthTotal.toLocaleString()}원` : '—';
-        aoa.push(totalRow);
+        setCell(ws, rowIdx, 0, `${moInfo.label} 합산 지출`, S.monthTotalLabel);
+        for (let c = 1; c < 7; c++) setCell(ws, rowIdx, c, '', S.monthTotal);
+        setCell(ws, rowIdx, 7, monthTotal ? `${monthTotal.toLocaleString()}원` : '—', S.monthTotal);
+        merges.push({ s: { r: rowIdx, c: 0 }, e: { r: rowIdx, c: 6 } });
+        rowIdx++;
 
-        // 시트 생성
-        const ws = XLSX.utils.aoa_to_sheet(aoa);
-
-        // 열 너비 설정
+        // 시트 범위 설정
+        ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rowIdx - 1, c: 7 } });
+        ws['!merges'] = merges;
         ws['!cols'] = [
-          { wch: 22 }, // 일
-          { wch: 22 }, // 월
-          { wch: 22 }, // 화
-          { wch: 22 }, // 수
-          { wch: 22 }, // 목
-          { wch: 22 }, // 금
-          { wch: 22 }, // 토
-          { wch: 18 }, // 주간합계
+          { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 },
+          { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 16 },
         ];
 
-        // 행 높이: 이벤트 내용 행은 조금 높게
-        ws['!rows'] = aoa.map((row, i) => {
-          if (i === 0) return { hpt: 28 }; // 제목
-          // 이벤트 내용이 있는 행: 셀 텍스트 줄수에 따라 높이 조절
-          const hasContent = row.some(c => c && String(c).includes('\n'));
-          return hasContent ? { hpt: 60 } : { hpt: 18 };
-        });
-
-        // 제목 셀 병합
-        if (!ws['!merges']) ws['!merges'] = [];
-        ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } });
+        // 행 높이
+        ws['!rows'] = [];
+        for (let r = 0; r < rowIdx; r++) {
+          // 날짜 숫자 행: 20pt, 이벤트 행: 50pt, 구분행: 6pt, 제목행: 30pt
+          ws['!rows'][r] = { hpt: 18 };
+        }
+        ws['!rows'][0] = { hpt: 30 }; // 제목
+        ws['!rows'][1] = { hpt: 22 }; // 요일 헤더
 
         XLSX.utils.book_append_sheet(wb, ws, `${moInfo.m}월`);
       });
 
-      // 다운로드
-      const today = new Date();
       const fname = `발주캘린더_2026_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}.xlsx`;
       XLSX.writeFile(wb, fname);
     }
