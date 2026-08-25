@@ -785,7 +785,7 @@
       .po-cal-grid { grid-template-columns: repeat(7, minmax(90px,1fr)) 100px; overflow-x: auto; }
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
 <body>
   <script src="https://frameby-marketing.github.io/Dashboard_Hub/nav.js"></script>
@@ -6000,7 +6000,13 @@
       });
 
       const fname = `발주캘린더_2026_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}.xlsx`;
-      XLSX.writeFile(wb, fname);
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob  = new Blob([wbout], { type: 'application/octet-stream' });
+      const url   = URL.createObjectURL(blob);
+      const a     = document.createElement('a');
+      a.href = url; a.download = fname;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
     }
 
     function poRenderCalendar() {
