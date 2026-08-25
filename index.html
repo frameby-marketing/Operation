@@ -5812,6 +5812,40 @@
       </div>`;
     }
 
+    function poDownloadExcel() {
+      const data = poState.data;
+      if (!data || !data.length) { alert('데이터가 없습니다. 먼저 데이터를 불러와주세요.'); return; }
+
+      // 날짜 오름차순 정렬
+      const sorted = [...data].sort((a, b) => a.month !== b.month ? a.month - b.month : a.day - b.day);
+
+      const headers = ['일자', '유형', '항목(제품명)', '수량', '금액', '비고', '협의사항'];
+      const rows = sorted.map(r => {
+        const cells = [
+          `2026년 ${r.month}월 ${r.day}일`,
+          PO_TYPE_LABEL[r.type] || r.type,
+          r.product,
+          r.qty != null ? r.qty : '',
+          r.amount != null ? r.amount : '',
+          (r.note  || '').replace(/"/g, '""'),
+          (r.memo  || '').replace(/"/g, '""'),
+        ];
+        return cells.map(v => `"${v}"`).join(',');
+      });
+
+      const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      const today = new Date();
+      a.href     = url;
+      a.download = `발주캘린더_2026_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
     function poRenderCalendar() {
       const month = poState.month || poDefaultMonth();
       const moInfo = PO_MONTHS.find(x => x.m === month) || PO_MONTHS[0];
@@ -5856,7 +5890,7 @@
       }
       calHtml += `</div></div>`;
 
-      return `<article class="card full"><div class="card-head"><div><div class="card-title">월별 발주 캘린더</div><div class="card-sub">일자별 발주 / 입고 이벤트</div></div></div>${legend}${nav}${calHtml}</article>`;
+      return `<article class="card full"><div class="card-head"><div><div class="card-title">월별 발주 캘린더</div><div class="card-sub">일자별 발주 / 입고 이벤트</div></div><button onclick="poDownloadExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.35);border-radius:7px;color:#2ecc71;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .2s;" onmouseover="this.style.background='rgba(46,204,113,0.22)'" onmouseout="this.style.background='rgba(46,204,113,0.12)'">📥 엑셀로 내려받기</button></div>${legend}${nav}${calHtml}</article>`;
     }
 
     function poRenderSupplierTable() {
