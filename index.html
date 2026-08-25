@@ -5812,38 +5812,139 @@
       </div>`;
     }
 
-    function poDownloadExcel() {
+    async function poDownloadExcel() {
       const data = poState.data;
       if (!data || !data.length) { alert('데이터가 없습니다. 먼저 데이터를 불러와주세요.'); return; }
 
-      // 날짜 오름차순 정렬
-      const sorted = [...data].sort((a, b) => a.month !== b.month ? a.month - b.month : a.day - b.day);
+      // SheetJS 동적 로드
+      if (!window.XLSX) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      const XLSX = window.XLSX;
+      const wb = XLSX.utils.book_new();
 
-      const headers = ['일자', '유형', '항목(제품명)', '수량', '금액', '비고', '협의사항'];
-      const rows = sorted.map(r => {
-        const cells = [
-          `2026년 ${r.month}월 ${r.day}일`,
-          PO_TYPE_LABEL[r.type] || r.type,
-          r.product,
-          r.qty != null ? r.qty : '',
-          r.amount != null ? r.amount : '',
-          (r.note  || '').replace(/"/g, '""'),
-          (r.memo  || '').replace(/"/g, '""'),
+      const DOW_KR   = ['일', '월', '화', '수', '목', '금', '토'];
+      const TYPE_LBL = PO_TYPE_LABEL;
+
+      PO_MONTHS.forEach(moInfo => {
+        const monthData = data.filter(r => r.month === moInfo.m);
+        const byDay = {};
+        monthData.forEach(r => { (byDay[r.day] ||= []).push(r); });
+
+        const firstDow = new Date(moInfo.year, moInfo.m - 1, 1).getDay();
+        const days     = moInfo.days;
+        const numWeeks = Math.ceil((firstDow + days) / 7);
+
+        // ── 시트 데이터 구성 ──────────────────────────
+        // 각 셀은 { v: 값, s: 스타일 } 형태로 aoa(array of arrays)로 구성
+        const aoa = [];
+
+        // 행0: 월 제목
+        const titleRow = Array(8).fill(null);
+        titleRow[0] = `${moInfo.year}년 ${moInfo.label} 발주 캘린더`;
+        aoa.push(titleRow);
+
+        // 행1: 빈 행
+        aoa.push(Array(8).fill(null));
+
+        // 행2: 헤더 (일~토 + 주간합계)
+        aoa.push([...DOW_KR, '주간합계']);
+
+        // 행3~: 주차별 달력
+        for (let week = 0; week < numWeeks; week++) {
+          // 셀 내용 행 (날짜)
+          const dateRow  = Array(8).fill(null);
+          // 내용 행들 (이벤트가 여러 개일 수 있으므로 최대 행 수 계산)
+          let maxEvents = 0;
+          let weekCost = 0;
+
+          for (let dow = 0; dow < 7; dow++) {
+            const dayNum = week * 7 + dow - firstDow + 1;
+            if (dayNum < 1 || dayNum > days) { dateRow[dow] = ''; continue; }
+            dateRow[dow] = dayNum;
+            const events = byDay[dayNum] || [];
+            maxEvents = Math.max(maxEvents, events.length);
+            events.forEach(e => { weekCost += (e.amount || 0); });
+          }
+          dateRow[7] = ''; // 주간합계 열은 날짜 행에서 비움
+          aoa.push(dateRow);
+
+          // 이벤트 내용 행들
+          for (let ei = 0; ei < Math.max(maxEvents, 1); ei++) {
+            const evRow = Array(8).fill(null);
+            for (let dow = 0; dow < 7; dow++) {
+              const dayNum = week * 7 + dow - firstDow + 1;
+              if (dayNum < 1 || dayNum > days) { evRow[dow] = ''; continue; }
+              const events = byDay[dayNum] || [];
+              const e = events[ei];
+              if (!e) { evRow[dow] = ''; continue; }
+
+              const typeLbl = TYPE_LBL[e.type] || e.type;
+              let cellText = `[${e.type}] ${e.product}`;
+              if (e.qty)    cellText += `\n수량: ${e.qty.toLocaleString()}개`;
+              if (e.amount) cellText += `\n금액: ${e.amount.toLocaleString()}원`;
+              if (e.memo)   cellText += `\n※ ${e.memo}`;
+              evRow[dow] = cellText;
+            }
+            // 마지막 이벤트 행에 주간합계 표시
+            if (ei === Math.max(maxEvents, 1) - 1) {
+              evRow[7] = weekCost ? `${weekCost.toLocaleString()}원` : '—';
+            } else {
+              evRow[7] = '';
+            }
+            aoa.push(evRow);
+          }
+
+          // 주차 구분 빈 행
+          aoa.push(Array(8).fill(null));
+        }
+
+        // 월 합산 행
+        const monthTotal = monthData.reduce((s, r) => s + (r.amount || 0), 0);
+        const totalRow = Array(8).fill(null);
+        totalRow[0] = `${moInfo.label} 합산 지출`;
+        totalRow[7] = monthTotal ? `${monthTotal.toLocaleString()}원` : '—';
+        aoa.push(totalRow);
+
+        // 시트 생성
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+        // 열 너비 설정
+        ws['!cols'] = [
+          { wch: 22 }, // 일
+          { wch: 22 }, // 월
+          { wch: 22 }, // 화
+          { wch: 22 }, // 수
+          { wch: 22 }, // 목
+          { wch: 22 }, // 금
+          { wch: 22 }, // 토
+          { wch: 18 }, // 주간합계
         ];
-        return cells.map(v => `"${v}"`).join(',');
+
+        // 행 높이: 이벤트 내용 행은 조금 높게
+        ws['!rows'] = aoa.map((row, i) => {
+          if (i === 0) return { hpt: 28 }; // 제목
+          // 이벤트 내용이 있는 행: 셀 텍스트 줄수에 따라 높이 조절
+          const hasContent = row.some(c => c && String(c).includes('\n'));
+          return hasContent ? { hpt: 60 } : { hpt: 18 };
+        });
+
+        // 제목 셀 병합
+        if (!ws['!merges']) ws['!merges'] = [];
+        ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } });
+
+        XLSX.utils.book_append_sheet(wb, ws, `${moInfo.m}월`);
       });
 
-      const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
+      // 다운로드
       const today = new Date();
-      a.href     = url;
-      a.download = `발주캘린더_2026_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const fname = `발주캘린더_2026_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}.xlsx`;
+      XLSX.writeFile(wb, fname);
     }
 
     function poRenderCalendar() {
