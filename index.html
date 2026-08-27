@@ -565,6 +565,16 @@
     .b2b-horizontal-bar.previous { background:#64748b; }
     .b2b-horizontal-bar.current { background:#2563eb; }
     .b2b-horizontal-empty { height:26px; display:flex; align-items:center; padding-left:8px; color:var(--muted); font-size:10px; }
+    .b2b-vertical-chart-scroll { overflow-x:auto; padding:8px 2px 4px; margin-top:14px; }
+    .b2b-vertical-chart { min-width:900px; height:390px; display:grid; grid-template-columns:repeat(12,minmax(58px,1fr)); gap:12px; align-items:end; padding:34px 10px 44px; border-bottom:1px solid var(--panel-line); background:repeating-linear-gradient(to top,var(--ov055) 0,var(--ov055) 1px,transparent 1px,transparent 25%); }
+    .b2b-vertical-month { height:100%; display:grid; grid-template-columns:repeat(2,minmax(20px,1fr)); gap:6px; align-items:end; position:relative; }
+    .b2b-vertical-col { height:100%; display:flex; flex-direction:column; justify-content:end; align-items:stretch; gap:7px; min-width:0; }
+    .b2b-vertical-value { color:var(--text2); font-size:9px; font-weight:900; text-align:center; white-space:nowrap; transform:rotate(-45deg); transform-origin:center; margin-bottom:15px; }
+    .b2b-vertical-bar { min-height:3px; border-radius:8px 8px 0 0; }
+    .b2b-vertical-bar.previous { background:#64748b; }
+    .b2b-vertical-bar.current { background:#2563eb; }
+    .b2b-vertical-placeholder { min-height:3px; border:1px dashed var(--ov12); border-radius:8px 8px 0 0; background:var(--ov025); }
+    .b2b-vertical-month-label { position:absolute; left:0; right:0; bottom:-30px; text-align:center; color:var(--muted); font-size:10px; font-weight:800; }
     .b2b-donut-layout { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(300px,1.2fr); gap:28px; align-items:center; }
     .b2b-donut { width:min(270px,80vw); aspect-ratio:1; border-radius:50%; margin:auto; position:relative; }
     .b2b-donut::after { content:''; position:absolute; inset:58px; border-radius:50%; background:var(--modal-bg); border:1px solid var(--panel-line); }
@@ -6330,8 +6340,12 @@
     function b2bCompareModal(all){
       const prev=b2bCumulativeByMonth(all,2025,11), cur=b2bCumulativeByMonth(all,2026,7);
       const vals=[...prev.filter(v=>v!==null),...cur.filter(v=>v!==null)], max=Math.max(1,...vals);
-      const rows=Array.from({length:12},(_,i)=>{ const pv=prev[i], cv=cur[i], pw=pv===null?0:Math.max(1,pv/max*100), cw=cv===null?0:Math.max(1,cv/max*100); return `<div class="b2b-horizontal-month"><div class="b2b-horizontal-label">${i+1}월</div><div class="b2b-horizontal-bars"><div class="b2b-horizontal-track">${pv===null?'<div class="b2b-horizontal-empty">-</div>':`<div class="b2b-horizontal-bar previous" style="width:${pw}%">${money(pv)}</div>`}</div><div class="b2b-horizontal-track">${cv===null?'<div class="b2b-horizontal-empty">2026 데이터 없음</div>':`<div class="b2b-horizontal-bar current" style="width:${cw}%">${money(cv)}</div>`}</div></div></div>`; }).join('');
-      return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">월별 누적 B2B 매출 비교</div><div class="card-sub">가로 막대 비교 · 2025년(회색) 1~12월 / 2026년(파랑) 1~8월 · VAT 포함</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="period-compare-legend"><span><i class="b2b-line-legend-dot previous"></i>2025년</span><span><i class="b2b-line-legend-dot current"></i>2026년</span></div><div class="b2b-horizontal-chart">${rows}</div></div></div>`;
+      const rows=Array.from({length:12},(_,i)=>{
+        const pv=prev[i], cv=cur[i];
+        const ph=pv===null?0:Math.max(1,pv/max*100), ch=cv===null?0:Math.max(1,cv/max*100);
+        return `<div class="b2b-vertical-month"><div class="b2b-vertical-col">${pv===null?'<div class="b2b-vertical-placeholder"></div>':`<div class="b2b-vertical-value">${money(pv)}</div><div class="b2b-vertical-bar previous" style="height:${ph}%"></div>`}</div><div class="b2b-vertical-col">${cv===null?'<div class="b2b-vertical-placeholder" title="2026 데이터 없음"></div>':`<div class="b2b-vertical-value">${money(cv)}</div><div class="b2b-vertical-bar current" style="height:${ch}%"></div>`}</div><div class="b2b-vertical-month-label">${i+1}월</div></div>`;
+      }).join('');
+      return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">월별 누적 B2B 매출 비교</div><div class="card-sub">세로 막대 비교 · 2025년(회색) 1~12월 / 2026년(파랑) 1~8월 · VAT 포함</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="period-compare-legend"><span><i class="b2b-line-legend-dot previous"></i>2025년</span><span><i class="b2b-line-legend-dot current"></i>2026년</span></div><div class="b2b-vertical-chart-scroll"><div class="b2b-vertical-chart">${rows}</div></div></div></div>`;
     }
     function renderB2B(){
       if(!b2bState.loaded && !b2bState.loading){ grid(`<article class="card full"><div class="empty">B2B 데이터를 불러오는 중입니다.</div></article>`); b2bLoad(); return; }
