@@ -1001,6 +1001,11 @@
         return new Date(Number(krDate[1]), Number(krDate[2]) - 1, Number(krDate[3]));
       }
 
+      const shortKr = raw.match(/^(\d{2})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+      if (shortKr) {
+        return new Date(2000 + Number(shortKr[1]), Number(shortKr[2]) - 1, Number(shortKr[3]));
+      }
+
       const normal = raw.split(' ')[0].replaceAll('.', '-').replaceAll('/', '-');
       const direct = normal.match(/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})$/);
       if (direct) {
@@ -6172,7 +6177,7 @@
       return rows.slice(1).map(r => {
         const o={}; headers.forEach((h,i)=>o[h]=r[i]||'');
         const date=b2bParseDate(o['일자']);
-        return { date, company:o['기업명']||'', product:o['제품명']||'', use:o['활용방안']||'', confirm:o['고객사 컨펌현황']||'', production:o['제작현황']||'', delivery:o['납품현황']||'', qty:toNum(o['수량']), amount:toNum(o['견적금액 (VAT포함)']), settlement:o['정산현황']||'', note:o['비고']||'' };
+        return { date, company:String(o['기업명']||'').trim(), product:String(o['제품명']||'').trim(), use:String(o['활용방안']||'').trim(), confirm:String(o['고객사 컨펌현황']||'').trim(), production:String(o['제작현황']||'').trim(), delivery:String(o['납품현황']||'').trim(), qty:toNum(o['수량']), amount:toNum(o['견적금액 (VAT포함)']), settlement:String(o['정산현황']||'').trim(), note:String(o['비고']||'').trim() };
       }).filter(r=>r.date && b2bConfirmed(r.confirm));
     }
     async function b2bLoad() {
@@ -6199,17 +6204,17 @@
       const nowMonth=(y===new Date().getFullYear()?new Date().getMonth():11), c=curCum[nowMonth]||0,p=prevCum[nowMonth]||0, delta=p?((c/p-1)*100):null;
       const productRows=products.map(x=>`<tr><td>${safeHtml(x.name)}</td><td class="right"><strong>${fmt(x.qty)}개</strong></td><td class="right">${money(x.amount)}</td><td class="right muted">${fmt(x.count)}건</td></tr>`).join('');
       const clientCards=companies.map(x=>`<div class="b2b-client"><strong>${safeHtml(x.name)}</strong><span>${fmt(x.count)}건 · ${fmt(x.qty)}개 · ${money(x.amount)}</span></div>`).join('');
-      const recent=[...yr].sort((a,b)=>b.date-a.date).slice(0,12).map(r=>`<tr><td>${dateStr(r.date)}</td><td>${safeHtml(r.company)}</td><td>${safeHtml(r.product)}</td><td class="right">${fmt(r.qty)}개</td><td class="right">${money(r.amount)}</td><td>${safeHtml(r.production||'-')}</td><td>${safeHtml(r.delivery||'-')}</td><td>${safeHtml(r.settlement||'-')}</td></tr>`).join('');
+      const recent=[...yr].sort((a,b)=>b.date-a.date).slice(0,12).map(r=>`<tr><td>${dateStr(r.date)}</td><td>${safeHtml(r.company)}</td><td>${safeHtml(r.product)}</td><td>${safeHtml(r.use||'-')}</td><td class="right">${fmt(r.qty)}개</td><td class="right">${money(r.amount)}</td><td>${safeHtml(r.production||'-')}</td><td>${safeHtml(r.delivery||'-')}</td><td>${safeHtml(r.settlement||'-')}</td></tr>`).join('');
       grid(`
         <article class="card full"><div class="card-head"><div><div class="card-title">B2B 연도</div><div class="card-sub">고객사 컨펌현황 = 확정 기준</div></div><div class="b2b-year-tabs">${[2025,2026,...years].filter((v,i,a)=>a.indexOf(v)===i).sort().map(v=>`<button class="b2b-year-tab ${v===y?'active':''}" onclick="b2bSetYear(${v})">${String(v).slice(2)}년</button>`).join('')}</div></div></article>
         ${renderSummaryKpiCard({title:`${y} B2B 매출`,sub:'확정 프로젝트 견적금액',value:money(totalAmount),caption:`${fmt(yr.length)}건 · ${fmt(totalQty)}개`,badge:`${String(y).slice(2)}년`})}
         ${renderSummaryKpiCard({title:`${y} B2B 수량`,sub:'확정 프로젝트 수량 합계',value:fmt(totalQty),unit:'개',caption:`제품 ${fmt(products.length)}종`,badge:`${String(y).slice(2)}년`})}
-        ${renderSummaryKpiCard({title:`${y} 고객사`,sub:'확정 프로젝트 기업 수',value:fmt(clients.size),unit:'개사',caption:`확정 ${fmt(yr.length)}건`,badge:'확정만'})}
+        ${renderSummaryKpiCard({title:`${y} 고객사`,sub:'확정 프로젝트 기업 수',value:fmt(clients.size),unit:'개사',caption:`확정 ${fmt(yr.length)}건 · 진행중 ${fmt(yr.filter(r=>r.delivery!=='납품완료').length)}건`,badge:'확정만'})}
         ${renderSummaryKpiCard({title:'전체 누적 B2B',sub:'데이터 전체 기간 확정 기준',value:money(allAmount),caption:`${fmt(all.length)}건 · ${fmt(allQty)}개`,badge:'누적'})}
         <article class="card full"><div class="card-head"><div><div class="card-title">전년도 동월 대비 누적 B2B 매출</div><div class="card-sub">월별 누적 견적금액(VAT 포함) · ${y} vs ${y-1}</div></div><span class="badge ${delta!==null&&delta<0?'warn':''}">${delta===null?'비교 기준 없음':`${delta>=0?'+':''}${delta.toFixed(1)}%`}</span></div>${b2bLineChart(curCum,prevCum,y)}</article>
         <article class="card half"><div class="card-head"><div><div class="card-title">제품별 누적 B2B</div><div class="card-sub">${y} 확정 기준 · 수량과 매출</div></div></div><div class="table-wrap"><table><thead><tr><th>제품명</th><th class="right">누적 수량</th><th class="right">누적 매출</th><th class="right">건수</th></tr></thead><tbody>${productRows||'<tr><td colspan="4" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>
         <article class="card half"><div class="card-head"><div><div class="card-title">기업 리스트</div><div class="card-sub">${y} 확정 고객사 · 매출 순</div></div></div><div class="b2b-client-grid">${clientCards||'<div class="empty">데이터 없음</div>'}</div></article>
-        <article class="card full"><div class="card-head"><div><div class="card-title">최근 확정 B2B 프로젝트</div><div class="card-sub">제작·납품·정산 진행상태를 한눈에 확인</div></div></div><div class="table-wrap"><table><thead><tr><th>일자</th><th>기업명</th><th>제품명</th><th class="right">수량</th><th class="right">견적금액</th><th>제작</th><th>납품</th><th>정산</th></tr></thead><tbody>${recent||'<tr><td colspan="8" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>`);
+        <article class="card full"><div class="card-head"><div><div class="card-title">최근 확정 B2B 프로젝트</div><div class="card-sub">제작·납품·정산 진행상태를 한눈에 확인</div></div></div><div class="table-wrap"><table><thead><tr><th>일자</th><th>기업명</th><th>제품명</th><th>활용방안</th><th class="right">수량</th><th class="right">견적금액</th><th>제작</th><th>납품</th><th>정산</th></tr></thead><tbody>${recent||'<tr><td colspan="9" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>`);
     }
 
     function renderCurrentTab() {
