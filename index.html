@@ -528,6 +528,9 @@
     .b2b-filterbar select { max-width:190px; }
     .b2b-project-table { min-width:1180px; table-layout:auto; }
     .b2b-project-table th, .b2b-project-table td { white-space:nowrap; font-size:clamp(10px,.82vw,13px); letter-spacing:-.025em; }
+    .b2b-project-table tr.settlement-pending-row td { background:rgba(251,113,133,.10); border-bottom-color:rgba(251,113,133,.18); }
+    .b2b-project-table tr.settlement-pending-row td:first-child { box-shadow:inset 3px 0 0 var(--red); }
+    .b2b-project-table tr.settlement-pending-row:hover td { background:rgba(251,113,133,.15); }
     .b2b-project-table .settlement-pending { color:var(--red); font-weight:900; }
     .b2b-sort-btn { padding:6px 8px; border-radius:8px; font-size:10px; background:var(--ov04); }
     .modal-backdrop.b2b-modal-backdrop { left:var(--b2b-modal-left,0px); right:0; width:auto; transition:left .18s ease; }
@@ -559,7 +562,7 @@
     .b2b-horizontal-bars { display:grid; gap:6px; }
     .b2b-horizontal-track { height:26px; border-radius:8px; background:var(--ov05); overflow:visible; position:relative; }
     .b2b-horizontal-bar { height:100%; min-width:3px; border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding:0 8px; color:#fff; font-size:10px; font-weight:900; white-space:nowrap; }
-    .b2b-horizontal-bar.previous { background:#ef4444; }
+    .b2b-horizontal-bar.previous { background:#64748b; }
     .b2b-horizontal-bar.current { background:#2563eb; }
     .b2b-horizontal-empty { height:26px; display:flex; align-items:center; padding-left:8px; color:var(--muted); font-size:10px; }
     .b2b-donut-layout { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(300px,1.2fr); gap:28px; align-items:center; }
@@ -6328,7 +6331,7 @@
       const prev=b2bCumulativeByMonth(all,2025,11), cur=b2bCumulativeByMonth(all,2026,7);
       const vals=[...prev.filter(v=>v!==null),...cur.filter(v=>v!==null)], max=Math.max(1,...vals);
       const rows=Array.from({length:12},(_,i)=>{ const pv=prev[i], cv=cur[i], pw=pv===null?0:Math.max(1,pv/max*100), cw=cv===null?0:Math.max(1,cv/max*100); return `<div class="b2b-horizontal-month"><div class="b2b-horizontal-label">${i+1}월</div><div class="b2b-horizontal-bars"><div class="b2b-horizontal-track">${pv===null?'<div class="b2b-horizontal-empty">-</div>':`<div class="b2b-horizontal-bar previous" style="width:${pw}%">${money(pv)}</div>`}</div><div class="b2b-horizontal-track">${cv===null?'<div class="b2b-horizontal-empty">2026 데이터 없음</div>':`<div class="b2b-horizontal-bar current" style="width:${cw}%">${money(cv)}</div>`}</div></div></div>`; }).join('');
-      return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">월별 누적 B2B 매출 비교</div><div class="card-sub">가로 막대 비교 · 2025년(빨강) 1~12월 / 2026년(파랑) 1~8월 · VAT 포함</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="period-compare-legend"><span><i class="b2b-line-legend-dot previous"></i>2025년</span><span><i class="b2b-line-legend-dot current"></i>2026년</span></div><div class="b2b-horizontal-chart">${rows}</div></div></div>`;
+      return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">월별 누적 B2B 매출 비교</div><div class="card-sub">가로 막대 비교 · 2025년(회색) 1~12월 / 2026년(파랑) 1~8월 · VAT 포함</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="period-compare-legend"><span><i class="b2b-line-legend-dot previous"></i>2025년</span><span><i class="b2b-line-legend-dot current"></i>2026년</span></div><div class="b2b-horizontal-chart">${rows}</div></div></div>`;
     }
     function renderB2B(){
       if(!b2bState.loaded && !b2bState.loading){ grid(`<article class="card full"><div class="empty">B2B 데이터를 불러오는 중입니다.</div></article>`); b2bLoad(); return; }
@@ -6349,7 +6352,7 @@
       let tableRows=yr.filter(r=>state.b2b.productFilter==='all'||r.product===state.b2b.productFilter);
       const key=state.b2b.sortKey, dir=state.b2b.sortDir==='asc'?1:-1;
       tableRows=[...tableRows].sort((a,b)=>{ let av,bv; if(key==='date'){av=a.date;bv=b.date;} else if(key==='qty'){av=a.qty;bv=b.qty;} else if(key==='amount'){av=a.amount;bv=b.amount;} else {av=String(a[key]||'');bv=String(b[key]||'');} return av>bv?dir:av<bv?-dir:0; });
-      const recent=tableRows.map(r=>{ const unit=r.qty?r.amount/r.qty:0; const pending=String(r.settlement||'').trim()==='대기중'; return `<tr><td>${dateStr(r.date)}</td><td>${safeHtml(r.company)}</td><td>${safeHtml(r.product)}</td><td>${safeHtml(r.use||'-')}</td><td class="right">${fmt(r.qty)}개</td><td class="right">${money(unit)}</td><td class="right">${money(r.amount)}</td><td>${safeHtml(r.production||'-')}</td><td>${safeHtml(r.delivery||'-')}</td><td class="${pending?'settlement-pending':''}">${safeHtml(r.settlement||'-')}</td></tr>`; }).join('');
+      const recent=tableRows.map(r=>{ const unit=r.qty?r.amount/r.qty:0; const pending=String(r.settlement||'').trim()==='대기중'; return `<tr class="${pending?'settlement-pending-row':''}"><td>${dateStr(r.date)}</td><td>${safeHtml(r.company)}</td><td>${safeHtml(r.product)}</td><td>${safeHtml(r.use||'-')}</td><td class="right">${fmt(r.qty)}개</td><td class="right">${money(unit)}</td><td class="right">${money(r.amount)}</td><td>${safeHtml(r.production||'-')}</td><td>${safeHtml(r.delivery||'-')}</td><td class="${pending?'settlement-pending':''}">${safeHtml(r.settlement||'-')}</td></tr>`; }).join('');
       const sortArrow=k=>state.b2b.sortKey===k?(state.b2b.sortDir==='asc'?'▲':'▼'):'↕';
       let modal=''; if(state.b2b.modal==='sales') modal=b2bSalesModal(all,y); else if(state.b2b.modal==='qty') modal=b2bDonutModal(all); else if(state.b2b.modal==='clients') modal=b2bClientsModal(all); else if(state.b2b.modal==='trend') modal=b2bCompareModal(all);
       grid(`
