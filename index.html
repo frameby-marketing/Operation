@@ -572,7 +572,8 @@
     .b2b-vertical-value { color:var(--text2); font-size:9px; font-weight:900; text-align:center; white-space:nowrap; line-height:1; margin-bottom:6px; }
     .b2b-vertical-col.label-inside { position:relative; }
     .b2b-vertical-col.label-inside .b2b-vertical-value { position:absolute; left:50%; bottom:calc(var(--bar-h,0%) - 10px); transform:translate(-50%,100%); z-index:2; color:#fff; writing-mode:vertical-rl; text-orientation:mixed; margin:0; font-size:9px; text-shadow:0 1px 2px rgba(0,0,0,.35); }
-    .b2b-vertical-col.label-outside .b2b-vertical-value { margin-bottom:6px; transform:none; writing-mode:horizontal-tb; }
+    .b2b-vertical-col.label-outside { position:relative; }
+    .b2b-vertical-col.label-outside .b2b-vertical-value { position:absolute; left:50%; bottom:calc(var(--bar-h,0%) + 8px); transform:translateX(-50%); z-index:2; margin:0; writing-mode:vertical-rl; text-orientation:mixed; font-size:9px; line-height:1; white-space:nowrap; }
     .b2b-monthly-legend .b2b-line-legend-dot.previous { background:#64748b; }
     .b2b-vertical-bar { min-height:3px; border-radius:8px 8px 0 0; }
     .b2b-vertical-bar.previous { background:#64748b; }
