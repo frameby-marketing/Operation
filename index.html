@@ -497,6 +497,20 @@
     .track { height: 10px; border-radius: 999px; background: var(--ov08); overflow: hidden; }
     .fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
 
+
+    /* ── B2B 대시보드 ── */
+    .b2b-year-tabs { display:flex; gap:8px; flex-wrap:wrap; position:relative; z-index:1; }
+    .b2b-year-tab { background:var(--ov05); border-color:var(--panel-line); }
+    .b2b-year-tab.active { background:linear-gradient(135deg,rgba(91,124,250,.55),rgba(34,211,238,.28)); border-color:rgba(34,211,238,.4); color:#fff; font-weight:900; }
+    .b2b-line-chart { position:relative; z-index:1; height:300px; margin-top:10px; padding:20px 12px 34px 50px; }
+    .b2b-line-plot { position:relative; height:100%; border-left:1px solid var(--panel-line); border-bottom:1px solid var(--panel-line); background:repeating-linear-gradient(to top,var(--ov055) 0,var(--ov055) 1px,transparent 1px,transparent 25%); }
+    .b2b-line-plot svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+    .b2b-line-labels { position:absolute; left:50px; right:12px; bottom:4px; display:grid; grid-template-columns:repeat(12,1fr); color:var(--muted); font-size:10px; text-align:center; }
+    .b2b-client-grid { position:relative; z-index:1; display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }
+    .b2b-client { padding:14px; border:1px solid var(--ov08); border-radius:15px; background:var(--ov035); }
+    .b2b-client strong { display:block; color:var(--text); font-size:13px; }
+    .b2b-client span { display:block; color:var(--muted); font-size:10px; margin-top:5px; }
+
     table { width: 100%; border-collapse: collapse; position: relative; z-index: 1; font-size: 13px; }
     th { text-align: left; color: var(--muted); font-weight: 600; padding: 12px 10px; border-bottom: 1px solid var(--panel-line); }
     td { padding: 14px 10px; border-bottom: 1px solid var(--ov05); color: var(--text2); }
@@ -853,7 +867,7 @@
     // 주말 외 회사 휴무일. 필요 시 날짜만 추가하면 택배 집계에서 자동 제외됩니다.
     const SHIPPING_CLOSED_DATES = new Set(['2026-08-14', '2026-08-17']);
 
-    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { selectedLots: null, lotFilterOpen: false, defectDetailOpen: false, detailExpanded: false, photoReason: 'all', photoExpanded: false, photoViewerOpen: false, photoViewerIndex: 0 }, coupang: { page: 1, pageSize: 30, basis: 'supply', categoryMetric: 'qty', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' } };
+    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { selectedLots: null, lotFilterOpen: false, defectDetailOpen: false, detailExpanded: false, photoReason: 'all', photoExpanded: false, photoViewerOpen: false, photoViewerIndex: 0 }, coupang: { page: 1, pageSize: 30, basis: 'supply', categoryMetric: 'qty', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' }, b2b: { year: 2026 } };
 
     const titles = {
       overview: ['주간 운영 대시보드', '전체 운영 상황을 대표 보고용으로 요약합니다.'],
@@ -865,7 +879,8 @@
       inboundManage: ['입고 관리', '실제 입고 처리, 검수, 수량 차이, 상태를 관리합니다.'],
       inventory: ['재고 관리', '재고관리_재고 탭 기준으로 전체 품목 재고, 소진기간, 소진시점, 품절 여부를 확인합니다.'],
       coupang: ['쿠팡 판매', '쿠팡 판매수량, 매출, 출고 흐름을 확인합니다.'],
-      reorder: ['발주관리', '발주 시뮬레이션과 주력 제품 재고/발주 캘린더를 확인합니다.']
+      reorder: ['발주관리', '발주 시뮬레이션과 주력 제품 재고/발주 캘린더를 확인합니다.'],
+      b2b: ['B2B 현황', '확정된 B2B 프로젝트의 매출, 수량, 고객사 및 전년 동월 대비 흐름을 확인합니다.']
     };
 
     // ── 일반모드 / 다크모드 (나머지 대시보드와 동일한 방식: 메모리에만 유지, 기본값 다크) ──
@@ -6136,6 +6151,67 @@
       </article>`;
     }
 
+    // ════════════════════════════════════════════════════════════
+    // B2B 대시보드 — 별도 Google Sheet / "B2B 현황" B5:L 기준
+    // 고객사 컨펌현황이 "확정"인 행만 모든 집계에 포함합니다.
+    // ════════════════════════════════════════════════════════════
+    const B2B_SHEET_ID = '1MLo9mYivyHla2ANgJDr4V38VoQfaaa1FLHg93KgcZZ4';
+    const B2B_SHEET_NAME = 'B2B 현황';
+    const b2bState = { loading:false, loaded:false, error:'', rows:[] };
+
+    function b2bCsvUrl() { return `https://docs.google.com/spreadsheets/d/${B2B_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(B2B_SHEET_NAME)}&range=B5:L`; }
+    function b2bConfirmed(v) { return String(v || '').trim() === '확정'; }
+    function b2bParseDate(v) {
+      const d = toDate(v); if (d) return d;
+      const m = String(v||'').trim().match(/^(\d{2})[.\/-](\d{1,2})[.\/-](\d{1,2})/);
+      return m ? new Date(2000 + Number(m[1]), Number(m[2])-1, Number(m[3])) : null;
+    }
+    function b2bParseRows(rows) {
+      if (!rows.length) return [];
+      const headers = rows[0].map(x => String(x).trim());
+      return rows.slice(1).map(r => {
+        const o={}; headers.forEach((h,i)=>o[h]=r[i]||'');
+        const date=b2bParseDate(o['일자']);
+        return { date, company:o['기업명']||'', product:o['제품명']||'', use:o['활용방안']||'', confirm:o['고객사 컨펌현황']||'', production:o['제작현황']||'', delivery:o['납품현황']||'', qty:toNum(o['수량']), amount:toNum(o['견적금액 (VAT포함)']), settlement:o['정산현황']||'', note:o['비고']||'' };
+      }).filter(r=>r.date && b2bConfirmed(r.confirm));
+    }
+    async function b2bLoad() {
+      if (b2bState.loading) return;
+      b2bState.loading=true; b2bState.error='';
+      try { const res=await fetch(b2bCsvUrl()); if(!res.ok) throw new Error(`B2B 시트 응답 오류 ${res.status}`); b2bState.rows=b2bParseRows(parseCSV(await res.text())); b2bState.loaded=true; }
+      catch(e){ b2bState.error=e.message||'B2B 데이터를 불러오지 못했습니다.'; }
+      finally { b2bState.loading=false; if(state.tab==='b2b') renderB2B(); }
+    }
+    function b2bSetYear(y){ state.b2b.year=Number(y); renderB2B(); }
+    function b2bAggregate(rows,key){ const m=new Map(); rows.forEach(r=>{const k=r[key]||'미입력'; const x=m.get(k)||{qty:0,amount:0,count:0}; x.qty+=r.qty; x.amount+=r.amount; x.count++; m.set(k,x);}); return [...m].map(([name,v])=>({name,...v})).sort((a,b)=>b.amount-a.amount); }
+    function b2bCumulativeByMonth(rows,year){ let run=0; return Array.from({length:12},(_,i)=>{ run += rows.filter(r=>r.date.getFullYear()===year && r.date.getMonth()===i).reduce((s,r)=>s+r.amount,0); return run; }); }
+    function b2bLineChart(current,previous,year){ const max=Math.max(1,...current,...previous); const pts=a=>a.map((v,i)=>`${(i/11)*100},${100-(v/max)*100}`).join(' '); return `<div class="b2b-line-chart"><div class="b2b-line-plot"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="누적 B2B 매출 비교"><polyline points="${pts(previous)}" fill="none" stroke="var(--yellow)" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity=".8"/><polyline points="${pts(current)}" fill="none" stroke="var(--cyan)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div><div class="b2b-line-labels">${Array.from({length:12},(_,i)=>`<span>${i+1}월</span>`).join('')}</div></div><div class="period-compare-legend"><span><i class="period-compare-dot current"></i>${year} 누적</span><span><i class="period-compare-dot previous"></i>${year-1} 누적</span></div>`; }
+    function renderB2B(){
+      if(!b2bState.loaded && !b2bState.loading){ grid(`<article class="card full"><div class="empty">B2B 데이터를 불러오는 중입니다.</div></article>`); b2bLoad(); return; }
+      if(b2bState.error){ grid(`<article class="card full"><div class="error">${safeHtml(b2bState.error)}</div><div class="card-sub">Google Sheet 공유 권한 또는 웹 게시 설정을 확인해 주세요.</div></article>`); return; }
+      const all=b2bState.rows, years=[...new Set(all.map(r=>r.date.getFullYear()))].sort();
+      if(!years.includes(state.b2b.year)) state.b2b.year=years.includes(2026)?2026:(years.at(-1)||2026);
+      const y=state.b2b.year, yr=all.filter(r=>r.date.getFullYear()===y), prev=all.filter(r=>r.date.getFullYear()===y-1);
+      const totalAmount=yr.reduce((s,r)=>s+r.amount,0), totalQty=yr.reduce((s,r)=>s+r.qty,0), clients=new Set(yr.map(r=>r.company).filter(Boolean));
+      const allAmount=all.reduce((s,r)=>s+r.amount,0), allQty=all.reduce((s,r)=>s+r.qty,0);
+      const products=b2bAggregate(yr,'product'), companies=b2bAggregate(yr,'company');
+      const curCum=b2bCumulativeByMonth(all,y), prevCum=b2bCumulativeByMonth(all,y-1);
+      const nowMonth=(y===new Date().getFullYear()?new Date().getMonth():11), c=curCum[nowMonth]||0,p=prevCum[nowMonth]||0, delta=p?((c/p-1)*100):null;
+      const productRows=products.map(x=>`<tr><td>${safeHtml(x.name)}</td><td class="right"><strong>${fmt(x.qty)}개</strong></td><td class="right">${money(x.amount)}</td><td class="right muted">${fmt(x.count)}건</td></tr>`).join('');
+      const clientCards=companies.map(x=>`<div class="b2b-client"><strong>${safeHtml(x.name)}</strong><span>${fmt(x.count)}건 · ${fmt(x.qty)}개 · ${money(x.amount)}</span></div>`).join('');
+      const recent=[...yr].sort((a,b)=>b.date-a.date).slice(0,12).map(r=>`<tr><td>${dateStr(r.date)}</td><td>${safeHtml(r.company)}</td><td>${safeHtml(r.product)}</td><td class="right">${fmt(r.qty)}개</td><td class="right">${money(r.amount)}</td><td>${safeHtml(r.production||'-')}</td><td>${safeHtml(r.delivery||'-')}</td><td>${safeHtml(r.settlement||'-')}</td></tr>`).join('');
+      grid(`
+        <article class="card full"><div class="card-head"><div><div class="card-title">B2B 연도</div><div class="card-sub">고객사 컨펌현황 = 확정 기준</div></div><div class="b2b-year-tabs">${[2025,2026,...years].filter((v,i,a)=>a.indexOf(v)===i).sort().map(v=>`<button class="b2b-year-tab ${v===y?'active':''}" onclick="b2bSetYear(${v})">${String(v).slice(2)}년</button>`).join('')}</div></div></article>
+        ${renderSummaryKpiCard({title:`${y} B2B 매출`,sub:'확정 프로젝트 견적금액',value:money(totalAmount),caption:`${fmt(yr.length)}건 · ${fmt(totalQty)}개`,badge:`${String(y).slice(2)}년`})}
+        ${renderSummaryKpiCard({title:`${y} B2B 수량`,sub:'확정 프로젝트 수량 합계',value:fmt(totalQty),unit:'개',caption:`제품 ${fmt(products.length)}종`,badge:`${String(y).slice(2)}년`})}
+        ${renderSummaryKpiCard({title:`${y} 고객사`,sub:'확정 프로젝트 기업 수',value:fmt(clients.size),unit:'개사',caption:`확정 ${fmt(yr.length)}건`,badge:'확정만'})}
+        ${renderSummaryKpiCard({title:'전체 누적 B2B',sub:'데이터 전체 기간 확정 기준',value:money(allAmount),caption:`${fmt(all.length)}건 · ${fmt(allQty)}개`,badge:'누적'})}
+        <article class="card full"><div class="card-head"><div><div class="card-title">전년도 동월 대비 누적 B2B 매출</div><div class="card-sub">월별 누적 견적금액(VAT 포함) · ${y} vs ${y-1}</div></div><span class="badge ${delta!==null&&delta<0?'warn':''}">${delta===null?'비교 기준 없음':`${delta>=0?'+':''}${delta.toFixed(1)}%`}</span></div>${b2bLineChart(curCum,prevCum,y)}</article>
+        <article class="card half"><div class="card-head"><div><div class="card-title">제품별 누적 B2B</div><div class="card-sub">${y} 확정 기준 · 수량과 매출</div></div></div><div class="table-wrap"><table><thead><tr><th>제품명</th><th class="right">누적 수량</th><th class="right">누적 매출</th><th class="right">건수</th></tr></thead><tbody>${productRows||'<tr><td colspan="4" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>
+        <article class="card half"><div class="card-head"><div><div class="card-title">기업 리스트</div><div class="card-sub">${y} 확정 고객사 · 매출 순</div></div></div><div class="b2b-client-grid">${clientCards||'<div class="empty">데이터 없음</div>'}</div></article>
+        <article class="card full"><div class="card-head"><div><div class="card-title">최근 확정 B2B 프로젝트</div><div class="card-sub">제작·납품·정산 진행상태를 한눈에 확인</div></div></div><div class="table-wrap"><table><thead><tr><th>일자</th><th>기업명</th><th>제품명</th><th class="right">수량</th><th class="right">견적금액</th><th>제작</th><th>납품</th><th>정산</th></tr></thead><tbody>${recent||'<tr><td colspan="8" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>`);
+    }
+
     function renderCurrentTab() {
       // 좌측 통합 사이드바(nav.js)가 이 페이지 밖에서 관리되므로, 현재 탭을
       // location.hash에 반영해 새로고침/공유 링크/사이드바 활성 표시가 맞도록 한다.
@@ -6156,6 +6232,7 @@
       else if (state.tab === 'inboundManage') renderInboundManage();
       else if (state.tab === 'inventory') renderInventory();
       else if (state.tab === 'reorder') renderReorder();
+      else if (state.tab === 'b2b') renderB2B();
       else renderGeneric(state.tab);
     }
 
@@ -6187,7 +6264,7 @@
     };
 
     function ensureInspectionNavItem() {
-      if (document.querySelector?.('a.fb-item[data-dept="operation"][data-item="inspection"]')) return;
+      if (document.querySelector?.('a.fb-item[data-dept="operation"][data-item="inspection"]')) { ensureB2BNavItem(); return; }
       const productionLink = document.querySelector?.('a.fb-item[data-dept="operation"][data-item="production"]');
       if (!productionLink || !document.createElement) return;
       const link = document.createElement('a');
@@ -6197,6 +6274,20 @@
       link.setAttribute('href', '#inspection');
       link.innerHTML = '<span class="fb-item-dot"></span><span>생산 입고·검수</span>';
       productionLink.after(link);
+      ensureB2BNavItem();
+    }
+
+    function ensureB2BNavItem() {
+      if (document.querySelector?.('a.fb-item[data-dept="operation"][data-item="b2b"]')) return;
+      const reorderLink = document.querySelector?.('a.fb-item[data-dept="operation"][data-item="reorder"]');
+      if (!reorderLink || !document.createElement) return;
+      const link = document.createElement('a');
+      link.className = 'fb-item';
+      link.dataset.dept = 'operation';
+      link.dataset.item = 'b2b';
+      link.setAttribute('href', '#b2b');
+      link.innerHTML = '<span class="fb-item-dot"></span><span>B2B</span>';
+      reorderLink.after(link);
     }
 
     function syncOperationNavActive() {
