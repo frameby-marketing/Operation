@@ -6453,16 +6453,33 @@
     }
 
     function ensureB2BNavItem() {
-      if (document.querySelector?.('a.fb-item[data-dept="operation"][data-item="b2b"]')) return;
+      if (!document.createElement) return;
+
+      const selector = 'a.fb-item[data-dept="operation"][data-item]';
       const reorderLink = document.querySelector?.('a.fb-item[data-dept="operation"][data-item="reorder"]');
-      if (!reorderLink || !document.createElement) return;
-      const link = document.createElement('a');
-      link.className = 'fb-item';
-      link.dataset.dept = 'operation';
-      link.dataset.item = 'b2b';
-      link.setAttribute('href', '#b2b');
-      link.innerHTML = '<span class="fb-item-dot"></span><span>B2B</span>';
-      reorderLink.after(link);
+      let b2bLink = document.querySelector?.('a.fb-item[data-dept="operation"][data-item="b2b"]');
+
+      // 공통 nav.js가 OPERATION 하위 메뉴를 단계적으로 그리는 경우에도
+      // 발주관리(reorder)의 생성 여부를 기다리지 않고 B2B를 즉시 표시한다.
+      if (!b2bLink) {
+        const operationLinks = [...(document.querySelectorAll?.(selector) || [])]
+          .filter(link => link.dataset.item !== 'b2b');
+        const anchor = reorderLink || operationLinks[operationLinks.length - 1];
+        if (!anchor) return;
+
+        b2bLink = document.createElement('a');
+        b2bLink.className = 'fb-item';
+        b2bLink.dataset.dept = 'operation';
+        b2bLink.dataset.item = 'b2b';
+        b2bLink.setAttribute('href', '#b2b');
+        b2bLink.innerHTML = '<span class="fb-item-dot"></span><span>B2B</span>';
+        anchor.after(b2bLink);
+      }
+
+      // 발주관리 메뉴가 나중에 생성되면 최종 위치만 발주관리 바로 아래로 정렬한다.
+      if (reorderLink && reorderLink.nextElementSibling !== b2bLink) {
+        reorderLink.after(b2bLink);
+      }
     }
 
     function syncOperationNavActive() {
@@ -6485,6 +6502,17 @@
     }
 
     document.addEventListener('click', event => {
+      // OPERATION 상위 메뉴를 누르는 순간/직후 공통 nav.js가 하위 메뉴를 그릴 수 있으므로
+      // 같은 프레임과 다음 프레임에서 B2B 존재 여부를 다시 보장한다.
+      const operationTrigger = event.target.closest?.('[data-dept="operation"]');
+      if (operationTrigger && !operationTrigger.matches?.('a.fb-item[data-item]')) {
+        ensureB2BNavItem();
+        requestAnimationFrame(() => {
+          ensureB2BNavItem();
+          requestAnimationFrame(ensureB2BNavItem);
+        });
+      }
+
       const link = event.target.closest?.('a.fb-item[data-dept="operation"][data-item]');
       const tab = link?.dataset?.item;
       if (!tab || !titles[tab]) return;
