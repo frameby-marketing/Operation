@@ -868,6 +868,11 @@
     .po-stock-row { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; padding: 2px 0; }
     .po-stock-row span:first-child { color: var(--muted); }
     .po-stock-drawer-btn { margin-top: 10px; width: 100%; padding: 7px 0; background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.32); border-radius: 12px; color: var(--yellow); font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .po-china-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; position:relative; z-index:1; }
+    .po-china-card { border:1px solid rgba(34,211,238,.22); border-radius:16px; padding:15px; background:rgba(34,211,238,.055); }
+    .po-china-name { color:var(--text); font-size:13px; font-weight:800; line-height:1.4; }
+    .po-china-qty { margin-top:10px; color:var(--cyan); font-size:25px; font-weight:900; letter-spacing:-.03em; }
+    .po-china-qty small { margin-left:3px; color:var(--muted); font-size:12px; font-weight:700; }
 
     .po-month-nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; position: relative; z-index: 1; }
     .po-cal-legend { display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 12px; margin-bottom: 14px; position: relative; z-index: 1; }
@@ -5569,7 +5574,7 @@
       loading: false, loaded: false, error: '',
       data: [], month: null, subTab: 'sim',
       stockItems: [], stockError: '', stockUpdatedAt: '',
-      stockDetailOpen: false
+      stockDetailOpen: false, chinaStockItems: [], chinaStockError: ''
     };
 
     function poParseRow(row) {
@@ -5745,11 +5750,36 @@
       return items;
     }
 
+    async function poLoadChinaStock() {
+      const url = `https://docs.google.com/spreadsheets/d/${PO_STOCK_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('재고')}&range=CL1:CU16`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const rows = parseCSV(await res.text());
+      const headerIdx = rows.findIndex(r => r.some(c => String(c).trim() === '중국 현지 재고'));
+      if (headerIdx === -1) throw new Error('헤더(중국 현지 재고)를 찾지 못했습니다');
+      const header = rows[headerIdx].map(c => String(c).trim());
+      const productCol = header.indexOf('제품');
+      const colorCol = header.indexOf('COLOR');
+      const chinaCol = header.indexOf('중국 현지 재고');
+      if (productCol === -1 || colorCol === -1 || chinaCol === -1) throw new Error('필수 열을 찾지 못했습니다');
+      const items = [];
+      for (let i = headerIdx + 1; i < rows.length; i++) {
+        const rawQty = String(rows[i][chinaCol] ?? '').trim();
+        if (rawQty === '') continue;
+        const qty = Number(rawQty.replace(/,/g, '').replace(/[^0-9.-]/g, ''));
+        if (!Number.isFinite(qty)) continue;
+        const product = String(rows[i][productCol] || '').trim();
+        const color = String(rows[i][colorCol] || '').trim();
+        if (product) items.push({ product, color, qty });
+      }
+      return items;
+    }
+
     async function poReload() {
       poState.loading = true;
-      poState.error = ''; poState.stockError = '';
+      poState.error = ''; poState.stockError = ''; poState.chinaStockError = '';
       grid(`<article class="card full"><div class="empty">발주 데이터를 불러오는 중입니다.</div></article>`);
-      const [timelineResult, stockResult] = await Promise.allSettled([poLoadTimeline(), poLoadStock()]);
+      const [timelineResult, stockResult, chinaStockResult] = await Promise.allSettled([poLoadTimeline(), poLoadStock(), poLoadChinaStock()]);
       if (timelineResult.status === 'fulfilled') {
         poState.data = timelineResult.value;
         poState.month = poState.month || poDefaultMonth();
@@ -5762,6 +5792,11 @@
         poState.stockUpdatedAt = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} 기준`;
       } else {
         poState.stockError = stockResult.reason?.message || '재고 데이터를 불러오지 못했습니다.';
+      }
+      if (chinaStockResult.status === 'fulfilled') {
+        poState.chinaStockItems = chinaStockResult.value;
+      } else {
+        poState.chinaStockError = chinaStockResult.reason?.message || '중국 현지 재고를 불러오지 못했습니다.';
       }
       poState.loading = false;
       poState.loaded = true;
@@ -5836,7 +5871,21 @@
       const avgBar = Math.round(avg / 10000);
       const barChart = `<article class="card full"><div class="card-head"><div><div class="card-title">월별 지출 금액</div><div class="card-sub">신규 · 추가입고 · 기존 잔금 합계 / 단위: 만원 · 3,500만원 초과 시 빨간색</div></div><span class="badge">AVG ${fmt(avgBar)}만원</span></div>${renderBarChart(barData, 'total', 'label', { dangerThreshold: 3500 })}</article>`;
 
-      return kpis + barChart + poRenderStockSection() + poRenderCalendar() + poRenderSupplierTable();
+      return kpis + barChart + poRenderStockSection() + poRenderChinaStockSection() + poRenderCalendar() + poRenderSupplierTable();
+    }
+
+    function poRenderChinaStockSection() {
+      if (poState.chinaStockError && !poState.chinaStockItems.length) {
+        return `<article class="card full"><div class="card-head"><div><div class="card-title">중국 현지 재고 현황</div><div class="card-sub">데이터 로드 실패</div></div></div><div class="empty">${poState.chinaStockError}</div></article>`;
+      }
+      const cards = poState.chinaStockItems.map(item => {
+        const name = item.color ? `${item.product} · ${item.color}` : item.product;
+        return `<div class="po-china-card"><div class="po-china-name">${name}</div><div class="po-china-qty">${fmt(item.qty)}<small>개</small></div></div>`;
+      }).join('');
+      return `<article class="card full">
+        <div class="card-head"><div><div class="card-title">중국 현지 재고 현황</div><div class="card-sub">재고 시트 CL1:CU16 기준 · 수량이 입력된 품목만 표시</div></div><span class="badge">${fmt(poState.chinaStockItems.length)}개 품목</span></div>
+        ${cards ? `<div class="po-china-grid">${cards}</div>` : '<div class="empty">입력된 중국 현지 재고가 없습니다.</div>'}
+      </article>`;
     }
 
     function poRenderStockSection() {
