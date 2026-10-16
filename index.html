@@ -903,7 +903,7 @@
       .po-stock-grid { grid-template-columns: repeat(2, 1fr); }
       .po-cal-grid { grid-template-columns: repeat(7, minmax(90px,1fr)) 100px; overflow-x: auto; }
     }
-  .op-connections{grid-column:1/-1;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:12px 4px}.op-connections span{display:inline-flex;gap:5px;align-items:center}.op-connections i{width:7px;height:7px;border-radius:50%}.op-timeline{padding:18px 0;border-bottom:1px solid var(--panel-line)}.op-steps{display:grid;grid-template-columns:repeat(4,1fr);margin-top:12px;gap:12px}.op-step{border-top:3px solid var(--cyan);padding:10px;background:var(--ov03);display:flex;flex-direction:column;gap:8px}.op-step span{color:var(--muted);font-size:12px}.op-pipeline{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:12px;overflow:auto}.op-pipeline section{padding:16px;background:var(--ov03);border:1px solid var(--panel-line);border-radius:14px}.op-pipeline h2{margin:12px 0}.op-pipeline small{font-size:12px;margin-left:5px}.op-pipe-item{font-size:12px;padding:10px 0;border-top:1px solid var(--panel-line)}.op-pipe-item div{color:var(--muted);margin-top:5px}@media(max-width:650px){.op-steps{grid-template-columns:repeat(2,1fr)}} </style>
+  .op-connections{grid-column:1/-1;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:12px 4px}.op-connections span{display:inline-flex;gap:5px;align-items:center}.op-connections i{width:7px;height:7px;border-radius:50%}.op-timeline{padding:18px 0;border-bottom:1px solid var(--panel-line)}.op-steps{display:grid;grid-template-columns:repeat(4,1fr);margin-top:12px;gap:12px}.op-step{border-top:3px solid var(--cyan);padding:10px;background:var(--ov03);display:flex;flex-direction:column;gap:8px}.op-step span{color:var(--muted);font-size:12px}.op-pipeline{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:12px;overflow:auto}.op-pipeline section{padding:16px;background:var(--ov03);border:1px solid var(--panel-line);border-radius:14px}.op-pipeline h2{margin:12px 0}.op-pipeline small{font-size:12px;margin-left:5px}.op-pipe-item{font-size:12px;padding:10px 0;border-top:1px solid var(--panel-line)}.op-pipe-item div{color:var(--muted);margin-top:5px}@media(max-width:650px){.op-steps{grid-template-columns:repeat(2,1fr)}} .op-b2b-steps{grid-template-columns:repeat(5,minmax(100px,1fr));overflow:auto}.op-step.op-future{border-color:var(--panel-line);opacity:.55}.op-step.op-done{border-color:var(--green)}.op-step.op-current{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan)} </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
 <body>
@@ -4864,53 +4864,6 @@
       };
     }
 
-    function renderInbound() {
-      const a = getInboundAnalysis();
-      if (!a.headers.length) {
-        grid(`<article class="card full"><div class="card-head"><div><div class="card-title">입고 예정</div><div class="card-sub">데이터 로드 실패</div></div></div><div class="empty">입고_예정 시트 데이터를 불러오지 못했습니다. 시트 탭명 또는 공유 권한을 확인해 주세요.</div></article>`);
-        return;
-      }
-
-      const rows = a.objects.slice(0, 40).map(o => `
-        <tr>
-          <td>${o[a.dateKey] || '-'}</td>
-          <td>${o[a.productKey] || '-'}</td>
-          <td>${o[a.vendorKey] || '-'}</td>
-          <td>${o[a.poKey] || '-'}</td>
-          <td class="right">${fmt(toNum(o[a.qtyKey]))}</td>
-          <td>${o[a.statusKey] || '-'}</td>
-          <td>${o[a.reasonKey] || '-'}</td>
-        </tr>
-      `).join('');
-
-      grid(`
-        ${metricCard('입고 예정수량','선택 기간 합계',fmt(a.totalQty),a.qtyKey || '수량 컬럼 없음','good',a.daily.map(r=>r.qty))}
-        ${metricCard('입고 예정금액','금액 컬럼 기준',a.amountKey ? money(a.totalAmount) : '금액 없음',a.amountKey || '금액 컬럼 없음',a.amountKey ? 'good' : 'warn',[a.totalAmount])}
-        ${metricCard('지연 가능 건','예정일 경과 / 미완료',fmt(a.delayed.length),`${fmt(a.delayed.reduce((s,o)=>s+toNum(o[a.qtyKey]),0))}개 확인 필요`,a.delayed.length ? 'warn' : 'good',[a.delayed.length])}
-        ${metricCard('다가오는 입고','오늘 이후 미완료',fmt(a.upcoming.length),a.upcoming[0] ? `최근 예정일 ${a.upcoming[0][a.dateKey]}` : '예정 없음','good',[a.upcoming.length])}
-
-        <article class="card wide"><div class="card-head"><div><div class="card-title">날짜별 입고 예정 흐름</div><div class="card-sub">입고 예정일 기준 수량 흐름</div></div><span class="badge">${a.dateKey || '날짜열 없음'}</span></div>${renderCoupangFlowChart(a.daily)}</article>
-
-        <article class="card side"><div class="card-head"><div><div class="card-title">지연 / 확인 필요 입고</div><div class="card-sub">예정일 경과 후 미완료 건</div></div><span class="badge ${a.delayed.length ? 'warn' : ''}">${fmt(a.delayed.length)}건</span></div><div class="issue-list">
-          ${a.delayed.slice(0,8).map(o => `
-            <div class="issue"><div class="issue-icon">⚠️</div><div><strong>${o[a.productKey] || '품목 미지정'}</strong><span>${o[a.dateKey] || '-'} / ${o[a.vendorKey] || '-'} / 사유: ${o[a.reasonKey] || '미기재'}</span></div><div class="issue-num">${fmt(toNum(o[a.qtyKey]))}</div></div>
-          `).join('') || '<div class="empty">지연 입고 건이 없습니다.</div>'}
-        </div></article>
-
-        <article class="card half"><div class="card-head"><div><div class="card-title">거래처별 입고 예정</div><div class="card-sub">수량 / 금액 기준</div></div></div>${renderProductRankChart(a.vendorRank, 8)}</article>
-        <article class="card half"><div class="card-head"><div><div class="card-title">품목별 입고 예정 TOP</div><div class="card-sub">입고 예정수량 큰 순</div></div></div>${renderProductRankChart(a.productRank, 8)}</article>
-
-        <article class="card half"><div class="card-head"><div><div class="card-title">다가오는 입고 일정</div><div class="card-sub">오늘 이후 미완료 건</div></div><span class="badge">${fmt(a.upcoming.length)}건</span></div><div class="issue-list">
-          ${a.upcoming.slice(0,8).map(o => `
-            <div class="issue"><div class="issue-icon">📥</div><div><strong>${o[a.productKey] || '품목 미지정'}</strong><span>${o[a.dateKey] || '-'} / ${o[a.vendorKey] || '-'}</span></div><div class="issue-num">${fmt(toNum(o[a.qtyKey]))}</div></div>
-          `).join('') || '<div class="empty">다가오는 입고 예정이 없습니다.</div>'}
-        </div></article>
-
-        <article class="card full"><div class="card-head"><div><div class="card-title">입고 예정 상세 데이터</div><div class="card-sub">선택 기간 기준 상위 40행</div></div></div>
-          <div class="table-wrap"><table><thead><tr><th>예정일</th><th>품목</th><th>거래처</th><th>PO</th><th class="right">수량</th><th>상태</th><th>사유</th></tr></thead><tbody>${rows}</tbody></table></div>
-        </article>
-      `);
-    }
 
     function getInboundManageAnalysis() {
       const rows = state.raw.inboundManage || [];
@@ -5364,164 +5317,6 @@
       </div>`;
     }
 
-    function renderInventory() {
-      const a = getInventoryAnalysis();
-      if (!a.stockHeaders.length || !a.enriched.length) {
-        grid(`<article class="card full"><div class="card-head"><div><div class="card-title">재고 관리</div><div class="card-sub">데이터 로드 실패</div></div></div><div class="empty">재고관리_재고 시트 데이터를 불러오지 못했습니다. 시트 탭명과 공유 권한을 확인해 주세요.</div></article>`);
-        return;
-      }
-
-      const q = (state.inventory.search || '').trim().toLowerCase();
-      const searchFilteredRows = a.enriched.filter(r => `${r.product} ${r.variant} ${r.qty} ${r.months} ${r.sellout} ${r.soldout} ${r.restock}`.toLowerCase().includes(q));
-      const categoryCounts = searchFilteredRows.reduce((map, r) => {
-        const category = inventoryCategory(r.product);
-        if (!map[category]) map[category] = { name: category, sku: 0, qty: 0, risk: 0 };
-        map[category].sku += 1;
-        map[category].qty += r.qty;
-        if (r.status.label === '위험') map[category].risk += 1;
-        return map;
-      }, {});
-      const categoryOrder = ['전체', '휴대폰 케이스', '휴대폰 액세서리', '노트북 거치대', '애플펜슬 팁', '에어팟 액세서리', '파우치', '기타'];
-      const selectedCategory = state.inventory.selectedCategory || 'all';
-      const filteredRows = selectedCategory === 'all' ? searchFilteredRows : searchFilteredRows.filter(r => inventoryCategory(r.product) === selectedCategory);
-
-      const productMap = {};
-      filteredRows.forEach(r => {
-        const productName = String(r.product || '').trim() || '제품 미지정';
-        if (!productMap[productName]) productMap[productName] = { name:productName, rows:[], qty:0, risk:0, warn:0, ok:0, minMonths:Infinity, nearestSellout:'-' };
-        const g = productMap[productName];
-        g.rows.push(r);
-        g.qty += r.qty;
-        if (r.status.label === '위험') g.risk += 1;
-        else if (r.status.label === '주의') g.warn += 1;
-        else g.ok += 1;
-        if (r.months > 0) g.minMonths = Math.min(g.minMonths, r.months);
-      });
-
-      Object.values(productMap).forEach(g => {
-        const nearest = g.rows
-          .filter(r => r.sellout && r.sellout !== '-')
-          .sort((x,y)=>(toDate(x.sellout)?.getTime() || 9999999999999) - (toDate(y.sellout)?.getTime() || 9999999999999))[0];
-        g.nearestSellout = nearest?.sellout || '-';
-      });
-
-      const products = Object.values(productMap).sort((a,b) => b.risk - a.risk || b.warn - a.warn || a.minMonths - b.minMonths || a.name.localeCompare(b.name, 'ko'));
-      const riskRows = filteredRows.filter(r => r.status.label !== '정상').slice(0, 20);
-      const selectedProduct = state.inventory.selectedProduct;
-      const selectedRows = selectedProduct ? filteredRows.filter(r => r.product === selectedProduct) : [];
-      const selectedRowsSorted = [...selectedRows].sort((a,b) => {
-        const dir = state.inventory.sortDir === 'asc' ? 1 : -1;
-        const key = state.inventory.sortKey;
-        if (key === 'product') return a.product.localeCompare(b.product, 'ko') * dir;
-        return ((a[key] || 0) - (b[key] || 0)) * dir;
-      });
-      const selectedModal = selectedProduct ? `
-        <div class="modal-backdrop" onclick="closeInventoryProduct()">
-          <div class="modal-card inventory-modal" onclick="event.stopPropagation()">
-            <div class="modal-head">
-              <div><div class="card-title">${selectedProduct} 재고 상세</div><div class="card-sub">기종 / 색상 / 재고 / 소진기간 / 재입고일정 상세</div></div>
-              <button class="modal-close" onclick="closeInventoryProduct()">닫기</button>
-            </div>
-            <div class="flow-summary" style="margin-bottom:18px;">
-              <div class="pill">SKU ${fmt(selectedRows.length)}개</div>
-              <div class="pill">총 재고 ${fmt(selectedRows.reduce((s,r)=>s+r.qty,0))}개</div>
-              <div class="pill">위험 ${fmt(selectedRows.filter(r=>r.status.label==='위험').length)}개</div>
-              <div class="pill">주의 ${fmt(selectedRows.filter(r=>r.status.label==='주의').length)}개</div>
-            </div>
-            <div class="table-tools" style="margin-bottom:12px;">
-              <div class="tool-left">
-                <button onclick="setInventorySort('product')" class="${state.inventory.sortKey === 'product' ? 'active-mode' : ''}">제품명 ${state.inventory.sortKey === 'product' ? (state.inventory.sortDir === 'asc' ? '↑' : '↓') : ''}</button>
-                <button onclick="setInventorySort('qty')" class="${state.inventory.sortKey === 'qty' ? 'active-mode' : ''}">재고 ${state.inventory.sortKey === 'qty' ? (state.inventory.sortDir === 'asc' ? '↑' : '↓') : ''}</button>
-                <button onclick="setInventorySort('months')" class="${state.inventory.sortKey === 'months' ? 'active-mode' : ''}">소진기간 ${state.inventory.sortKey === 'months' ? (state.inventory.sortDir === 'asc' ? '↑' : '↓') : ''}</button>
-                <button onclick="toggleInventoryOptionColumns(this)">옵션 컬럼 펼치기</button>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>제품</th><th>기종</th><th class="inventory-extra-col">케이스색상</th><th class="inventory-extra-col">프레임색상</th><th class="inventory-extra-col">카드수납</th><th class="inventory-extra-col">옵션</th><th>색상</th><th class="right">재고</th><th class="right">소진기간</th><th>소진시점</th><th>품절여부</th><th>재입고일정</th><th>상태</th></tr></thead>
-                <tbody>${selectedRowsSorted.map(r=>`
-                  <tr>
-                    <td>${r.product}</td>
-                    <td>${r.variantParts.find(p=>p.label==='기종')?.value || '-'}</td>
-                    <td class="inventory-extra-col">${r.variantParts.find(p=>p.label==='케이스색상')?.value || '-'}</td>
-                    <td class="inventory-extra-col">${r.variantParts.find(p=>p.label==='프레임색상')?.value || '-'}</td>
-                    <td class="inventory-extra-col">${r.variantParts.find(p=>p.label==='카드수납')?.value || '-'}</td>
-                    <td class="inventory-extra-col">${r.variantParts.find(p=>p.label==='옵션')?.value || r.variantParts.filter(p=>!['기종','케이스색상','프레임색상','카드수납','색상'].includes(p.label)).map(p=>`${p.label}: ${p.value}`).join(' / ') || '-'}</td>
-                    <td>${r.variantParts.find(p=>p.label==='색상')?.value || r.variantParts.find(p=>p.label==='옵션')?.value || '-'}</td>
-                    <td class="right">${fmt(r.qty)}</td>
-                    <td class="right">${r.months ? `${r.months}개월` : '-'}</td>
-                    <td>${r.sellout || '-'}</td>
-                    <td>${r.soldout || '-'}</td>
-                    <td>${r.restock || '-'}</td>
-                    <td>${inventoryBadge(r.status)}</td>
-                  </tr>
-                `).join('')}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      ` : '';
-
-      grid(`
-        ${metricCard('총 SKU','헤더명 기준',fmt(filteredRows.length),`전체 ${fmt(a.enriched.length)}개 중 표시`,'good',[filteredRows.length])}
-        ${metricCard('재고 합계','재고 열 기준',fmt(filteredRows.reduce((s,r)=>s+r.qty,0)),`제품 ${fmt(products.length)}개 그룹`,'good',[filteredRows.reduce((s,r)=>s+r.qty,0)])}
-        ${metricCard('품절 / 위험','품절 또는 1개월 이하',fmt(filteredRows.filter(r=>r.status.label==='위험').length),`우선 확인 필요`,filteredRows.some(r=>r.status.label==='위험') ? 'danger' : 'good',[filteredRows.filter(r=>r.status.label==='위험').length])}
-        ${metricCard('주의 재고','소진기간 1~2개월',fmt(filteredRows.filter(r=>r.status.label==='주의').length),`발주 검토 대상`,filteredRows.some(r=>r.status.label==='주의') ? 'warn' : 'good',[filteredRows.filter(r=>r.status.label==='주의').length])}
-
-        <article class="card full"><div class="card-head"><div><div class="card-title">재고 검색 / 카테고리 필터</div><div class="card-sub">제품군별로 먼저 나누고, 필요한 제품만 클릭해서 상세 확인</div></div><span class="badge">제품 블록 ${fmt(a.blocks?.length || 0)}개 · 수량매칭 ${fmt(filteredRows.reduce((s,r)=>s+r.qty,0))}개</span></div>
-          <div class="table-tools">
-            <div class="tool-left"><input id="inventorySearch" type="search" autocomplete="off" placeholder="제품 / 기종 / 색상 / 재입고 / 품절여부 입력 후 Enter" value="${String(state.inventory.search || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" oncompositionstart="startInventorySearchComposition()" oncompositionend="endInventorySearchComposition(this.value)" oninput="setInventorySearch(this.value)" onkeydown="handleInventorySearchKeydown(event, this.value)" style="border:1px solid var(--panel-line);background:var(--ov05);color:var(--text2);padding:10px 14px;border-radius:999px;min-width:360px;" /><button onclick="submitInventorySearch(document.getElementById('inventorySearch')?.value || '')">검색</button><button onclick="clearInventorySearch()">초기화</button><div class="pill">검색어 입력 후 Enter 또는 검색 버튼</div></div>
-          </div>
-          <div class="table-tools" style="margin-top:12px;">
-            <div class="tool-left">
-              ${categoryOrder.map(cat => {
-                const key = cat === '전체' ? 'all' : cat;
-                const info = cat === '전체'
-                  ? { sku: searchFilteredRows.length, qty: searchFilteredRows.reduce((s,r)=>s+r.qty,0), risk: searchFilteredRows.filter(r=>r.status.label==='위험').length }
-                  : (categoryCounts[cat] || { sku:0, qty:0, risk:0 });
-                return `<button onclick="setInventoryCategory('${key}')" class="${selectedCategory === key ? 'active-mode' : ''}">${cat} · ${fmt(info.sku)}SKU · ${fmt(info.qty)}개${info.risk ? ` · 위험 ${fmt(info.risk)}` : ''}</button>`;
-              }).join('')}
-            </div>
-          </div>
-        </article>
-
-        <article class="card full"><div class="card-head"><div><div class="card-title">위험 / 주의 재고 TOP</div><div class="card-sub">품절 또는 소진기간이 짧은 항목 우선 표시</div></div><button onclick="toggleInventoryRisk()" class="${state.inventory.riskOpen ? 'active-mode' : ''}">${state.inventory.riskOpen ? '접기' : '펼치기'} · ${fmt(riskRows.length)}건</button></div>
-          ${state.inventory.riskOpen ? `<div class="inventory-risk-list">
-            ${riskRows.map(r=>`
-              <div class="inventory-risk-row ${r.status.label === '위험' ? 'danger' : 'warn'}">
-                <div><strong>${r.product}</strong><div class="inventory-option-line">${r.variant || '-'} · 소진 ${r.months ? `${r.months}개월` : '-'} · 소진시점 ${r.sellout || '-'}</div></div>
-                <div class="right"><strong>${fmt(r.qty)}개</strong><div class="inventory-option-line">재입고 ${r.restock || '-'}</div></div>
-                <div>${inventoryBadge(r.status)}</div>
-              </div>
-            `).join('') || '<div class="empty">위험/주의 재고가 없습니다.</div>'}
-          </div>` : '<div class="empty">위험 / 주의 재고 목록은 접혀 있습니다. 버튼을 눌러 상세 항목을 확인하세요.</div>'}
-        </article>
-
-        <article class="card full"><div class="card-head"><div><div class="card-title">제품별 재고 현황</div><div class="card-sub">${selectedCategory === 'all' ? '전체 카테고리' : selectedCategory} 기준 / 제품 카드를 클릭하면 기종·색상 상세를 확인할 수 있습니다.</div></div><span class="badge">${fmt(products.length)}개 제품</span></div>
-          <div class="inventory-product-grid">
-            ${products.map(g=>`
-              <div class="inventory-product-card" onclick="openInventoryProduct('${String(g.name).replace(/'/g, "\'")}')">
-                <div class="inventory-product-title">${g.name}</div>
-                <div class="inventory-option-line">${inventoryCategory(g.name)} · SKU ${fmt(g.rows.length)}개 · 카드합계 ${fmt(g.qty)}개 · 가장 빠른 소진 ${g.minMonths === Infinity ? '-' : `${g.minMonths}개월`}</div>
-                <div class="inventory-product-stats">
-                  <div class="inventory-stat"><span>재고</span><strong>${fmt(g.qty)}</strong></div>
-                  <div class="inventory-stat"><span>소진시점</span><strong>${g.nearestSellout}</strong></div>
-                  <div class="inventory-stat"><span>위험</span><strong style="color:${g.risk ? 'var(--red)' : 'var(--text)'}">${fmt(g.risk)}</strong></div>
-                  <div class="inventory-stat"><span>주의</span><strong style="color:${g.warn ? 'var(--yellow)' : 'var(--text)'}">${fmt(g.warn)}</strong></div>
-                </div>
-              </div>
-            `).join('') || '<div class="empty">표시할 제품 데이터가 없습니다.</div>'}
-          </div>
-        </article>
-
-        <article class="card full"><div class="card-head"><div><div class="card-title">전체 재고 상세 테이블</div><div class="card-sub">필요 시 스크롤로 전체 확인</div></div></div>
-          <div class="table-wrap"><table><thead><tr><th>제품</th><th>기종</th><th>케이스색상</th><th>프레임색상</th><th>카드수납</th><th>옵션</th><th>색상</th><th class="right">재고</th><th class="right">소진기간</th><th>소진시점</th><th>품절여부</th><th>재입고일정</th><th>상태</th></tr></thead><tbody>${filteredRows.map(r=>`
-            <tr><td>${r.product}</td><td>${r.variantParts.find(p=>p.label==='기종')?.value || '-'}</td><td>${r.variantParts.find(p=>p.label==='케이스색상')?.value || '-'}</td><td>${r.variantParts.find(p=>p.label==='프레임색상')?.value || '-'}</td><td>${r.variantParts.find(p=>p.label==='카드수납')?.value || '-'}</td><td>${r.variantParts.find(p=>p.label==='옵션')?.value || r.variantParts.filter(p=>!['기종','케이스색상','프레임색상','카드수납','색상'].includes(p.label)).map(p=>`${p.label}: ${p.value}`).join(' / ') || '-'}</td><td>${r.variantParts.find(p=>p.label==='색상')?.value || r.variantParts.find(p=>p.label==='옵션')?.value || '-'}</td><td class="right">${fmt(r.qty)}</td><td class="right">${r.months ? `${r.months}개월` : '-'}</td><td>${r.sellout || '-'}</td><td>${r.soldout || '-'}</td><td>${r.restock || '-'}</td><td>${inventoryBadge(r.status)}</td></tr>
-          `).join('') || '<tr><td colspan="12" class="muted">표시할 재고 데이터가 없습니다.</td></tr>'}</tbody></table></div>
-        </article>
-        ${selectedModal}
-      `);
-    }
 
     function renderProgressHtml() {
       const items = [
@@ -6381,16 +6176,17 @@
       const cell=x=>x?`<div class="b2b-client-compare-cell"><strong>${safeHtml(x.name)}</strong><span>${fmt(x.count)}건 · ${fmt(x.qty)}개 · ${money(x.amount)}</span></div>`:`<div class="b2b-client-compare-cell empty-cell"></div>`;
       return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">확정 B2B 고객사 비교</div><div class="card-sub">동일 고객사를 상단 같은 행에 우선 배치 · 왼쪽 2025년 / 오른쪽 2026년</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="b2b-client-compare-list"><div class="b2b-client-column-head">2025년 고객사 · ${fmt(a.length)}개사</div><div class="b2b-client-column-head">2026년 고객사 · ${fmt(b.length)}개사</div>${rows.map(([x,y])=>cell(x)+cell(y)).join('')||'<div class="empty">데이터 없음</div>'}</div></div></div>`;
     }
+    function opB2BMonthly(rows,year,cutoffMonth){return Array.from({length:12},(_,m)=>m>cutoffMonth?null:rows.filter(r=>r.date.getFullYear()===year&&r.date.getMonth()===m).reduce((sum,r)=>sum+r.amount,0));}
     function b2bCompareModal(all){
-      const y=state.b2b.year, now=todayDate(), m=y===now.getFullYear()?now.getMonth():11, d=y===now.getFullYear()?now.getDate():31; const prev=b2bCumulativeByMonth(b2bRowsThroughDate(all,y-1,m,d),y-1,m), cur=b2bCumulativeByMonth(all,y,m);
+      const y=state.b2b.year, now=todayDate(), m=y===now.getFullYear()?now.getMonth():11, d=y===now.getFullYear()?now.getDate():31; const prev=opB2BMonthly(all,y-1,11), cur=opB2BMonthly(all,y,m);
       const vals=[...prev.filter(v=>v!==null),...cur.filter(v=>v!==null)], max=Math.max(1,...vals);
       const rows=Array.from({length:12},(_,i)=>{
         const pv=prev[i], cv=cur[i];
-        const ph=pv===null?0:Math.max(1,pv/max*100), ch=cv===null?0:Math.max(1,cv/max*100);
+        const ph=pv===null?0:pv/max*100, ch=cv===null?0:cv/max*100;
         const prevInside=ph>=42, curInside=ch>=42;
         return `<div class="b2b-vertical-month"><div class="b2b-vertical-col ${prevInside?'label-inside':'label-outside'}" style="--bar-h:${ph}%">${pv===null?'<div class="b2b-vertical-placeholder"></div>':`<div class="b2b-vertical-value">${money(pv)}</div><div class="b2b-vertical-bar previous" style="height:${ph}%"></div>`}</div><div class="b2b-vertical-col ${curInside?'label-inside':'label-outside'}" style="--bar-h:${ch}%">${cv===null?'<div class="b2b-vertical-placeholder" title="2026 데이터 없음"></div>':`<div class="b2b-vertical-value">${money(cv)}</div><div class="b2b-vertical-bar current" style="height:${ch}%"></div>`}</div><div class="b2b-vertical-month-label">${i+1}월</div></div>`;
       }).join('');
-      return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">월별 누적 B2B 매출 비교</div><div class="card-sub">세로 막대 비교 · ${y-1}년(회색) / ${y}년(파랑) · ${m+1}월 ${d}일 동일시점 기준 · VAT 포함</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="period-compare-legend b2b-monthly-legend"><span><i class="b2b-line-legend-dot previous"></i>${y-1}년</span><span><i class="b2b-line-legend-dot current"></i>${y}년</span></div><div class="b2b-vertical-chart-scroll"><div class="b2b-vertical-chart">${rows}</div></div></div></div>`;
+      return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">월별 B2B 발생 매출 비교</div><div class="card-sub">세로 막대 비교 · ${y-1}년(회색) / ${y}년(파랑) · 월별 발생액 · ${y}년 ${m+1}월은 ${d}일까지 · VAT 포함</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="period-compare-legend b2b-monthly-legend"><span><i class="b2b-line-legend-dot previous"></i>${y-1}년</span><span><i class="b2b-line-legend-dot current"></i>${y}년</span></div><div class="b2b-vertical-chart-scroll"><div class="b2b-vertical-chart">${rows}</div></div></div></div>`;
     }
     function renderB2B(){
       if(!b2bState.loaded && !b2bState.loading){ grid(`<article class="card full"><div class="empty">B2B 데이터를 불러오는 중입니다.</div></article>`); b2bLoad(); return; }
@@ -6423,7 +6219,7 @@
         ${renderSummaryKpiCard({title:`${y} 고객사`,sub:'확정 프로젝트 기업 수',value:fmt(clients.size),unit:'개사',caption:`확정 ${fmt(yr.length)}건 · 진행중 ${fmt(yr.filter(r=>r.delivery!=='납품완료').length)}건`,badge:'확정만',extraClass:'b2b-kpi',onclick:"b2bOpenModal('clients')"})}
         ${renderSummaryKpiCard({title:'미정산 금액',sub:'납품 완료 후 입금 예정',value:unpaidKnown.length?money(unpaidAmount):unpaid.length?'금액 확인 필요':money(0),caption:`${unpaid.length}건 · 금액 미확인 ${unpaid.length-unpaidKnown.length}건`,badge:'미정산',extraClass:'b2b-kpi'})}
         <article class="card full b2b-trend-card" onclick="b2bOpenModal('trend')" role="button" tabindex="0"><div class="card-head"><div><div class="card-title">전년도 동월 대비 누적 B2B 매출</div><div class="card-sub">${y===2025?'2025년 월별 누적 견적금액(VAT 포함)':`월별 누적 견적금액(VAT 포함) · ${y} vs ${y-1}`}</div></div><span class="badge ${delta!==null&&delta<0?'danger':''}">${y===2025?'2025 누적':delta===null?'비교 기준 없음':`${delta>=0?'+':''}${delta.toFixed(1)}%`}</span></div>${b2bLineChart(curCum,prevCum,y,currentMonthCount)}<span class="b2b-detail-hint">상세보기 ›</span></article>
-        ${opB2BPipeline(yr)}
+        ${opB2BPipeline(b2bState.rows)}
         <article class="card half"><div class="card-head"><div><div class="card-title">제품별 누적 B2B</div><div class="card-sub">${y} 확정 기준 · 수량과 매출</div></div></div><div class="table-wrap"><table><thead><tr><th>제품명</th><th class="right">누적 수량</th><th class="right">누적 매출</th><th class="right">건수</th></tr></thead><tbody>${productRows||'<tr><td colspan="4" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>
         <article class="card half"><div class="card-head"><div><div class="card-title">기업 리스트</div><div class="card-sub">${y} 확정 고객사 · 매출 순</div></div></div><div class="b2b-client-grid">${clientCards||'<div class="empty">데이터 없음</div>'}</div></article>
         <article class="card full"><div class="card-head"><div><div class="card-title">진행중 B2B 상세 · 누적 프로젝트</div><div class="card-sub">제작·납품·정산 진행상태 · 견적금액/수량 기준 VAT 포함 VAT 포함 개당 단가</div></div></div><div class="b2b-filterbar"><select onchange="b2bSetProductFilter(this.value)">${productOptions.map(v=>`<option value="${safeHtml(v)}" ${state.b2b.productFilter===v?'selected':''}>${v==='all'?'전체 제품':safeHtml(v)}</option>`).join('')}</select><button class="b2b-sort-btn" onclick="b2bSetSort('date')">일자 ${sortArrow('date')}</button><button class="b2b-sort-btn" onclick="b2bSetSort('qty')">수량 ${sortArrow('qty')}</button><button class="b2b-sort-btn" onclick="b2bSetSort('amount')">견적금액 ${sortArrow('amount')}</button></div><div class="table-wrap"><table class="b2b-project-table"><thead><tr><th>일자</th><th>기업명</th><th>제품명</th><th>활용방안</th><th class="right">수량</th><th class="right">VAT 포함 개당 단가</th><th class="right">견적금액</th><th>제작</th><th>납품</th><th>정산</th></tr></thead><tbody>${recent||'<tr><td colspan="10" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>${modal}`);
@@ -6449,9 +6245,9 @@
     }
     function renderInbound(){
       const rows=opInboundRows().filter(o=>!o.done).sort((a,b)=>(a.due?.getTime()||Infinity)-(b.due?.getTime()||Infinity)),now=todayDate(),week=new Date(now);week.setDate(now.getDate()-((now.getDay()+6)%7));const weekEnd=new Date(week);weekEnd.setDate(week.getDate()+7);
-      const month=rows.filter(o=>o.due&&o.due.getFullYear()===now.getFullYear()&&o.due.getMonth()===now.getMonth()),weekly=rows.filter(o=>o.due&&o.due>=week&&o.due<weekEnd),late=rows.filter(o=>o.due&&o.due<now);const china=poState.chinaStockItems;
+      const month=rows.filter(o=>o.due&&o.due.getFullYear()===now.getFullYear()&&o.due.getMonth()===now.getMonth()),weekly=rows.filter(o=>o.due&&o.due>=week&&o.due<weekEnd),late=rows.filter(o=>o.due&&o.due<now);const china=poState.chinaStockItems; const timeline=rows.filter(o=>o.due&&o.stage!=='미입력');
       grid(`${metricCard('이번달 입고 예정','미입고 건 기준',`${month.length}건`,`${fmt(month.reduce((n,o)=>n+(o.qty||0),0))}개${month.some(o=>o.qty===null)?' · 수량 미입력 포함':''}`)}${metricCard('이번주 도착 예정','월요일~일요일',`${weekly.length}건`,'본사 입고예정일 기준')}${metricCard('지연 중','예정일 경과 · 입고 미완료',`${late.length}건`,'생산완료도 미입고로 집계',late.length?'warn':'good')}${metricCard('현지 대기 재고','중국 현지재고',china.length?`${fmt(china.reduce((n,o)=>n+o.qty,0))}개`:'미확인',poState.chinaStockError||'현지 재고 시트 기준')}
-      ${opCard('입고 예정 타임라인','품목별 발주 → 생산 → 선적/운송 → 본사 입고예정일',rows.length?rows.map(o=>`<div class="op-timeline"><strong>${safeHtml(o.name)}</strong><div class="op-steps">${['발주','생산','선적/운송','본사 입고예정'].map((v,i)=>`<div class="op-step"><span>${v}</span><b>${o.dates[i]?dateStr(o.dates[i]):'미입력'}</b></div>`).join('')}</div></div>`).join(''):'<div class="empty">입고 예정 데이터 등록 후 표시됩니다.</div>')}
+      ${opCard('입고 예정 타임라인','본사 입고예정일이 정해진 진행 건 · 입고완료 건 제외',timeline.length?timeline.map(o=>{const current=o.stage==='선적'?2:o.stage==='생산중'||o.stage==='생산완료'?1:0;return `<div class="op-timeline"><div class="card-head"><div><strong>${safeHtml(o.name)}</strong><div class="card-sub">${safeHtml(o.vendor||'거래처 미입력')} · ${o.qty===null?'수량 미입력':fmt(o.qty)+'개'} · 본사 입고예정 ${dateStr(o.due)}</div></div><span class="badge">${o.stage}</span></div><div class="op-steps">${['발주','생산','선적/운송','본사 입고예정'].map((v,i)=>`<div class="op-step ${i<current?'op-done':i===current?'op-current':'op-future'}"><span>${v}${i===current?' · 현재':''}</span><b>${o.dates[i]?dateStr(o.dates[i]):i===1&&o.stage==='생산완료'?'생산완료':'일정 미입력'}</b></div>`).join('')}</div></div>`;}).join(''):'<div class="empty">본사 입고예정일이 정해진 진행 건이 없습니다.</div>')}
       ${opCard('입고예정 목록','일정 미입력 건도 함께 표시',opTable(['입고 예정일','D-day','품목명','수량','거래처','단계'],rows.map(o=>{const days=o.due?Math.round((o.due-now)/86400000):null;return `<tr><td>${o.due?dateStr(o.due):'미입력'}</td><td class="${days<0?'settlement-pending':''}">${days===null?'미입력':days===0?'D-day':days>0?'D-'+days:'지연 '+(-days)+'일'}</td><td>${safeHtml(o.name)}</td><td>${o.qty===null?'미입력':fmt(o.qty)+'개'}</td><td>${safeHtml(o.vendor||'미입력')}</td><td>${o.stage}</td></tr>`;})))}`);
     }
     const OP_PRODUCTS=['PH - 실버','PH - 블랙','맥세이프 킥프레임','DW PLUS - 실버','DW PLUS - 블랙','DW PLUS - 그린','DW PRO - 실버','DW PRO - 블랙','프레임팁 - LIGHT','프레임팁 - BALANCED','프레임팁 - FIRM','프레임팁 - SOLID'];
@@ -6469,7 +6265,15 @@
     }
     function opB2BStage(r){if(/^(정산완료|입금완료|완납|완료)$/.test(r.settlement.replace(/\s/g,'')))return '정산완료';if(/납품\s*완료|배송\s*완료|수령\s*완료/.test(r.delivery))return '납품완료';if(/출고\s*예정|출고\s*완료|배송중|발송|제작\s*완료|생산\s*완료/.test(r.delivery+' '+r.production))return '출고예정';if(/제작\s*중|생산\s*중|진행\s*중/.test(r.production))return '제작중';return '확정';}
     function opOutstanding(r){if(r.outstanding!==null&&r.outstanding!==undefined)return r.outstanding;if(r.paid!==null&&r.paid!==undefined)return Math.max(0,r.amount-r.paid);if(/^(미입금|미정산|대기중|입금예정|미결제)$/.test(r.settlement.replace(/\s/g,'')))return r.amount;return null;}
-    function opB2BPipeline(rows){return opCard('진행단계 파이프라인','확정 → 제작중 → 출고예정 → 납품완료 → 정산완료',`<div class="op-pipeline">${['확정','제작중','출고예정','납품완료','정산완료'].map(stage=>{const list=rows.filter(r=>opB2BStage(r)===stage);return `<section><span>${stage}</span><h2>${list.length}<small>건</small></h2>${list.map(r=>`<div class="op-pipe-item"><strong>${safeHtml(r.company)}</strong><div>${safeHtml(r.product)} · ${fmt(r.qty)}개</div></div>`).join('')||'<div class="muted">해당 건 없음</div>'}</section>`;}).join('')}</div>`);}
+    function opB2BPipeline(rows){
+      const stages=['확정','제작중','출고예정','납품완료','정산완료'];
+      const active=rows.filter(r=>opB2BStage(r)!=='정산완료').sort((a,b)=>a.date-b.date);
+      return opCard('진행단계 파이프라인',`현재 진행중 ${active.length}건 · 정산완료 건 제외`,active.length?active.map(r=>{
+        const current=stages.indexOf(opB2BStage(r));
+        return `<div class="op-timeline"><div class="card-head"><div><strong>${safeHtml(r.company)}</strong><div class="card-sub">${safeHtml(r.product)} · ${fmt(r.qty)}개 · ${money(r.amount)}</div></div><span class="badge">${stages[current]}</span></div><div class="op-steps op-b2b-steps">${stages.map((v,i)=>`<div class="op-step ${i<current?'op-done':i===current?'op-current':'op-future'}"><span>${v}</span><b>${i<current?'완료':i===current?'현재 단계':'예정'}</b></div>`).join('')}</div></div>`;
+      }).join(''):'<div class="empty">현재 진행중인 B2B 건이 없습니다.</div>');
+    }
+
 
     function renderCurrentTab() {
       // 좌측 통합 사이드바(nav.js)가 이 페이지 밖에서 관리되므로, 현재 탭을
@@ -6522,7 +6326,7 @@
       renderCurrentTab();
     };
 
-    const OP_MENU=[['overview','종합현황'],['reorder','발주관리'],['inbound','입고예정'],['inspection','생산입고 ・검수'],['production','제작 현황'],['coupang','쿠팡판매'],['b2b','B2B현황']];
+    const OP_MENU=[['overview','종합현황'],['reorder','발주관리'],['inbound','입고예정'],['inspection','생산입고 ・검수'],['production','제작 현황'],['inventory','재고 관리'],['coupang','쿠팡판매'],['b2b','B2B현황']];
     function ensureInspectionNavItem(){ensureB2BNavItem();}
     function ensureB2BNavItem(){
       const links=[...document.querySelectorAll('a.fb-item[data-dept="operation"][data-item]')];
