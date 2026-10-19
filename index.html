@@ -5642,22 +5642,11 @@
       });
       const total = months.reduce((s, m) => s + m.total, 0);
       const avg = Math.round(total / (PO_MONTHS.length || 1));
-      const byType = t => poState.data.filter(r => r.type === t);
-      const sum = arr => arr.reduce((s, r) => s + (r.amount || 0), 0);
-      const 신 = byType('신'), 추 = byType('추'), 기 = byType('기');
-
-      const kpis = [
-        poMetricCard('총 지출 (6~12월)', '신규 발주 + 추가입고 + 기존 잔금', money(total), `월평균 ${money(avg)}`, 'good'),
-        poMetricCard('신규 생산 발주', '발주 시점 기준 금액', money(sum(신)), `${fmt(신.length)}건`, 'good'),
-        poMetricCard('추가 입고', '생산완료 후 입고 기준', money(sum(추)), `${fmt(추.length)}건`, 'warn'),
-        poMetricCard('기존 잔금', '기존 생산물량 잔금', money(sum(기)), `${fmt(기.length)}건`, 'danger')
-      ].join('');
-
       const barData = months.map(m => ({ label: m.label, total: Math.round(m.total / 10000) }));
       const avgBar = Math.round(avg / 10000);
       const barChart = `<article class="card full"><div class="card-head"><div><div class="card-title">월별 지출 금액</div><div class="card-sub">신규 · 추가입고 · 기존 잔금 합계 / 단위: 만원 · 3,500만원 초과 시 빨간색</div></div><span class="badge">AVG ${fmt(avgBar)}만원</span></div>${renderBarChart(barData, 'total', 'label', { dangerThreshold: 3500 })}</article>`;
 
-      return kpis + barChart + poRenderStockSection() + poRenderChinaStockSection() + poRenderCalendar() + poRenderSupplierTable();
+      return barChart + poRenderStockSection() + poRenderChinaStockSection() + poRenderCalendar();
     }
 
     function poRenderChinaStockSection() {
@@ -6012,27 +6001,6 @@
       calHtml += `</div></div>`;
 
       return `<article class="card full"><div class="card-head"><div><div class="card-title">월별 발주 캘린더</div><div class="card-sub">일자별 발주 / 입고 이벤트</div></div><button onclick="poDownloadExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.35);border-radius:7px;color:#2ecc71;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .2s;" onmouseover="this.style.background='rgba(46,204,113,0.22)'" onmouseout="this.style.background='rgba(46,204,113,0.12)'">📥 엑셀로 내려받기</button></div>${legend}${nav}${calHtml}</article>`;
-    }
-
-    function poRenderSupplierTable() {
-      const rows = PO_MONTHS.map(mo => {
-        const monthData = poState.data.filter(r => r.month === mo.m);
-        const tairu = monthData.filter(r => poGetSupplier(r.product) === '타이루').reduce((s, r) => s + (r.amount || 0), 0);
-        const ridian = monthData.filter(r => poGetSupplier(r.product) === '리디안').reduce((s, r) => s + (r.amount || 0), 0);
-        return { label: mo.label, tairu, ridian, total: tairu + ridian };
-      });
-      const totalTairu = rows.reduce((s, r) => s + r.tairu, 0);
-      const totalRidian = rows.reduce((s, r) => s + r.ridian, 0);
-      const body = rows.map(r => `<tr><td>${r.label}</td><td class="right">${r.tairu ? money(r.tairu) : '—'}</td><td class="right">${r.ridian ? money(r.ridian) : '—'}</td><td class="right">${r.total ? money(r.total) : '—'}</td></tr>`).join('');
-
-      return `<article class="card full">
-        <div class="card-head"><div><div class="card-title">업체별 월별 결제 총액</div><div class="card-sub">타이루(맥세이프 킥프레임 · DW 프로 · DW 플러스) / 리디안(PH)</div></div></div>
-        <div class="table-wrap"><table><thead><tr><th>월</th><th class="right">타이루 결제 총액</th><th class="right">리디안 결제 총액</th><th class="right">월 합계</th></tr></thead>
-          <tbody>${body}
-            <tr style="background:var(--ov03);"><td><strong>전체 합계</strong></td><td class="right"><strong>${money(totalTairu)}</strong></td><td class="right"><strong>${money(totalRidian)}</strong></td><td class="right"><strong>${money(totalTairu + totalRidian)}</strong></td></tr>
-          </tbody>
-        </table></div>
-      </article>`;
     }
 
     function poRenderOverviewTable() {
