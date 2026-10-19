@@ -524,7 +524,7 @@
     .b2b-line-labels.dynamic { grid-template-columns:repeat(var(--b2b-month-count,12),1fr); }
     .b2b-line-legend-dot { display:inline-block; width:10px; height:10px; border-radius:999px; margin-right:6px; vertical-align:-1px; }
     .b2b-line-legend-dot.current { background:#2563eb; }
-    .b2b-line-legend-dot.previous { background:#ef4444; }
+    .b2b-line-legend-dot.previous { background:#64748b; }
     .b2b-filterbar { position:relative; z-index:2; display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
     .b2b-filterbar select { max-width:190px; }
     .b2b-project-table { min-width:1180px; table-layout:auto; }
@@ -545,7 +545,7 @@
     .b2b-sales-col { height:280px; display:flex; flex-direction:column; justify-content:end; align-items:stretch; gap:8px; }
     .b2b-sales-value { text-align:center; color:var(--text); font-size:14px; font-weight:950; white-space:nowrap; }
     .b2b-sales-bar { min-height:4px; border-radius:14px 14px 0 0; }
-    .b2b-sales-bar.previous { background:#ef4444; }
+    .b2b-sales-bar.previous { background:#64748b; }
     .b2b-sales-bar.current { background:#2563eb; }
     .b2b-sales-axis { display:grid; grid-template-columns:repeat(2,minmax(150px,230px)); justify-content:center; gap:54px; margin-top:10px; text-align:center; color:var(--text2); font-size:12px; font-weight:900; }
     .b2b-client-compare { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
@@ -905,7 +905,16 @@
       .po-stock-grid { grid-template-columns: repeat(2, 1fr); }
       .po-cal-grid { grid-template-columns: repeat(7, minmax(90px,1fr)) 100px; overflow-x: auto; }
     }
-  .op-connections{grid-column:1/-1;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:12px 4px}.op-connections span{display:inline-flex;gap:5px;align-items:center}.op-connections i{width:7px;height:7px;border-radius:50%}.op-timeline{padding:18px 0;border-bottom:1px solid var(--panel-line)}.op-steps{display:grid;grid-template-columns:repeat(4,1fr);margin-top:12px;gap:12px}.op-step{border-top:3px solid var(--cyan);padding:10px;background:var(--ov03);display:flex;flex-direction:column;gap:8px}.op-step span{color:var(--muted);font-size:12px}.op-pipeline{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:12px;overflow:auto}.op-pipeline section{padding:16px;background:var(--ov03);border:1px solid var(--panel-line);border-radius:14px}.op-pipeline h2{margin:12px 0}.op-pipeline small{font-size:12px;margin-left:5px}.op-pipe-item{font-size:12px;padding:10px 0;border-top:1px solid var(--panel-line)}.op-pipe-item div{color:var(--muted);margin-top:5px}@media(max-width:650px){.op-steps{grid-template-columns:repeat(2,1fr)}} .op-b2b-steps{grid-template-columns:repeat(5,minmax(100px,1fr));overflow:auto}.op-step.op-future{border-color:var(--panel-line);opacity:.55}.op-step.op-done{border-color:var(--green)}.op-step.op-current{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan)} </style>
+  .op-connections{grid-column:1/-1;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:12px 4px}.op-connections span{display:inline-flex;gap:5px;align-items:center}.op-connections i{width:7px;height:7px;border-radius:50%}.op-timeline{padding:18px 0;border-bottom:1px solid var(--panel-line)}.op-steps{display:grid;grid-template-columns:repeat(4,1fr);margin-top:12px;gap:12px}.op-step{border-top:3px solid var(--cyan);padding:10px;background:var(--ov03);display:flex;flex-direction:column;gap:8px}.op-step span{color:var(--muted);font-size:12px}.op-pipeline{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:12px;overflow:auto}.op-pipeline section{padding:16px;background:var(--ov03);border:1px solid var(--panel-line);border-radius:14px}.op-pipeline h2{margin:12px 0}.op-pipeline small{font-size:12px;margin-left:5px}.op-pipe-item{font-size:12px;padding:10px 0;border-top:1px solid var(--panel-line)}.op-pipe-item div{color:var(--muted);margin-top:5px}@media(max-width:650px){.op-steps{grid-template-columns:repeat(2,1fr)}} .op-b2b-steps{grid-template-columns:repeat(5,minmax(100px,1fr));overflow:auto}.op-step.op-future{border-color:var(--panel-line);opacity:.55}.op-step.op-done{border-color:var(--green)}.op-step.op-current{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan)} 
+    .b2b-kpi.b2b-unpaid { grid-column:span 6; }
+    .b2b-total-bars { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; padding:28px 16px 18px; }
+    .b2b-total-column { height:250px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:10px; min-width:0; }
+    .b2b-total-column strong { font-size:clamp(11px,1.2vw,16px); white-space:nowrap; }
+    .b2b-total-column .b2b-sales-bar { width:70%; flex-shrink:0; }
+    .b2b-project-note { white-space:pre-wrap; margin-top:12px; padding:12px; background:var(--ov03); border-radius:10px; }
+    .op-b2b-steps .op-step b { overflow-wrap:anywhere; }
+    @media(max-width:820px){ .b2b-kpi.b2b-unpaid,.b2b-trend-card { grid-column:span 12; } }
+</style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
 <body>
@@ -6070,7 +6079,7 @@
     const B2B_SHEET_NAME = 'B2B 현황';
     const b2bState = { loading:false, loaded:false, error:'', rows:[] };
 
-    function b2bCsvUrl() { return `https://docs.google.com/spreadsheets/d/${B2B_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(B2B_SHEET_NAME)}&range=B5:L`; }
+    function b2bCsvUrl() { return `https://docs.google.com/spreadsheets/d/${B2B_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(B2B_SHEET_NAME)}&range=B5:N`; }
     function b2bConfirmed(v) { return String(v || '').trim() === '확정'; }
     function b2bParseDate(v) {
       const d = toDate(v); if (d) return d;
@@ -6083,8 +6092,8 @@
       return rows.slice(1).map(r => {
         const o={}; headers.forEach((h,i)=>o[h]=r[i]||'');
         const date=b2bParseDate(o['일자']);
-        return { date, company:String(o['기업명']||'').trim(), product:String(o['제품명']||'').trim(), use:String(o['활용방안']||'').trim(), confirm:String(o['고객사 컨펌현황']||'').trim(), production:String(o['제작현황']||'').trim(), delivery:String(o['납품현황']||'').trim(), qty:toNum(o['수량']), amount:toNum(o['견적금액 (VAT포함)']), settlement:String(o['정산현황']||'').trim(), note:String(o['비고']||'').trim(), outstanding:opNullable(o,['미정산금액','미정산 금액','잔금']), paid:opNullable(o,['입금액','입금완료금액','정산금액']) };
-      }).filter(r=>r.date && b2bConfirmed(r.confirm));
+        return { date, company:String(o['기업명']||'').trim(), product:String(o['제품명']||'').trim(), use:String(o['활용방안']||'').trim(), confirm:String(o['고객사 컨펌현황']||'').trim(), production:String(o['제작현황']||'').trim(), shippingDate:String(o['출고 예정일']||'').trim(), advanceRate:b2bAdvanceRate(o['선금비중']), delivery:String(o['납품현황']||'').trim(), qty:toNum(o['수량']), amount:toNum(o['견적금액 (VAT포함)']), settlement:String(o['정산현황']||'').trim(), note:String(o['비고']||'').trim(), outstanding:opNullable(o,['미정산금액','미정산 금액','잔금']), paid:opNullable(o,['입금액','입금완료금액','정산금액']) };
+      }).filter(r=>r.date);
     }
     async function b2bLoad() {
       if (b2bState.loading) return;
@@ -6160,7 +6169,7 @@
     function renderB2B(){
       if(!b2bState.loaded && !b2bState.loading){ grid(`<article class="card full"><div class="empty">B2B 데이터를 불러오는 중입니다.</div></article>`); b2bLoad(); return; }
       if(b2bState.error){ grid(`<article class="card full"><div class="error">${safeHtml(b2bState.error)}</div><div class="card-sub">Google Sheet 공유 권한 또는 웹 게시 설정을 확인해 주세요.</div></article>`); return; }
-      const all=b2bState.rows.filter(r=>r.date<=endOfDay(todayDate())), years=[...new Set(all.map(r=>r.date.getFullYear()))].sort();
+      const all=b2bState.rows.filter(r=>b2bConfirmed(r.confirm)&&r.date<=endOfDay(todayDate())), years=[...new Set(all.map(r=>r.date.getFullYear()))].sort();
       if(!years.includes(state.b2b.year)) state.b2b.year=years.includes(2026)?2026:(years.at(-1)||2026);
       const y=state.b2b.year, yr=all.filter(r=>r.date.getFullYear()===y), products=b2bAggregate(yr,'product'), companies=b2bAggregate(yr,'company');
       const now=todayDate(), cutoff=y===now.getFullYear()?now:new Date(y,11,31), cutoffMonth=cutoff.getMonth(), cutoffDay=cutoff.getDate();
@@ -6169,8 +6178,8 @@
       const cutoffLabel=cutoff?`${cutoff.getMonth()+1}/${cutoff.getDate()}까지 누적`:'누적 데이터 없음';
       const currentMonthCount=cutoffMonth+1;
       const curCum=b2bCumulativeByMonth(all,y,currentMonthCount-1), prevCum=y>2025?b2bCumulativeByMonth(prevSame,y-1,currentMonthCount-1):Array(12).fill(null);
-      const c=curCum[currentMonthCount-1]||0,p=prevCum[currentMonthCount-1]||0, delta=p?((c/p-1)*100):null;
-      const unpaid=yr.filter(r=>opB2BStage(r)==='납품완료');
+      const c=curCum[currentMonthCount-1]||0,p=all.filter(r=>r.date.getFullYear()===y-1&&r.date.getMonth()<=cutoffMonth).reduce((sum,r)=>sum+r.amount,0), delta=p?((c/p-1)*100):null;
+      const unpaid=yr.filter(r=>opB2BStage(r)!=='정산완료');
       const unpaidKnown=unpaid.filter(r=>opOutstanding(r)!==null), unpaidAmount=unpaidKnown.reduce((a,r)=>a+opOutstanding(r),0);
       const productRows=products.map(x=>`<tr><td>${safeHtml(x.name)}</td><td class="right"><strong>${fmt(x.qty)}개</strong></td><td class="right">${money(x.amount)}</td><td class="right muted">${fmt(x.count)}건</td></tr>`).join('');
       const clientCards=companies.map(x=>`<div class="b2b-client"><strong>${safeHtml(x.name)}</strong><span>${fmt(x.count)}건 · ${fmt(x.qty)}개 · ${money(x.amount)}</span></div>`).join('');
@@ -6178,7 +6187,7 @@
       let tableRows=yr.filter(r=>state.b2b.productFilter==='all'||r.product===state.b2b.productFilter);
       const key=state.b2b.sortKey, dir=state.b2b.sortDir==='asc'?1:-1;
       tableRows=[...tableRows].sort((a,b)=>{ let av,bv; if(key==='date'){av=a.date;bv=b.date;} else if(key==='qty'){av=a.qty;bv=b.qty;} else if(key==='amount'){av=a.amount;bv=b.amount;} else {av=String(a[key]||'');bv=String(b[key]||'');} return av>bv?dir:av<bv?-dir:0; });
-      const recent=tableRows.map(r=>{ const unit=r.qty?r.amount/r.qty:0; const pending=String(r.settlement||'').trim()==='대기중'; return `<tr class="${pending?'settlement-pending-row':''}"><td>${dateStr(r.date)}</td><td>${safeHtml(r.company)}</td><td>${safeHtml(r.product)}</td><td>${safeHtml(r.use||'-')}</td><td class="right">${fmt(r.qty)}개</td><td class="right">${money(unit)}</td><td class="right">${money(r.amount)}</td><td>${safeHtml(r.production||'-')}</td><td>${safeHtml(r.delivery||'-')}</td><td class="${pending?'settlement-pending':''}">${safeHtml(r.settlement||'-')}</td></tr>`; }).join('');
+      const recent=tableRows.map(r=>{ const unit=r.qty?r.amount/r.qty:0; const pending=String(r.settlement||'').trim()==='대기중'; return `<tr class="${pending?'settlement-pending-row':''}"><td>${dateStr(r.date)}</td><td>${safeHtml(r.company)}</td><td>${safeHtml(r.product)}</td><td>${safeHtml(r.use||'-')}</td><td class="right">${fmt(r.qty)}개</td><td class="right">${money(unit)}</td><td class="right">${money(r.amount)}</td><td>${safeHtml(r.production||'-')}</td><td>${safeHtml(r.shippingDate?(b2bParseDate(r.shippingDate)?dateStr(b2bParseDate(r.shippingDate)):r.shippingDate):'예정일 미정')}</td><td>${safeHtml(r.delivery||'-')}</td><td class="${pending?'settlement-pending':''}">${safeHtml(r.settlement||'-')}</td><td style="white-space:pre-wrap;min-width:180px">${safeHtml(r.note||'-')}</td></tr>`; }).join('');
       const sortArrow=k=>state.b2b.sortKey===k?(state.b2b.sortDir==='asc'?'▲':'▼'):'↕';
       let modal=''; if(state.b2b.modal==='sales') modal=b2bSalesModal(all,y); else if(state.b2b.modal==='qty') modal=b2bDonutModal(all); else if(state.b2b.modal==='clients') modal=b2bClientsModal(all); else if(state.b2b.modal==='trend') modal=b2bCompareModal(all);
       grid(`
@@ -6186,12 +6195,12 @@
         ${renderSummaryKpiCard({title:`${y}년 B2B 누적 매출`,sub:'확정 프로젝트 견적금액',value:money(totalAmount),caption:y===2026?`${cutoffLabel} · ${b2bChangeText(totalAmount,prevSameAmount)}`:cutoffLabel,badge:`${String(y).slice(2)}년`,extraClass:'b2b-kpi',onclick:"b2bOpenModal('sales')"})}
         ${renderSummaryKpiCard({title:`${y}년 B2B 누적 수량`,sub:'확정 프로젝트 수량 합계',value:fmt(totalQty),unit:'개',caption:y===2026?`${cutoffLabel} · ${b2bQtyChangeText(totalQty,prevSameQty)}`:`${cutoffLabel} · 제품 ${fmt(products.length)}종`,badge:`${String(y).slice(2)}년`,extraClass:'b2b-kpi',onclick:"b2bOpenModal('qty')"})}
         ${renderSummaryKpiCard({title:`${y} 고객사`,sub:'확정 프로젝트 기업 수',value:fmt(clients.size),unit:'개사',caption:`확정 ${fmt(yr.length)}건 · 진행중 ${fmt(yr.filter(r=>r.delivery!=='납품완료').length)}건`,badge:'확정만',extraClass:'b2b-kpi',onclick:"b2bOpenModal('clients')"})}
-        ${renderSummaryKpiCard({title:'미정산 금액',sub:'납품 완료 후 입금 예정',value:unpaidKnown.length?money(unpaidAmount):unpaid.length?'금액 확인 필요':money(0),caption:`${unpaid.length}건 · 금액 미확인 ${unpaid.length-unpaidKnown.length}건`,badge:'미정산',extraClass:'b2b-kpi'})}
-        <article class="card full b2b-trend-card" onclick="b2bOpenModal('trend')" role="button" tabindex="0"><div class="card-head"><div><div class="card-title">전년도 동월 대비 누적 B2B 매출</div><div class="card-sub">${y===2025?'2025년 월별 누적 견적금액(VAT 포함)':`월별 누적 견적금액(VAT 포함) · ${y} vs ${y-1}`}</div></div><span class="badge ${delta!==null&&delta<0?'danger':''}">${y===2025?'2025 누적':delta===null?'비교 기준 없음':`${delta>=0?'+':''}${delta.toFixed(1)}%`}</span></div>${b2bLineChart(curCum,prevCum,y,currentMonthCount)}<span class="b2b-detail-hint">상세보기 ›</span></article>
+        ${renderSummaryKpiCard({title:'미정산 금액',sub:'선금 정산분을 제외한 잔금 합계',value:unpaidKnown.length?money(unpaidAmount):unpaid.length?'금액 확인 필요':money(0),caption:`${unpaid.length}건 · 금액 미확인 ${unpaid.length-unpaidKnown.length}건`,badge:'미정산',extraClass:'b2b-kpi b2b-unpaid'})}
+        <article class="card half b2b-trend-card" onclick="b2bOpenModal('trend')" role="button" tabindex="0"><div class="card-head"><div><div class="card-title">전년도 동월 대비 누적 B2B 매출</div><div class="card-sub">${y}년 / ${y-1}년 · 1~${cutoffMonth+1}월 누적 총액 · VAT 포함</div></div><span class="badge ${delta!==null&&delta<0?'danger':''}">${y===2025?'2025 누적':delta===null?'비교 기준 없음':`${delta>=0?'+':''}${delta.toFixed(1)}%`}</span></div>${b2bTotalBars(all,y,cutoffMonth)}<span class="b2b-detail-hint">상세보기 ›</span></article>
         ${opB2BPipeline(b2bState.rows)}
         <article class="card half"><div class="card-head"><div><div class="card-title">제품별 누적 B2B</div><div class="card-sub">${y} 확정 기준 · 수량과 매출</div></div></div><div class="table-wrap"><table><thead><tr><th>제품명</th><th class="right">누적 수량</th><th class="right">누적 매출</th><th class="right">건수</th></tr></thead><tbody>${productRows||'<tr><td colspan="4" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>
         <article class="card half"><div class="card-head"><div><div class="card-title">기업 리스트</div><div class="card-sub">${y} 확정 고객사 · 매출 순</div></div></div><div class="b2b-client-grid">${clientCards||'<div class="empty">데이터 없음</div>'}</div></article>
-        <article class="card full"><div class="card-head"><div><div class="card-title">진행중 B2B 상세 · 누적 프로젝트</div><div class="card-sub">제작·납품·정산 진행상태 · 견적금액/수량 기준 VAT 포함 VAT 포함 개당 단가</div></div></div><div class="b2b-filterbar"><select onchange="b2bSetProductFilter(this.value)">${productOptions.map(v=>`<option value="${safeHtml(v)}" ${state.b2b.productFilter===v?'selected':''}>${v==='all'?'전체 제품':safeHtml(v)}</option>`).join('')}</select><button class="b2b-sort-btn" onclick="b2bSetSort('date')">일자 ${sortArrow('date')}</button><button class="b2b-sort-btn" onclick="b2bSetSort('qty')">수량 ${sortArrow('qty')}</button><button class="b2b-sort-btn" onclick="b2bSetSort('amount')">견적금액 ${sortArrow('amount')}</button></div><div class="table-wrap"><table class="b2b-project-table"><thead><tr><th>일자</th><th>기업명</th><th>제품명</th><th>활용방안</th><th class="right">수량</th><th class="right">VAT 포함 개당 단가</th><th class="right">견적금액</th><th>제작</th><th>납품</th><th>정산</th></tr></thead><tbody>${recent||'<tr><td colspan="10" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>${modal}`);
+        <article class="card full"><div class="card-head"><div><div class="card-title">진행중 B2B 상세 · 누적 프로젝트</div><div class="card-sub">제작·납품·정산 진행상태 · 견적금액/수량 기준 VAT 포함 VAT 포함 개당 단가</div></div></div><div class="b2b-filterbar"><select onchange="b2bSetProductFilter(this.value)">${productOptions.map(v=>`<option value="${safeHtml(v)}" ${state.b2b.productFilter===v?'selected':''}>${v==='all'?'전체 제품':safeHtml(v)}</option>`).join('')}</select><button class="b2b-sort-btn" onclick="b2bSetSort('date')">일자 ${sortArrow('date')}</button><button class="b2b-sort-btn" onclick="b2bSetSort('qty')">수량 ${sortArrow('qty')}</button><button class="b2b-sort-btn" onclick="b2bSetSort('amount')">견적금액 ${sortArrow('amount')}</button></div><div class="table-wrap"><table class="b2b-project-table"><thead><tr><th>일자</th><th>기업명</th><th>제품명</th><th>활용방안</th><th class="right">수량</th><th class="right">VAT 포함 개당 단가</th><th class="right">견적금액</th><th>제작현황</th><th>출고 예정일</th><th>납품 현황</th><th>정산 현황</th><th>비고</th></tr></thead><tbody>${recent||'<tr><td colspan="12" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>${modal}`);
       if(modal) requestAnimationFrame(b2bSyncModalOffset);
     }
 
@@ -6233,13 +6242,32 @@
       grid(`${metricCard('총 SKU','전체 등록 품목',fmt(a.enriched.length),'재고 시트 기준')}${metricCard('재고 합계','국내 재고',fmt(a.totalQty),'개')}${metricCard('품절/위험','재고 확인 필요',fmt(a.riskRows.length),'SKU','danger')}${metricCard('주의재고','수급 확인 필요',fmt(a.warnRows.length),'SKU','warn')}${opCard('주력 제품 재고 현황','발주 필요시점은 원본 입력값 기준 · 비어 있는 항목은 미입력',opTable(['품목','국내재고','중국현지재고','일평균 판매수량','품절예상일자','중국잔여재고 발주필요시점','신규발주필요시점','상태'],body))}${opCard('중국 현지재고','국내 재고와 별도 관리',poState.chinaStockError?`<div class="error">${poState.chinaStockError}</div>`:opTable(['제품','색상/옵션','현지재고'],china.map(r=>`<tr><td>${safeHtml(r.product)}</td><td>${safeHtml(r.color)}</td><td>${fmt(r.qty)}개</td></tr>`)))}`);
     }
     function opB2BStage(r){if(/^(정산완료|입금완료|완납|완료)$/.test(r.settlement.replace(/\s/g,'')))return '정산완료';if(/납품\s*완료|배송\s*완료|수령\s*완료/.test(r.delivery))return '납품완료';if(/출고\s*예정|출고\s*완료|배송중|발송|제작\s*완료|생산\s*완료/.test(r.delivery+' '+r.production))return '출고예정';if(/제작\s*중|생산\s*중|진행\s*중/.test(r.production))return '제작중';return '확정';}
-    function opOutstanding(r){if(r.outstanding!==null&&r.outstanding!==undefined)return r.outstanding;if(r.paid!==null&&r.paid!==undefined)return Math.max(0,r.amount-r.paid);if(/^(미입금|미정산|대기중|입금예정|미결제)$/.test(r.settlement.replace(/\s/g,'')))return r.amount;return null;}
+    function b2bAdvanceRate(v){
+      const text=String(v??'').trim(); if(!text)return null;
+      const n=Number(text.replace(/[%％,\s]/g,'')); if(!Number.isFinite(n))return null;
+      const rate=/[%％]/.test(text)||n>1?n/100:n; return rate>=0&&rate<=1?rate:null;
+    }
+    function opOutstanding(r){
+      const status=String(r.settlement||'').replace(/\s/g,'');
+      if(/^(정산완료|입금완료|완납|완료)$/.test(status))return 0;
+      if(status==='선금정산완료')return r.advanceRate===null||r.advanceRate===undefined?null:Math.round(r.amount*(1-r.advanceRate));
+      if(r.outstanding!==null&&r.outstanding!==undefined)return r.outstanding;
+      if(r.paid!==null&&r.paid!==undefined)return Math.max(0,r.amount-r.paid);
+      if(/^(미입금|미정산|대기중|입금예정|미결제)$/.test(status))return r.amount;
+      return null;
+    }
+    function b2bTotalBars(all,year,month){
+      const total=y=>all.filter(r=>r.date.getFullYear()===y&&r.date.getMonth()<=month).reduce((s,r)=>s+r.amount,0);
+      const prev=total(year-1),cur=total(year),max=Math.max(1,prev,cur);
+      return `<div class="b2b-total-bars">${[[year-1,prev,'previous'],[year,cur,'current']].map(([y,v,c])=>`<div class="b2b-total-column"><strong>${money(v)}</strong><div class="b2b-sales-bar ${c}" style="height:${v/max*190}px"></div><span>${y}년</span></div>`).join('')}</div>`;
+    }
     function opB2BPipeline(rows){
-      const stages=['확정','제작중','출고예정','납품완료','정산완료'];
-      const active=rows.filter(r=>opB2BStage(r)!=='정산완료').sort((a,b)=>a.date-b.date);
+      const active=rows.filter(r=>r.date<=endOfDay(todayDate())&&opB2BStage(r)!=='정산완료').sort((a,b)=>b.date-a.date);
       return opCard('진행단계 파이프라인',`현재 진행중 ${active.length}건 · 정산완료 건 제외`,active.length?active.map(r=>{
-        const current=stages.indexOf(opB2BStage(r));
-        return `<div class="op-timeline"><div class="card-head"><div><strong>${safeHtml(r.company)}</strong><div class="card-sub">${safeHtml(r.product)} · ${fmt(r.qty)}개 · ${money(r.amount)}</div></div><span class="badge">${stages[current]}</span></div><div class="op-steps op-b2b-steps">${stages.map((v,i)=>`<div class="op-step ${i<current?'op-done':i===current?'op-current':'op-future'}"><span>${v}</span><b>${i<current?'완료':i===current?'현재 단계':'예정'}</b></div>`).join('')}</div></div>`;
+        const confirmed=b2bConfirmed(r.confirm);
+        const shipping=r.shippingDate?(b2bParseDate(r.shippingDate)?dateStr(b2bParseDate(r.shippingDate)):r.shippingDate):'예정일 미정';
+        const steps=[['고객사 컨펌현황',confirmed?'확정':'검토중',confirmed],['제작현황',r.production||'제작 예정',/완료/.test(r.production)],['출고 예정일',shipping,false],['납품 현황',r.delivery||'납품 예정',/완료/.test(r.delivery)],['정산 현황',r.settlement||'정산 대기',false]];
+        return `<div class="op-timeline"><div class="card-head"><div><strong>${safeHtml(r.company)}</strong><div class="card-sub">${safeHtml(r.product)} · ${fmt(r.qty)}개 · ${money(r.amount)}</div></div><span class="badge">${confirmed?'확정':'검토중'}</span></div><div class="op-steps op-b2b-steps">${steps.map(([label,value,done])=>`<div class="op-step ${done?'op-done':''}"><span>${label}</span><b>${safeHtml(value)}</b></div>`).join('')}</div>${r.note?`<div class="card-sub b2b-project-note">${safeHtml(r.note)}</div>`:''}</div>`;
       }).join(''):'<div class="empty">현재 진행중인 B2B 건이 없습니다.</div>');
     }
 
