@@ -134,6 +134,7 @@
     .card { background: linear-gradient(180deg, var(--ov055), var(--ov025)); border: 1px solid var(--panel-line); border-radius: var(--radius); padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.22); position: relative; overflow: hidden; min-width: 0; }
     .card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 85% 0%, var(--ov08), transparent 28%); pointer-events: none; }
     .kpi { grid-column: span 3; min-height: 146px; }
+    .kpi.overview-kpi { grid-column: span 6; }
     .kpi.double { grid-column: span 6; }
     .kpi.third-kpi { grid-column: span 4; }
     .wide { grid-column: span 8; min-height: 370px; }
@@ -816,6 +817,7 @@
     @media (max-width: 1100px) {
       .app { grid-template-columns: 1fr; }
       .sidebar { display: none; }
+      .kpi.overview-kpi { grid-column: span 12; }
       .kpi, .wide, .side, .three-quarter, .half, .third { grid-column: span 12; }
       main { padding: 18px; }
       .topbar { flex-direction: column; }
@@ -2070,23 +2072,22 @@
       const coupangDateKey = coupangAnalysis.dateKey;
       const coupangObjects = coupangAnalysis.objects;
       grid(`
-        ${clickableMetricCard('결제 예정 금액','선택 기간 내 예정일 기준',money(paymentAnalysis.scheduledKrwInPeriod),`${fmt(paymentAnalysis.scheduledPaymentsInPeriod.length)}건 예정 / 클릭 시 상세`,'warn',[paymentAnalysis.scheduledKrwInPeriod],`openOverviewPaymentDetail('scheduled')`)}
-        ${clickableMetricCard('실제 결제 금액','선택 기간 내 결제 완료 기준',money(paymentAnalysis.paidKrwInPeriod),`${fmt(paymentAnalysis.paidPaymentsInPeriod.length)}건 결제 / 클릭 시 상세`,'good',[paymentAnalysis.paidKrwInPeriod],`openOverviewPaymentDetail('paid')`)}
-        ${metricCard('총 제작수량','제작_일별 기준',fmt(productionTotal),productionQtyKey ? `${productionQtyKey} 합계` : '행 개수 기준','good',[productionTotal])}
-        ${metricCard('불량 / 폐기','제작 품질 이슈',fmt(productionDefect),`불량·폐기율 ${productionRate}` ,productionDefect > 0 ? 'warn' : 'good',[productionDefect])}
-        ${metricCard('쿠팡 판매','수량 + 공급가액 합계',`${fmt(coupangTotal)}개`,`공급가액 ${money(coupangSupplyTotal)}`,'good',coupangAnalysis.dated.slice(-7).map(r=>r.qty))}
+        ${sizedMetricCard(clickableMetricCard('결제 예정 금액','선택 기간 내 예정일 기준',money(paymentAnalysis.scheduledKrwInPeriod),`${fmt(paymentAnalysis.scheduledPaymentsInPeriod.length)}건 예정 / 클릭 시 상세`,'warn',[paymentAnalysis.scheduledKrwInPeriod],`openOverviewPaymentDetail('scheduled')`), 'overview-kpi')}
+        ${sizedMetricCard(clickableMetricCard('실제 결제 금액','선택 기간 내 결제 완료 기준',money(paymentAnalysis.paidKrwInPeriod),`${fmt(paymentAnalysis.paidPaymentsInPeriod.length)}건 결제 / 클릭 시 상세`,'good',[paymentAnalysis.paidKrwInPeriod],`openOverviewPaymentDetail('paid')`), 'overview-kpi')}
+        ${sizedMetricCard(metricCard('총 제작수량','제작_일별 기준',fmt(productionTotal),productionQtyKey ? `${productionQtyKey} 합계` : '행 개수 기준','good',[productionTotal]), 'overview-kpi')}
+        ${sizedMetricCard(metricCard('불량 / 폐기','제작 품질 이슈',fmt(productionDefect),`불량·폐기율 ${productionRate}` ,productionDefect > 0 ? 'warn' : 'good',[productionDefect]), 'overview-kpi')}
+        <article class="card half"><div class="card-head"><div><div class="card-title">쿠팡 판매 현황</div><div class="card-sub">기간별 판매 / 매출 기준</div></div></div><div class="issue-list">
+          <div class="issue"><div class="issue-icon">🛒</div><div><strong>쿠팡 판매수량</strong><span>${coupangMainKey || '자동 감지'} 기준</span></div><div class="issue-num">${fmt(coupangTotal)}개</div></div>
+          <div class="issue"><div class="issue-icon">₩</div><div><strong>공급가액 합계</strong><span>쿠팡 판매 탭 계산 기준</span></div><div class="issue-num">${money(coupangSupplyTotal)}</div></div>
+          <div class="issue"><div class="issue-icon">📅</div><div><strong>기간 적용</strong><span>${document.getElementById('periodLabel').textContent}</span></div><div class="issue-num">${fmt(coupangObjects.length)}</div></div>
+          <div class="issue"><div class="issue-icon">📊</div><div><strong>데이터 상태</strong><span>쿠팡_판매 시트 연결</span></div><div class="issue-num">${coupangRows.length ? 'OK' : '확인'}</div></div>
+        </div></article>
         <article class="card half"><div class="card-head"><div><div class="card-title">제작 운영 현황</div><div class="card-sub">생산 / 불량 / 품질 기준</div></div></div><div class="issue-list">
           <div class="issue"><div class="issue-icon">🏭</div><div><strong>총 제작수량</strong><span>${productionQtyKey || '자동 감지'} 기준</span></div><div class="issue-num">${fmt(productionTotal)}</div></div>
           <div class="issue"><div class="issue-icon">⚠️</div><div><strong>불량 / 폐기</strong><span>${productionDefectKey || '감지 안됨'}</span></div><div class="issue-num">${fmt(productionDefect)}</div></div>
           <div class="issue"><div class="issue-icon">%</div><div><strong>불량·폐기율</strong><span>(불량 + 폐기) ÷ 제작수량</span></div><div class="issue-num">${productionRate}</div></div>
           <div class="issue"><div class="issue-icon">📅</div><div><strong>기간 적용</strong><span>${productionDateKey || '날짜열 감지 안됨'}</span></div><div class="issue-num">${productionObjects.length}</div></div>
           <div class="issue"><div class="issue-icon">🔎</div><div><strong>감지 컬럼</strong><span>수량: ${productionQtyKey || '없음'} / 샘플: ${productionDateParseSamples[0] || '-'}</span></div><div class="issue-num">확인</div></div>
-        </div></article>
-        <article class="card half"><div class="card-head"><div><div class="card-title">쿠팡 판매 현황</div><div class="card-sub">기간별 판매 / 매출 기준</div></div></div><div class="issue-list">
-          <div class="issue"><div class="issue-icon">🛒</div><div><strong>쿠팡 판매수량</strong><span>${coupangMainKey || '자동 감지'} 기준</span></div><div class="issue-num">${fmt(coupangTotal)}개</div></div>
-          <div class="issue"><div class="issue-icon">₩</div><div><strong>공급가액 합계</strong><span>쿠팡 판매 탭 계산 기준</span></div><div class="issue-num">${money(coupangSupplyTotal)}</div></div>
-          <div class="issue"><div class="issue-icon">📅</div><div><strong>기간 적용</strong><span>${document.getElementById('periodLabel').textContent}</span></div><div class="issue-num">${fmt(coupangObjects.length)}</div></div>
-          <div class="issue"><div class="issue-icon">📊</div><div><strong>데이터 상태</strong><span>쿠팡_판매 시트 연결</span></div><div class="issue-num">${coupangRows.length ? 'OK' : '확인'}</div></div>
         </div></article>
         <article class="card full"><div class="card-head"><div class="card-title">재고 관리</div><button onclick="window.__fbOperationSetTab('inventory')">주력 제품 · 중국 현지재고 보기 →</button></div></article>
         <footer class="op-connections">연결 상태 ${['production','productionInbound','inspectionDefects','po','inbound','inventoryStock','coupang'].map(k=>`<span title="${SHEETS[k].name}: ${state.raw[k]?'정상':'연결 실패'}"><i style="background:${state.raw[k]?'var(--green)':'var(--red)'}"></i>${safeHtml(SHEETS[k].name)}</span>`).join('')}</footer>
