@@ -914,6 +914,18 @@
     .b2b-project-note { white-space:pre-wrap; margin-top:12px; padding:12px; background:var(--ov03); border-radius:10px; }
     .op-b2b-steps .op-step b { overflow-wrap:anywhere; }
     @media(max-width:820px){ .b2b-kpi.b2b-unpaid,.b2b-trend-card { grid-column:span 12; } }
+
+.b2b-unpaid .summary-kpi-caption{white-space:normal;overflow:visible}
+.b2b-unpaid-details{display:grid;gap:12px;margin-top:20px}
+.b2b-unpaid-item{padding:12px;border:1px solid var(--panel-line);border-radius:10px;background:var(--ov03)}
+.b2b-unpaid-item>div{display:flex;justify-content:space-between;gap:12px;color:var(--text2);font-size:13px}
+.b2b-unpaid-item small{display:block;margin-top:6px;font-size:11px;color:var(--muted);line-height:1.6}
+.op-b2b-steps .op-step{border-radius:10px;min-height:115px;position:relative}
+.op-b2b-steps .op-step.op-current{border:2px solid #22d3ee;border-top:5px solid #22d3ee;background:rgba(34,211,238,.18);box-shadow:0 0 20px rgba(34,211,238,.3);opacity:1}
+.op-b2b-steps .op-current b,.op-b2b-steps .op-current small{color:var(--cyan);font-weight:950}
+.op-b2b-steps .op-step.op-done{background:rgba(52,211,153,.10);border-color:var(--green);opacity:.8}
+.op-b2b-steps .op-done small{color:var(--green)}
+.op-b2b-steps .op-step.op-future{background:var(--ov025);border-color:var(--panel-line);opacity:.42}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -6079,7 +6091,7 @@
     const B2B_SHEET_NAME = 'B2B 현황';
     const b2bState = { loading:false, loaded:false, error:'', rows:[] };
 
-    function b2bCsvUrl() { return `https://docs.google.com/spreadsheets/d/${B2B_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(B2B_SHEET_NAME)}&range=B5:N`; }
+    function b2bCsvUrl() { return `https://docs.google.com/spreadsheets/d/${B2B_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(B2B_SHEET_NAME)}&range=B5:Z`; }
     function b2bConfirmed(v) { return String(v || '').trim() === '확정'; }
     function b2bParseDate(v) {
       const d = toDate(v); if (d) return d;
@@ -6090,9 +6102,9 @@
       if (!rows.length) return [];
       const headers = rows[0].map(x => String(x).trim());
       return rows.slice(1).map(r => {
-        const o={}; headers.forEach((h,i)=>o[h]=r[i]||'');
+        const o={}; headers.forEach((h,i)=>o[h]=r[i]??'');
         const date=b2bParseDate(o['일자']);
-        return { date, company:String(o['기업명']||'').trim(), product:String(o['제품명']||'').trim(), use:String(o['활용방안']||'').trim(), confirm:String(o['고객사 컨펌현황']||'').trim(), production:String(o['제작현황']||'').trim(), shippingDate:String(o['출고 예정일']||'').trim(), advanceRate:b2bAdvanceRate(o['선금비중']), delivery:String(o['납품현황']||'').trim(), qty:toNum(o['수량']), amount:toNum(o['견적금액 (VAT포함)']), settlement:String(o['정산현황']||'').trim(), note:String(o['비고']||'').trim(), outstanding:opNullable(o,['미정산금액','미정산 금액','잔금']), paid:opNullable(o,['입금액','입금완료금액','정산금액']) };
+        return { date, company:String(o['기업명']||'').trim(), product:String(o['제품명']||'').trim(), use:String(o['활용방안']||'').trim(), confirm:String(o['고객사 컨펌현황']||'').trim(), production:String(o['제작현황']||'').trim(), deliveryDate:b2bParseDate(o['납품완료일']||o['납품 완료일']||o['납품일']||(/완료/.test(o['납품현황']||'')?o['납품현황']:'')), shippingDate:String(o['출고 예정일']||'').trim(), advanceRate:b2bAdvanceRate(o['선금비중']), delivery:String(o['납품현황']||'').trim(), qty:toNum(o['수량']), amount:toNum(o['견적금액 (VAT포함)']), settlement:String(o['정산현황']||'').trim(), note:String(o['비고']||'').trim(), outstanding:opNullable(o,['미정산금액','미정산 금액','잔금']), paid:opNullable(o,['입금액','입금완료금액','정산금액']) };
       }).filter(r=>r.date);
     }
     async function b2bLoad() {
@@ -6156,16 +6168,25 @@
     }
     function opB2BMonthly(rows,year,cutoffMonth){return Array.from({length:12},(_,m)=>m>cutoffMonth?null:rows.filter(r=>r.date.getFullYear()===year&&r.date.getMonth()===m).reduce((sum,r)=>sum+r.amount,0));}
     function b2bCompareModal(all){
-      const y=state.b2b.year, now=todayDate(), m=y===now.getFullYear()?now.getMonth():11, d=y===now.getFullYear()?now.getDate():31; const prev=opB2BMonthly(all,y-1,11), cur=opB2BMonthly(all,y,m);
-      const vals=[...prev.filter(v=>v!==null),...cur.filter(v=>v!==null)], max=Math.max(1,...vals);
-      const rows=Array.from({length:12},(_,i)=>{
-        const pv=prev[i], cv=cur[i];
-        const ph=pv===null?0:pv/max*100, ch=cv===null?0:cv/max*100;
-        const prevInside=ph>=42, curInside=ch>=42;
-        return `<div class="b2b-vertical-month"><div class="b2b-vertical-col ${prevInside?'label-inside':'label-outside'}" style="--bar-h:${ph}%">${pv===null?'<div class="b2b-vertical-placeholder"></div>':`<div class="b2b-vertical-value">${money(pv)}</div><div class="b2b-vertical-bar previous" style="height:${ph}%"></div>`}</div><div class="b2b-vertical-col ${curInside?'label-inside':'label-outside'}" style="--bar-h:${ch}%">${cv===null?'<div class="b2b-vertical-placeholder" title="2026 데이터 없음"></div>':`<div class="b2b-vertical-value">${money(cv)}</div><div class="b2b-vertical-bar current" style="height:${ch}%"></div>`}</div><div class="b2b-vertical-month-label">${i+1}월</div></div>`;
-      }).join('');
-      return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">월별 B2B 발생 매출 비교</div><div class="card-sub">세로 막대 비교 · ${y-1}년(회색) / ${y}년(파랑) · 월별 발생액 · ${y}년 ${m+1}월은 ${d}일까지 · VAT 포함</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="period-compare-legend b2b-monthly-legend"><span><i class="b2b-line-legend-dot previous"></i>${y-1}년</span><span><i class="b2b-line-legend-dot current"></i>${y}년</span></div><div class="b2b-vertical-chart-scroll"><div class="b2b-vertical-chart">${rows}</div></div></div></div>`;
+      const y=state.b2b.year,now=todayDate(),m=y===now.getFullYear()?now.getMonth():11;
+      const prev=opB2BMonthly(all,y-1,11),cur=opB2BMonthly(all,y,m),max=Math.max(1,...prev.filter(v=>v!==null),...cur.filter(v=>v!==null));
+      const x=i=>90+i*108,py=v=>330-v/max*240;
+      const series=(values,color,offset)=>`<polyline fill="none" stroke="${color}" stroke-width="3" points="${values.map((v,i)=>v===null?'':`${x(i)},${py(v)}`).filter(Boolean).join(' ')}"/>`+values.map((v,i)=>v===null?'':`<circle cx="${x(i)}" cy="${py(v)}" r="5" fill="${color}"/><text x="${x(i)}" y="${py(v)+offset}" text-anchor="middle" fill="${color}" font-size="11" font-weight="800" paint-order="stroke" stroke="var(--modal-bg)" stroke-width="4">${money(v)}</text>`).join('');
+      return `<div class="modal-backdrop b2b-modal-backdrop" onclick="b2bCloseModal()"><div class="modal-card b2b-modal" onclick="event.stopPropagation()"><div class="modal-head"><div><div class="card-title">월별 B2B 발생 매출 추이</div><div class="card-sub">${y-1}년 회색 / ${y}년 파란색 · 월별 발생액 · 당월은 오늘까지 · VAT 포함</div></div><button class="modal-close" onclick="b2bCloseModal()">닫기</button></div><div class="b2b-vertical-chart-scroll"><svg viewBox="0 0 1370 410" style="min-width:1370px;width:100%;height:auto" role="img" aria-label="연도별 월 매출 꺾은선 그래프">${[0,1,2,3,4].map(i=>`<line x1="60" x2="1320" y1="${330-i*60}" y2="${330-i*60}" stroke="var(--panel-line)"/>`).join('')}${series(prev,'#94a3b8',-18)}${series(cur,'#2563eb',25)}${Array.from({length:12},(_,i)=>`<text x="${x(i)}" y="385" text-anchor="middle" fill="var(--text2)" font-size="13">${i+1}월</text>`).join('')}</svg></div></div></div>`;
     }
+    // 2026 대한민국 공휴일 및 대체공휴일. 이후 연도는 달력 갱신 전 확정일로 표시하지 않는다.
+    const b2bHolidays2026=new Set(['01-01','02-16','02-17','02-18','03-01','03-02','05-01','05-05','05-24','05-25','06-03','06-06','07-17','08-15','08-17','09-24','09-25','09-26','10-03','10-05','10-09','12-25']);
+    function b2bSettlementDue(date){
+      if(!date)return null;
+      const d=new Date(date.getFullYear(),date.getMonth(),date.getDate());let count=0;
+      while(count<7){d.setDate(d.getDate()+1);if(d.getFullYear()!==2026)return null;const key=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');if(d.getDay()!==0&&d.getDay()!==6&&!b2bHolidays2026.has(key))count++;}
+      return d;
+    }
+    function b2bUnpaidDetails(rows){return rows.map(r=>{
+      const amount=opOutstanding(r),due=b2bSettlementDue(r.deliveryDate);
+      const schedule=due?`${dateStr(due)} 이내 정산 예정`:r.deliveryDate?'정산 예정일: 해당 연도 공휴일 확인 필요':'납품완료일 미입력 · 정산 예정일 미정';
+      return `<div class="b2b-unpaid-item"><div><strong>${safeHtml(r.company)}</strong><b>${amount===null?'금액 확인 필요':money(amount)}</b></div><small>${safeHtml(schedule)}</small>${r.deliveryDate?`<small>납품완료 ${dateStr(r.deliveryDate)} · 다음 영업일부터 7영업일</small>`:''}</div>`;
+    }).join('');}
     function renderB2B(){
       if(!b2bState.loaded && !b2bState.loading){ grid(`<article class="card full"><div class="empty">B2B 데이터를 불러오는 중입니다.</div></article>`); b2bLoad(); return; }
       if(b2bState.error){ grid(`<article class="card full"><div class="error">${safeHtml(b2bState.error)}</div><div class="card-sub">Google Sheet 공유 권한 또는 웹 게시 설정을 확인해 주세요.</div></article>`); return; }
@@ -6195,7 +6216,7 @@
         ${renderSummaryKpiCard({title:`${y}년 B2B 누적 매출`,sub:'확정 프로젝트 견적금액',value:money(totalAmount),caption:y===2026?`${cutoffLabel} · ${b2bChangeText(totalAmount,prevSameAmount)}`:cutoffLabel,badge:`${String(y).slice(2)}년`,extraClass:'b2b-kpi',onclick:"b2bOpenModal('sales')"})}
         ${renderSummaryKpiCard({title:`${y}년 B2B 누적 수량`,sub:'확정 프로젝트 수량 합계',value:fmt(totalQty),unit:'개',caption:y===2026?`${cutoffLabel} · ${b2bQtyChangeText(totalQty,prevSameQty)}`:`${cutoffLabel} · 제품 ${fmt(products.length)}종`,badge:`${String(y).slice(2)}년`,extraClass:'b2b-kpi',onclick:"b2bOpenModal('qty')"})}
         ${renderSummaryKpiCard({title:`${y} 고객사`,sub:'확정 프로젝트 기업 수',value:fmt(clients.size),unit:'개사',caption:`확정 ${fmt(yr.length)}건 · 진행중 ${fmt(yr.filter(r=>r.delivery!=='납품완료').length)}건`,badge:'확정만',extraClass:'b2b-kpi',onclick:"b2bOpenModal('clients')"})}
-        ${renderSummaryKpiCard({title:'미정산 금액',sub:'선금 정산분을 제외한 잔금 합계',value:unpaidKnown.length?money(unpaidAmount):unpaid.length?'금액 확인 필요':money(0),caption:`${unpaid.length}건 · 금액 미확인 ${unpaid.length-unpaidKnown.length}건`,badge:'미정산',extraClass:'b2b-kpi b2b-unpaid'})}
+        ${renderSummaryKpiCard({title:'미정산 금액',sub:'선금 정산분을 제외한 잔금 합계',value:unpaidKnown.length?money(unpaidAmount):unpaid.length?'금액 확인 필요':money(0),caption:`<div class="b2b-unpaid-details">${b2bUnpaidDetails(unpaid)}</div>`,badge:'미정산',extraClass:'b2b-kpi b2b-unpaid'})}
         <article class="card half b2b-trend-card" onclick="b2bOpenModal('trend')" role="button" tabindex="0"><div class="card-head"><div><div class="card-title">전년도 동월 대비 누적 B2B 매출</div><div class="card-sub">${y}년 / ${y-1}년 · 1~${cutoffMonth+1}월 누적 총액 · VAT 포함</div></div><span class="badge ${delta!==null&&delta<0?'danger':''}">${y===2025?'2025 누적':delta===null?'비교 기준 없음':`${delta>=0?'+':''}${delta.toFixed(1)}%`}</span></div>${b2bTotalBars(all,y,cutoffMonth)}<span class="b2b-detail-hint">상세보기 ›</span></article>
         ${opB2BPipeline(b2bState.rows)}
         <article class="card half"><div class="card-head"><div><div class="card-title">제품별 누적 B2B</div><div class="card-sub">${y} 확정 기준 · 수량과 매출</div></div></div><div class="table-wrap"><table><thead><tr><th>제품명</th><th class="right">누적 수량</th><th class="right">누적 매출</th><th class="right">건수</th></tr></thead><tbody>${productRows||'<tr><td colspan="4" class="empty">데이터 없음</td></tr>'}</tbody></table></div></article>
@@ -6262,12 +6283,14 @@
       return `<div class="b2b-total-bars">${[[year-1,prev,'previous'],[year,cur,'current']].map(([y,v,c])=>`<div class="b2b-total-column"><strong>${money(v)}</strong><div class="b2b-sales-bar ${c}" style="height:${v/max*190}px"></div><span>${y}년</span></div>`).join('')}</div>`;
     }
     function opB2BPipeline(rows){
-      const active=rows.filter(r=>r.date<=endOfDay(todayDate())&&opB2BStage(r)!=='정산완료').sort((a,b)=>b.date-a.date);
-      return opCard('진행단계 파이프라인',`현재 진행중 ${active.length}건 · 정산완료 건 제외`,active.length?active.map(r=>{
+      const now=todayDate();
+      const active=rows.filter(r=>r.date.getFullYear()===now.getFullYear()&&r.date.getMonth()===now.getMonth()&&r.date<=endOfDay(now)&&opB2BStage(r)!=='정산완료').sort((a,b)=>b.date-a.date);
+      return opCard('진행단계 파이프라인',`${now.getMonth()+1}월 진행중 ${active.length}건 · 당월 등록 건 기준`,active.length?active.map(r=>{
         const confirmed=b2bConfirmed(r.confirm);
+        const stage=opB2BStage(r),current=!confirmed?0:stage==='납품완료'?4:stage==='출고예정'?2:1;
         const shipping=r.shippingDate?(b2bParseDate(r.shippingDate)?dateStr(b2bParseDate(r.shippingDate)):r.shippingDate):'예정일 미정';
         const steps=[['고객사 컨펌현황',confirmed?'확정':'검토중',confirmed],['제작현황',r.production||'제작 예정',/완료/.test(r.production)],['출고 예정일',shipping,false],['납품 현황',r.delivery||'납품 예정',/완료/.test(r.delivery)],['정산 현황',r.settlement||'정산 대기',false]];
-        return `<div class="op-timeline"><div class="card-head"><div><strong>${safeHtml(r.company)}</strong><div class="card-sub">${safeHtml(r.product)} · ${fmt(r.qty)}개 · ${money(r.amount)}</div></div><span class="badge">${confirmed?'확정':'검토중'}</span></div><div class="op-steps op-b2b-steps">${steps.map(([label,value,done])=>`<div class="op-step ${done?'op-done':''}"><span>${label}</span><b>${safeHtml(value)}</b></div>`).join('')}</div>${r.note?`<div class="card-sub b2b-project-note">${safeHtml(r.note)}</div>`:''}</div>`;
+        return `<div class="op-timeline"><div class="card-head"><div><strong>${safeHtml(r.company)}</strong><div class="card-sub">${safeHtml(r.product)} · ${fmt(r.qty)}개 · ${money(r.amount)}</div></div><span class="badge">${['고객사 검토중','제작 진행','출고 준비','납품 진행','잔금 정산 대기'][current]}</span></div><div class="op-steps op-b2b-steps">${steps.map(([label,value,done],i)=>`<div class="op-step ${i<current?'op-done':i===current?'op-current':'op-future'}"><span>${label}</span><b>${safeHtml(value)}</b><small>${i<current?'✓ 완료':i===current?'● 현재 단계':'대기'}</small></div>`).join('')}</div>${r.note?`<div class="card-sub b2b-project-note">${safeHtml(r.note)}</div>`:''}</div>`;
       }).join(''):'<div class="empty">현재 진행중인 B2B 건이 없습니다.</div>');
     }
 
