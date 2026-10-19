@@ -6284,8 +6284,8 @@
     }
     function opB2BPipeline(rows){
       const now=todayDate();
-      const active=rows.filter(r=>r.date.getFullYear()===now.getFullYear()&&r.date.getMonth()===now.getMonth()&&r.date<=endOfDay(now)&&opB2BStage(r)!=='정산완료').sort((a,b)=>b.date-a.date);
-      return opCard('진행단계 파이프라인',`${now.getMonth()+1}월 진행중 ${active.length}건 · 당월 등록 건 기준`,active.length?active.map(r=>{
+      const active=rows.filter(r=>b2bConfirmed(r.confirm)&&String(r.delivery||'').replace(/\s/g,'')!=='납품완료').sort((a,b)=>b.date-a.date);
+      return opCard('진행단계 파이프라인',`확정 · 납품 미완료 ${active.length}건 · 등록 월 무관`,active.length?active.map(r=>{
         const confirmed=b2bConfirmed(r.confirm);
         const stage=opB2BStage(r),current=!confirmed?0:stage==='납품완료'?4:stage==='출고예정'?2:1;
         const shipping=r.shippingDate?(b2bParseDate(r.shippingDate)?dateStr(b2bParseDate(r.shippingDate)):r.shippingDate):'예정일 미정';
