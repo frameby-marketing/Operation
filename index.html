@@ -962,6 +962,22 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
     @media(max-width:800px){.inb-products{grid-template-columns:1fr}.inb-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.inb-overview>div{padding:18px}.inb-section-head{align-items:flex-start;flex-direction:column}.inb-product{padding:20px}.inb-date-row strong{font-size:23px}}
     @media(max-width:380px){.inb-date-row{flex-wrap:wrap}.inb-date-row strong{font-size:21px}.inb-date-row small{font-size:11px}.inb-dday{font-size:10px}}
 
+
+    .inb-view-heading{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .inb-view-button,.inb-cal-nav button{border:1px solid var(--panel-line);background:var(--panel);color:var(--text);border-radius:10px;padding:10px 15px;cursor:pointer;font:inherit;font-size:13px}
+    .inb-view-button{color:var(--cyan);border-color:var(--cyan)}
+    .inb-view-button:focus-visible,.inb-cal-nav button:focus-visible,.inb-cal-event summary:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+    .inb-calendar{grid-column:1/-1;min-width:0;border:1px solid var(--panel-line);border-radius:20px;padding:24px;background:var(--panel)}
+    .inb-calendar[hidden],.inb-products[hidden]{display:none!important}
+    .inb-cal-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:22px}.inb-cal-toolbar h3{font-size:24px;margin:0}.inb-cal-toolbar p{font-size:12px;color:var(--muted);margin:8px 0 0}.inb-cal-nav{display:flex;gap:8px;flex-shrink:0}
+    .inb-cal-scroll{overflow-x:auto;padding:3px}.inb-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-width:770px;gap:5px}
+    .inb-cal-weekday{text-align:center;font-size:12px;color:var(--muted);padding:10px}.inb-cal-weekday:first-child{color:var(--red)}
+    .inb-cal-day{min-height:122px;border:1px solid var(--panel-line);border-radius:10px;background:var(--ov02);padding:9px;min-width:0}.inb-cal-day.outside{background:var(--ov02)}.inb-cal-day.outside .inb-cal-date{opacity:.45}.inb-cal-day.has-events{background:var(--ov06)}
+    .inb-cal-day.is-today{outline:2px solid var(--cyan);outline-offset:-2px}.inb-cal-date{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:9px}.inb-cal-date span{color:var(--cyan);font-weight:700;font-size:10px}
+    .inb-cal-event{border-left:3px solid var(--event-color);background:color-mix(in srgb,var(--event-color) 18%,var(--panel));border-radius:5px;margin-top:6px;overflow:hidden}.inb-cal-event summary{padding:7px;cursor:pointer;list-style:none}.inb-cal-event summary::-webkit-details-marker{display:none}.inb-cal-event strong{display:block;font-size:11px;line-height:1.4;overflow-wrap:anywhere}.inb-cal-event summary span{display:block;margin-top:5px;font-size:12px;font-weight:700}.inb-cal-options{padding:0 7px 8px;font-size:10px;line-height:1.8;overflow-wrap:anywhere;border-top:1px solid var(--panel-line)}
+    .inb-cal-legend{display:flex;gap:12px 20px;flex-wrap:wrap;margin-top:20px}.inb-cal-legend span{display:flex;gap:7px;align-items:center;font-size:10px;color:var(--muted)}.inb-cal-legend i{display:inline-block;width:8px;height:8px;border-radius:3px;flex-shrink:0}
+    @media(max-width:650px){.inb-calendar{padding:14px}.inb-cal-toolbar{flex-wrap:wrap}.inb-cal-toolbar h3{font-size:21px}.inb-view-heading{gap:10px}.inb-view-button{padding:9px 11px}}
+
 </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -6297,6 +6313,42 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
       return [...groups.values()].map(g=>({...g,rows:g.rows.sort((a,b)=>(a.due?.getTime()??Infinity)-(b.due?.getTime()??Infinity))}))
         .sort((a,b)=>(a.rows[0].due?.getTime()??Infinity)-(b.rows[0].due?.getTime()??Infinity));
     }
+    let inboundCalendarOpen=false;
+    let inboundCalendarMonth=null;
+    function inboundKoreaToday(){
+      const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'numeric',day:'numeric'}).formatToParts(new Date());
+      const value=type=>Number(parts.find(p=>p.type===type).value);
+      return new Date(value('year'),value('month')-1,value('day'));
+    }
+    function toggleInboundCalendar(){
+      inboundCalendarOpen=!inboundCalendarOpen;
+      const panel=document.getElementById('inboundCalendar'),cards=document.getElementById('inboundProductCards'),button=document.getElementById('inboundCalendarToggle');
+      if(!panel||!cards||!button)return;
+      panel.hidden=!inboundCalendarOpen;cards.hidden=inboundCalendarOpen;
+      button.textContent=inboundCalendarOpen?'제품 카드로 보기':'캘린더로 보기';
+      button.setAttribute('aria-expanded',String(inboundCalendarOpen));
+      if(inboundCalendarOpen)renderInboundCalendar();
+    }
+    function moveInboundCalendar(delta){
+      const base=inboundCalendarMonth||inboundKoreaToday();
+      inboundCalendarMonth=delta===null?inboundKoreaToday():new Date(base.getFullYear(),base.getMonth()+delta,1);
+      renderInboundCalendar();
+    }
+    function renderInboundCalendar(){
+      const target=document.getElementById('inboundCalendar');if(!target)return;
+      const today=inboundKoreaToday(),month=inboundCalendarMonth||today,y=month.getFullYear(),m=month.getMonth();
+      const groups=opInboundGroups(opInboundRows().filter(r=>!r.done)).sort((a,b)=>a.name.localeCompare(b.name));
+      const colors=['#3b82f6','#a855f7','#14b8a6','#f97316','#ec4899','#84cc16','#eab308','#6366f1'];
+      const events=new Map();let undated=0;
+      groups.forEach((g,i)=>g.rows.forEach(r=>{if(!r.due){undated++;return;}const key=dateStr(r.due);if(!events.has(key))events.set(key,new Map());const daily=events.get(key);if(!daily.has(i))daily.set(i,[]);daily.get(i).push(r);}));
+      const first=new Date(y,m,1),start=new Date(y,m,1-first.getDay());
+      const count=Math.ceil((first.getDay()+new Date(y,m+1,0).getDate())/7)*7;
+      const cells=Array.from({length:count},(_,index)=>{
+        const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+index),key=dateStr(d),items=events.get(key),isToday=key===dateStr(today),outside=d.getMonth()!==m;
+        return `<div class="inb-cal-day ${outside?'outside':''} ${items?'has-events':''} ${isToday?'is-today':''}" ${isToday?'aria-current="date"':''}><div class="inb-cal-date"><time datetime="${key}">${d.getDate()}</time>${isToday?'<span>오늘</span>':''}</div>${items?[...items].map(([i,rows])=>`<details class="inb-cal-event" style="--event-color:${colors[i%colors.length]}"><summary><strong>${safeHtml(groups[i].name)}</strong><span>${fmt(rows.reduce((n,r)=>n+(r.qty||0),0))}개${rows.some(r=>r.qty===null||r.qty===0)?' · 수량 확인':''}</span></summary><div class="inb-cal-options">${rows.map(r=>`<div>${safeHtml(r.option||'옵션 없음')} · ${r.qty===null?'수량 미입력':fmt(r.qty)+'개'}</div>`).join('')}</div></details>`).join(''):''}</div>`;
+      }).join('');
+      target.innerHTML=`<div class="inb-cal-toolbar"><div><h3>${y}년 ${m+1}월</h3><p>입고 예정일 기준 · 제품을 누르면 옵션별 수량 표시</p></div><div class="inb-cal-nav"><button type="button" onclick="moveInboundCalendar(-1)" aria-label="이전 달">‹</button><button type="button" onclick="moveInboundCalendar(null)">오늘</button><button type="button" onclick="moveInboundCalendar(1)" aria-label="다음 달">›</button></div></div><div class="inb-cal-scroll"><div class="inb-cal-grid">${['일','월','화','수','목','금','토'].map(day=>`<div class="inb-cal-weekday">${day}</div>`).join('')}${cells}</div></div><div class="inb-cal-legend">${groups.map((g,i)=>`<span><i style="background:${colors[i%colors.length]}"></i>${safeHtml(g.name)}</span>`).join('')}</div>${undated?`<p class="card-sub">예정일 미입력 ${undated}건은 제품 카드에서 확인할 수 있습니다.</p>`:''}`;
+    }
     function renderInbound(){
       if(!state.raw.inbound){grid(opCard('입고 예정','연결 확인','<div class="empty">데이터를 불러오지 못했습니다. 새로고침 후 다시 확인해 주세요.</div>'));return;}
       const all=opInboundRows(),rows=all.filter(r=>!r.done),completed=all.filter(r=>r.done).sort((a,b)=>b.actual-a.actual),now=todayDate();
@@ -6323,11 +6375,13 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
         </article>`;
       }).join('');
       grid(`<section class="inb-overview"><div><span>입고 예정 제품</span><strong>${groups.length}<small>종</small></strong></div><div><span>전체 예정 수량</span><strong>${fmt(sum(rows))}<small>개</small></strong></div><div><span>이번 달 입고</span><strong>${fmt(sum(month))}<small>개</small></strong></div><div><span>입고 지연</span><strong style="color:${late.length?'var(--red)':'var(--text)'}">${late.length}<small>건</small></strong></div></section>
-        <div class="inb-section-head"><h2>어떤 제품이 들어오나요?</h2><span>가까운 입고일순 · 미입고 제품</span></div>
-        <section class="inb-products">${cards||'<div class="empty">입고 예정인 제품이 없습니다.</div>'}</section>
+        <div class="inb-section-head"><div class="inb-view-heading"><h2>어떤 제품이 들어오나요?</h2><button type="button" class="inb-view-button" id="inboundCalendarToggle" aria-controls="inboundCalendar" aria-expanded="${inboundCalendarOpen}" onclick="toggleInboundCalendar()">${inboundCalendarOpen?'제품 카드로 보기':'캘린더로 보기'}</button></div><span>가까운 입고일순 · 미입고 제품</span></div>
+        <section id="inboundCalendar" class="inb-calendar" ${inboundCalendarOpen?'':'hidden'} aria-label="제품별 입고 예정 달력"></section>
+        <section id="inboundProductCards" class="inb-products" ${inboundCalendarOpen?'hidden':''}>${cards||'<div class="empty">입고 예정인 제품이 없습니다.</div>'}</section>
         ${foldedTable('입고 예정 목록',rows)}
         ${foldedTable('지연/확인 필요 입고',needsCheck)}
         ${opCard('입고 완료 내역','입고완료일이 입력된 항목',`<details class="inb-options"><summary>완료 내역 보기 <span>${completed.length}건</span></summary>${opTable(['제품명','옵션','예정 수량','예정일','입고완료일'],completed.map(r=>`<tr><td>${safeHtml(r.name)}</td><td>${safeHtml(r.option||'-')}</td><td>${qty(r)}</td><td>${dateStr(r.due)}</td><td>${dateStr(r.actual)}</td></tr>`))}</details>`)}`);
+      if(inboundCalendarOpen)renderInboundCalendar();
     }
     const OP_PRODUCTS=['PH - 실버','PH - 블랙','맥세이프 킥프레임','DW PLUS - 실버','DW PLUS - 블랙','DW PLUS - 그린','DW PRO - 실버','DW PRO - 블랙','프레임팁 - LIGHT','프레임팁 - BALANCED','프레임팁 - FIRM','프레임팁 - SOLID'];
     function opNorm(v){return String(v).toUpperCase().replace(/DW플러스/g,'DWPLUS').replace(/DW프로/g,'DWPRO').replace(/맥세이프|STAND|스탠드|2\.0/g,'').replace(/SILVER|그레이/g,'실버').replace(/BLACK/g,'블랙').replace(/GREEN/g,'그린').replace(/FRAME\s*TIP/g,'프레임팁').replace(/[\s_\-\/]/g,'');}
