@@ -2,7 +2,20 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" id="vp" content="width=device-width, initial-scale=1.0" />
+  <script>
+  /* 폴더블(아이폰 듀오 펼침)·태블릿: PC 레이아웃(1180px)을 화면 폭에 맞춰 축소해서 보여줌.
+     접은 상태·일반 폰(짧은 변 560px 미만)은 기존 모바일 레이아웃 유지. PC 브라우저는 영향 없음. */
+  (function(){var vp=document.getElementById('vp'),DESK=1180,cur='';
+   function fit(){var sw=screen.width,sh=screen.height,land=window.matchMedia&&matchMedia('(orientation: landscape)').matches;
+    var w=land?Math.max(sw,sh):Math.min(sw,sh),shortSide=Math.min(sw,sh);
+    var c=(shortSide>=560&&w<DESK)?'width='+DESK:'width=device-width, initial-scale=1.0';
+    if(c!==cur){cur=c;vp.setAttribute('content',c);}}
+   fit();addEventListener('orientationchange',function(){setTimeout(fit,150);});addEventListener('resize',fit);
+   if(screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener('change',fit);
+  })();
+  </script>
+  <style>html,body{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
   <title>FRAMEBY 주간 운영 대시보드</title>
   <style>
     :root {
