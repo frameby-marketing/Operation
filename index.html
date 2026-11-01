@@ -1011,114 +1011,134 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
     .iv-priority-group{margin:26px 0}.iv-group-title{display:flex;align-items:center;gap:10px;font-size:18px;margin:0 0 14px}.iv-group-title.risk{color:var(--red)}.iv-group-title.warn{color:var(--yellow)}.iv-group-title span{font-size:12px;font-weight:500;color:var(--muted)}
 </style>
   <style>
-/* 생산입고 · 검수: 하나의 카드에서 누적 현황과 로트별 비교 */
-.card.inspection-unified { padding:26px 28px 0; overflow:visible; isolation:isolate; }
+/* 생산입고·검수 전용. 공통 카드 및 대시보드 색상 변수는 그대로 사용합니다. */
+.card.inspection-unified { padding:22px 24px 0; overflow:visible; isolation:isolate; }
 .inspection-unified::before { border-radius:inherit; }
 .inspection-unified > * { position:relative; }
-.inspection-unified .iu-head { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:20px; z-index:4; }
-.iu-eyebrow { font-size:10px; letter-spacing:.12em; font-weight:800; color:var(--muted); margin-bottom:7px; }
-.iu-head h2 { font-size:23px; letter-spacing:-.7px; margin:0; }
-.iu-head p { color:var(--muted); font-size:12px; margin:8px 0 0; line-height:1.6; }
-.iu-head .inspection-lot-trigger { min-width:210px; border-radius:12px; padding:10px 12px; }
+.inspection-unified button { font-family:inherit; }
+.inspection-unified .iu-head { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:16px; z-index:4; }
+.iu-head h2 { font-size:19px; font-weight:750; letter-spacing:-.5px; margin:0; }
+.iu-head p { color:var(--muted); font-size:11px; margin:7px 0 0; line-height:1.65; }
+.iu-context-divider { padding:0 7px; opacity:.6; }
+.iu-head .inspection-lot-trigger { min-width:200px; padding:9px 12px; }
 .iu-head .inspection-lot-panel { left:auto; right:0; }
-.iu-tabs { display:inline-flex; gap:3px; padding:4px; background:var(--ov04); border:1px solid var(--panel-line); border-radius:12px; }
-.iu-tabs button { font-size:12px; border:0; border-radius:8px; padding:9px 15px; background:transparent; color:var(--muted); font-weight:700; }
-.iu-tabs button[aria-pressed="true"] { background:var(--panel); color:var(--text); box-shadow:0 2px 6px rgba(0,0,0,.12); }
-.iu-basis { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
-.iu-basis-note { color:var(--muted); font-size:11px; }
-.iu-overview { padding:18px 0 20px; border-top:1px solid var(--panel-line); border-bottom:1px solid var(--panel-line); }
-.iu-summary { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:19px; }
-.iu-summary strong { font-size:16px; letter-spacing:-.35px; line-height:1.6; }
-.iu-summary > span { color:var(--muted); font-size:11px; white-space:nowrap; }
+.iu-basis { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.iu-tabs { display:inline-flex; gap:2px; padding:3px; background:var(--ov04); border:1px solid var(--panel-line); border-radius:10px; }
+.iu-tabs button { padding:7px 12px; border-radius:7px; border:0; color:var(--muted); background:transparent; font-size:11px; font-weight:650; }
+.iu-tabs button[aria-pressed="true"] { background:var(--ov08); color:var(--text); }
+.iu-basis-note { color:var(--muted); font-size:10px; }
+.iu-overview { padding:0 0 18px; border-bottom:1px solid var(--panel-line); }
 .iu-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
-.iu-metric { padding:0 22px; border-left:1px solid var(--panel-line); min-width:0; }
-.iu-metric:first-child { padding-left:0; border-left:0; }
-.iu-metric > span { color:var(--text2); display:block; font-size:12px; font-weight:600; margin-bottom:7px; }
-.iu-metric > strong,.iu-metric > button { font-size:29px; letter-spacing:-.9px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.25; color:var(--text); }
-.iu-metric small { font-size:13px; font-weight:500; margin-left:3px; color:var(--muted); }
-.iu-metric > em { display:block; font-style:normal; font-size:10px; color:var(--muted); margin-top:7px; line-height:1.5; }
-.iu-metric > button { background:none; padding:0; border:0; border-radius:4px; text-align:left; cursor:pointer; }
+.iu-metric { min-width:0; padding:0 22px; border-left:1px solid var(--panel-line); }
+.iu-metric:first-child { border-left:0; padding-left:0; }
+.iu-metric > span { display:block; font-size:12px; font-weight:600; color:var(--text2); margin-bottom:8px; }
+.iu-metric > strong,.iu-metric > button { color:var(--text); font-size:29px; font-weight:800; letter-spacing:-.7px; font-variant-numeric:tabular-nums; line-height:1.2; }
+.iu-metric small { font-size:12px; font-weight:500; margin-left:4px; color:var(--muted); }
+.iu-metric > em { display:block; margin-top:7px; color:var(--muted); font-size:10px; font-style:normal; line-height:1.5; }
+.iu-metric > button { background:none; border:0; padding:0; border-radius:3px; text-align:left; }
 .iu-metric > button:hover { text-decoration:underline; text-underline-offset:5px; }
+.iu-metric.is-inspected > strong { color:var(--green); }
 .iu-metric.is-remaining > strong { color:var(--yellow); }
 .iu-metric.is-defect > button,.iu-metric.is-defect > strong { color:var(--red); }
-.iu-progress-line { display:flex; align-items:center; gap:14px; margin-top:18px; }
-.iu-progress-line > span { color:var(--muted); font-size:11px; white-space:nowrap; }
-.iu-progress-line .iu-track { flex:1; height:7px; }
-.iu-track { height:6px; background:var(--ov08); border-radius:99px; overflow:hidden; }
-.iu-track > span { display:block; height:100%; background:var(--cyan); border-radius:inherit; }
-.iu-track.is-complete > span { background:var(--green); }
-.iu-table-head { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin:21px 0 11px; }
-.iu-table-head h3 { font-size:14px; margin:0; }
-.iu-table-head > span { font-size:10px; color:var(--muted); }
+.iu-summary { display:flex; align-items:center; gap:8px; margin-top:20px; padding:10px 12px; border-radius:9px; background:var(--ov035); }
+.iu-summary strong { font-size:12px; font-weight:600; color:var(--text2); line-height:1.6; }
+.iu-summary-dot { width:6px; height:6px; background:var(--cyan); border-radius:100%; flex:0 0 auto; }
+.iu-table-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:18px 0 10px; }
+.iu-table-head h3 { margin:0; font-size:13px; font-weight:700; }
+.iu-table-head > span { color:var(--muted); font-size:10px; }
 .iu-table-wrap { overflow-x:auto; }
-.iu-table { width:100%; min-width:780px; border-collapse:collapse; font-variant-numeric:tabular-nums; }
-.iu-table th { background:var(--ov035); font-size:11px; font-weight:600; color:var(--muted); padding:11px 13px; text-align:right; border-bottom:1px solid var(--panel-line); }
-.iu-table td { padding:14px 13px; font-size:14px; text-align:right; border-bottom:1px solid var(--panel-line); white-space:nowrap; }
-.iu-table th:first-child,.iu-table td:first-child { text-align:left; padding-left:14px; width:28%; white-space:normal; }
-.iu-table tbody tr:hover { background:var(--ov025); }
-.iu-product { font-size:13px; font-weight:700; color:var(--text); line-height:1.45; overflow-wrap:anywhere; }
-.iu-product-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:5px; font-size:10px; color:var(--muted); }
-.iu-status { display:inline-block; padding:3px 6px; border-radius:5px; background:var(--ov05); color:var(--text2); font-size:9px; font-weight:700; }
-.iu-status.pending { color:var(--yellow); background:rgba(251,191,36,.09); }
-.iu-status.complete { color:var(--green); background:rgba(52,211,153,.09); }
-.iu-status.check { color:var(--red); background:rgba(251,113,133,.09); }
-.iu-cell-progress { min-width:125px; }
-.iu-cell-progress strong { display:block; font-size:12px; font-weight:600; margin-bottom:7px; }
-.iu-number-note { color:var(--muted); font-size:10px; display:block; margin-top:4px; }
+.iu-table { width:100%; min-width:720px; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+.iu-table th { padding:10px 12px; font-size:11px; font-weight:600; text-align:right; color:var(--muted); background:var(--ov03); border-bottom:1px solid var(--panel-line); }
+.iu-table td { padding:17px 12px; font-size:15px; text-align:right; border-bottom:1px solid var(--panel-line); white-space:nowrap; vertical-align:middle; }
+.iu-table th:first-child,.iu-table td:first-child { width:31%; padding-left:12px; text-align:left; white-space:normal; }
+.iu-table .iu-lot-row:hover { background:var(--ov025); }
+.iu-product { display:inline-flex; align-items:baseline; gap:9px; padding:0; border:0; border-radius:3px; background:none; color:var(--text); font-size:14px; font-weight:700; text-align:left; line-height:1.6; overflow-wrap:anywhere; }
+.iu-product > span { color:var(--muted); font-size:12px; font-weight:400; }
+.iu-product:hover { color:var(--cyan); }
+.iu-product-meta { display:flex; flex-wrap:wrap; gap:9px; align-items:center; margin-top:5px; color:var(--muted); font-size:10px; line-height:1.5; }
+.iu-status { padding:2px 6px; border-radius:5px; color:var(--text2); background:var(--ov05); font-size:10px; font-weight:600; }
+.iu-status.pending { color:var(--yellow); }
+.iu-status.complete { color:var(--green); }
+.iu-status.check { color:var(--red); }
+.iu-unit { font-size:10px; font-weight:400; color:var(--muted); margin-left:3px; }
+.iu-cell-progress { min-width:170px; }
+.iu-cell-progress > div:first-child { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; }
+.iu-cell-progress strong { font-size:15px; font-weight:650; }
+.iu-cell-progress > div:first-child > span { font-size:11px; color:var(--muted); }
+.iu-track { height:5px; background:var(--ov08); border-radius:99px; overflow:hidden; }
+.iu-track > span { display:block; height:100%; border-radius:inherit; background:var(--cyan); }
+.iu-track.is-complete > span { background:var(--green); }
 .iu-remaining { color:var(--yellow); font-weight:800; }
-.iu-defect-button { background:none; border:0; padding:2px 0; color:var(--red); font-size:14px; font-weight:800; border-radius:3px; text-align:right; }
+.iu-defect-button { background:none; border:0; border-radius:3px; color:var(--red); font-size:16px; font-weight:800; text-align:right; padding:0; }
 .iu-defect-button:hover { text-decoration:underline; text-underline-offset:4px; }
-.iu-defect-rate { display:block; font-size:10px; font-weight:500; margin-top:4px; color:var(--muted); }
-.iu-table tfoot td { background:var(--ov035); border-bottom:0; font-weight:800; padding-top:15px; padding-bottom:15px; }
-.iu-footnote { color:var(--muted); font-size:10px; line-height:1.7; margin:11px 0 19px; }
-.iu-notice { margin:0 0 18px; border-left:3px solid var(--yellow); padding:10px 12px; background:rgba(251,191,36,.06); color:var(--text2); font-size:11px; line-height:1.65; }
-.iu-notice summary { cursor:pointer; font-weight:700; }
+.iu-defect-rate { display:block; color:var(--muted); font-size:10px; font-weight:400; margin-top:5px; }
+.iu-defect-button.is-zero { color:var(--muted); font-weight:500; }
+.iu-number-note { color:var(--muted); font-size:11px; }
+.iu-report { display:flex; gap:16px; align-items:flex-start; padding:14px 12px; background:var(--ov025); border-bottom:1px solid var(--panel-line); }
+.iu-report > span { color:var(--text2); font-size:11px; font-weight:700; white-space:nowrap; line-height:1.7; }
+.iu-report p { color:var(--text2); font-size:11px; line-height:1.7; margin:0; overflow-wrap:anywhere; }
+.iu-report p + p { color:var(--muted); margin-top:3px; }
+.iu-footer-note { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px 20px; padding:12px 0 15px; color:var(--muted); font-size:10px; line-height:1.65; }
+.iu-notice { margin:0 0 15px; padding:10px 12px; border-left:3px solid var(--yellow); background:var(--ov035); color:var(--text2); font-size:11px; line-height:1.7; }
+.iu-notice summary { cursor:pointer; color:var(--yellow); font-weight:650; }
 .iu-notice p { color:var(--muted); margin:7px 0 0; overflow-wrap:anywhere; }
+.iu-table .iu-lot-detail td { width:auto; padding:0; white-space:normal; }
+.iu-lot-detail-body { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; padding:16px 18px; background:var(--ov035); border-left:2px solid var(--cyan); }
+.iu-lot-detail-body > div > span { display:block; margin-bottom:6px; font-size:10px; color:var(--muted); }
+.iu-lot-detail-body strong { color:var(--text2); font-size:11px; font-weight:500; line-height:1.7; overflow-wrap:anywhere; }
+.iu-lot-photos { display:flex; flex-wrap:wrap; gap:5px; }
 .iu-fold { border-top:1px solid var(--panel-line); }
-.iu-fold > summary { display:flex; align-items:center; gap:8px; list-style:none; cursor:pointer; padding:17px 0; font-size:12px; font-weight:700; }
+.iu-fold > summary { display:flex; align-items:center; gap:8px; padding:13px 0; list-style:none; cursor:pointer; color:var(--text2); font-size:11px; font-weight:650; }
 .iu-fold > summary::-webkit-details-marker { display:none; }
-.iu-fold > summary:after { content:'＋'; font-size:15px; margin-left:auto; color:var(--muted); }
+.iu-fold > summary:after { content:'＋'; margin-left:auto; color:var(--muted); font-size:13px; }
 .iu-fold[open] > summary:after { content:'−'; }
-.iu-fold > summary > span { color:var(--muted); font-size:10px; font-weight:500; }
-.iu-fold-body { padding:0 0 20px; }
+.iu-fold > summary > span { color:var(--muted); font-size:10px; font-weight:400; }
+.iu-fold-body { padding-bottom:16px; }
 .iu-fold .inspection-photo-card { padding:0; background:none; border:0; box-shadow:none; }
 .iu-fold .inspection-photo-card .card-head { display:none; }
 .iu-fold .inspection-photo-empty { min-height:100px; }
-.iu-fold .inspection-photo-help { font-size:10px; }
 .iu-fold .table-wrap { margin:0; }
-.iu-source { color:var(--muted); font-size:10px; line-height:1.8; }
+.iu-source { color:var(--muted); font-size:11px; line-height:1.8; }
 .iu-source p { margin:0 0 8px; }
 .inspection-unified button:focus-visible,.inspection-unified summary:focus-visible { outline:2px solid var(--cyan); outline-offset:4px; }
-html[data-theme="light"] .iu-remaining,html[data-theme="light"] .iu-metric.is-remaining > strong,html[data-theme="light"] .iu-status.pending { color:#946000; }
-html[data-theme="light"] .iu-defect-button,html[data-theme="light"] .iu-metric.is-defect > button,html[data-theme="light"] .iu-metric.is-defect > strong,html[data-theme="light"] .iu-status.check { color:#c02e46; }
-html[data-theme="light"] .iu-status.complete { color:#087f5b; }
-html[data-theme="light"] .iu-track > span { background:#0891b2; }
-html[data-theme="light"] .iu-track.is-complete > span { background:#059669; }
-@media(max-width:1100px) { .iu-metric { padding:0 14px; } .iu-metric > strong,.iu-metric > button { font-size:25px; } }
+@media(max-width:1100px) { .iu-metric { padding:0 14px; } .iu-metric > strong,.iu-metric > button { font-size:26px; } }
 @media(max-width:650px) {
-  .card.inspection-unified { padding:20px 16px 0; }
-  .inspection-unified .iu-head { flex-direction:column; gap:14px; }
-  .iu-head h2 { font-size:21px; }
-  .iu-head .inspection-lot-filter { width:100%; }
-  .iu-head .inspection-lot-trigger { width:100%; }
-  .iu-head .inspection-lot-panel { left:0; right:auto; width:100%; box-sizing:border-box; }
-  .iu-summary { align-items:flex-start; flex-direction:column; gap:4px; }
-  .iu-summary strong { font-size:14px; }
-  .iu-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 0; }
-  .iu-metric { padding:0 0 0 14px; }
-  .iu-metric:nth-child(odd) { padding-left:0; border-left:0; }
-  .iu-basis { gap:12px; }
-  .iu-table { min-width:740px; }
-  .iu-table-head > span { width:100%; }
-  .iu-progress-line { flex-wrap:wrap; gap:8px; }
-  .iu-progress-line .iu-track { flex-basis:100%; }
+ .card.inspection-unified { padding:18px 16px 0; }
+ .inspection-unified .iu-head { flex-direction:column; gap:12px; }
+ .iu-head .inspection-lot-filter,.iu-head .inspection-lot-trigger { width:100%; }
+ .iu-head .inspection-lot-panel { left:0; right:auto; width:100%; }
+ .iu-basis { flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+ .iu-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 0; }
+ .iu-metric { padding:0 0 0 16px; }
+ .iu-metric:nth-child(odd) { padding-left:0; border-left:0; }
+ .iu-metric > strong,.iu-metric > button { font-size:27px; }
+ .iu-metric > em { font-size:10px; }
+ .iu-table-head { align-items:flex-start; flex-direction:column; gap:5px; }
+ .iu-table-wrap { overflow:visible; }
+ .iu-table { display:block; min-width:0; }
+ .iu-table caption { display:none; }
+ .iu-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+ .iu-table tbody { display:block; }
+ .iu-table .iu-lot-row { display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; padding:15px 0; border-bottom:1px solid var(--panel-line); }
+ .iu-table .iu-lot-row td { display:block; width:auto; padding:0; border:0; text-align:left; font-size:16px; min-width:0; }
+ .iu-table .iu-lot-row td:first-child { grid-column:1/-1; width:auto; padding:0; }
+ .iu-table td[data-label]:before { content:attr(data-label); display:block; margin-bottom:6px; font-size:10px; color:var(--muted); font-weight:400; }
+ .iu-product { font-size:14px; }
+ .iu-cell-progress { min-width:0; }
+ .iu-cell-progress > div:first-child { margin-bottom:7px; gap:6px; }
+ .iu-cell-progress > div:first-child > span { font-size:10px; }
+ .iu-defect-button { text-align:left; }
+ .iu-report { flex-direction:column; gap:5px; }
+ .iu-lot-detail,.iu-table .iu-lot-detail td { display:block; }
+ .iu-lot-detail-body { grid-template-columns:1fr; gap:12px; }
+ .iu-fold > summary { flex-wrap:wrap; }
 }
-.iu-defect-button.is-zero { color:var(--muted); font-weight:500; }
-html[data-theme="light"] .iu-defect-button.is-zero { color:var(--muted); }
-@media(max-width:650px) {
-  .iu-table-head:after { content:'표를 좌우로 밀어 나머지 항목을 확인하세요.'; color:var(--muted); font-size:10px; }
-  .iu-table th:first-child,.iu-table td:first-child { position:sticky; left:0; z-index:1; background:var(--panel); min-width:145px; width:145px; border-right:1px solid var(--panel-line); }
-}
+
+/* 상세 입구는 한 줄로, 펼친 내용은 전체 폭으로 표시합니다. */
+.iu-detail-sections { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:20px; border-top:1px solid var(--panel-line); }
+.iu-detail-sections > .iu-fold { border-top:0; min-width:0; }
+.iu-detail-sections > .iu-fold[open] { grid-column:1/-1; }
+@media(max-width:650px) { .iu-detail-sections { grid-template-columns:1fr; column-gap:0; } .iu-detail-sections > .iu-fold + .iu-fold { border-top:1px solid var(--panel-line); } }
 
 </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
@@ -1189,7 +1209,7 @@ html[data-theme="light"] .iu-defect-button.is-zero { color:var(--muted); }
     // 주말 외 회사 휴무일. 필요 시 날짜만 추가하면 택배 집계에서 자동 제외됩니다.
     const SHIPPING_CLOSED_DATES = new Set(['2026-08-14', '2026-08-17']);
 
-    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { basis: 'cumulative', photosSectionOpen: false, defectLot: '', selectedLots: null, lotFilterOpen: false, defectDetailOpen: false, detailExpanded: false, photoReason: 'all', photoExpanded: false, photoViewerOpen: false, photoViewerIndex: 0 }, coupang: { page: 1, pageSize: 30, basis: 'supply', categoryMetric: 'qty', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' }, b2b: { year: 2026, modal: '', clientYear: 2026, qtyYear: 2026, productFilter: 'all', sortKey: 'date', sortDir: 'desc' } };
+    const state = { tab: 'overview', loaded: false, raw: {}, shipping: [], filteredShipping: [], generic: {}, viewMode: { shipping: 'summary', production: 'summary', coupang: 'summary' }, production: { selectedProduct: 'all' }, inspection: { basis: 'cumulative', expandedLot: '', photosSectionOpen: false, defectLot: '', selectedLots: null, lotFilterOpen: false, defectDetailOpen: false, detailExpanded: false, photoReason: 'all', photoExpanded: false, photoViewerOpen: false, photoViewerIndex: 0 }, coupang: { page: 1, pageSize: 30, basis: 'supply', categoryMetric: 'qty', date: '', flowMode: 'daily', selectedMonthDetail: '' }, shippingView: { mode: 'daily', month: '' }, payment: { vendorPeriod: 'monthly', selectedVendor: 'all', startMonth: '', endMonth: '', selectedFlowPeriod: '', overviewDetail: '', poDetail: '', vendorFlowOpen: false }, inventory: { selectedProduct: '', selectedCategory: 'all', riskOpen: false, sortKey: 'qty', sortDir: 'desc', search: '' }, b2b: { year: 2026, modal: '', clientYear: 2026, qtyYear: 2026, productFilter: 'all', sortKey: 'date', sortDir: 'desc' } };
 
     const titles = {
       overview: ['주간 운영 대시보드', '전체 운영 상황을 대표 보고용으로 요약합니다.'],
@@ -4926,6 +4946,12 @@ html[data-theme="light"] .iu-defect-button.is-zero { color:var(--muted); }
       renderInspection();
     }
 
+    function toggleInspectionLotDetail(managementNo) {
+      state.inspection.expandedLot = state.inspection.expandedLot === managementNo ? '' : managementNo;
+      state.inspection.lotFilterOpen = false;
+      renderInspection();
+    }
+
     function renderInspection() {
       const a = getInspectionAnalysis();
       const missingSources = [];
@@ -4943,6 +4969,7 @@ html[data-theme="light"] .iu-defect-button.is-zero { color:var(--muted); }
       const selectedSet = new Set(allSelected ? a.availableLots : a.selectedLots);
       const scopeLabel = allSelected ? '전체 로트' : a.lots.length ? `선택 ${fmt(a.lots.length)}개 로트` : '선택 없음';
       const selectionLabel = allSelected ? `전체 ${fmt(a.allLots.length)}개 로트` : a.lots.length ? `${fmt(a.lots.length)}개 로트 선택` : '선택된 로트 없음';
+      const syncLabel = document.getElementById('lastSync').textContent;
       const rate = (num, den) => den > 0 ? pct(num, den) : '—';
       const width = (num, den) => den > 0 ? Math.min(100, Math.max(0, num / den * 100)) : 0;
       const hasQuantityIssue = lot => lot.inspected > lot.inboundQty || lot.defect > lot.inspected || [lot.inboundQty,lot.inspected,lot.defect].some(value => value < 0);
@@ -4974,37 +5001,53 @@ html[data-theme="light"] .iu-defect-button.is-zero { color:var(--muted); }
       const productCell = lot => {
         let label = hasQuantityIssue(lot) || !lot.linked ? '수량 확인' : lot.remaining > 0 ? (lot.inspected > 0 ? '검수중' : '검수 대기') : lot.inboundQty > 0 ? '검수 완료' : '입고 확인';
         let tone = hasQuantityIssue(lot) || !lot.linked ? 'check' : lot.remaining > 0 ? 'pending' : lot.inboundQty > 0 ? 'complete' : '';
-        return `<div class="iu-product">${safeHtml(lot.sku || '제품명 미입력')}</div><div class="iu-product-meta"><span>${safeHtml(lot.managementNo)}</span>${!periodMode ? `<span class="iu-status ${tone}">${label}</span>` : ''}</div>`;
+        return `<button type="button" class="iu-product" data-lot="${safeHtml(lot.managementNo)}" onclick="toggleInspectionLotDetail(this.dataset.lot)" aria-expanded="${state.inspection.expandedLot === lot.managementNo}" aria-label="${safeHtml(lot.sku || lot.managementNo)} 로트 상세 ${state.inspection.expandedLot === lot.managementNo ? '접기' : '보기'}">${safeHtml(lot.sku || '제품명 미입력')} <span aria-hidden="true">${state.inspection.expandedLot === lot.managementNo ? '−' : '＋'}</span></button><div class="iu-product-meta"><span>${safeHtml(lot.managementNo)}</span>${!periodMode ? `<span class="iu-status ${tone}">${label}</span>` : ''}</div>`;
       };
       const lotChecks = a.allLots.map(lot => `<label class="inspection-lot-check"><input type="checkbox" value="${safeHtml(lot.managementNo)}" ${selectedSet.has(lot.managementNo) ? 'checked' : ''} onchange="toggleInspectionLot(this.value,this.checked)"><span class="inspection-lot-check-copy"><strong>${safeHtml(lot.sku || lot.managementNo)}</strong><span>${safeHtml(lot.managementNo)}</span></span><span class="inspection-lot-check-qty">${fmt(lot.inboundQty)}개</span></label>`).join('');
       let summary;
       if (!a.lots.length) summary = a.allLots.length ? '비교할 로트를 선택해 주세요.' : '등록된 생산입고 로트가 없습니다.';
       else if (periodMode) summary = a.periodDetails.length ? `선택기간 검수 ${fmt(a.periodInspected)}개 · 불량 ${fmt(a.periodDefect)}개` : '선택기간에 등록된 검수 내역이 없습니다.';
       else if (quantityIssues.length) summary = `수량 확인이 필요한 로트 ${fmt(quantityIssues.length)}건 · 원본 입력값을 확인해 주세요.`;
-      else if (a.remaining > 0) summary = `${fmt(pendingCount)}개 로트 · 검수 ${fmt(a.remaining)}개 남았습니다.`;
-      else if (a.totalInbound > 0) summary = '선택한 로트의 검수가 모두 완료되었습니다.';
+      else if (a.remaining > 0) summary = `검수 ${rate(a.totalInspected,a.totalInbound)} 진행 · ${fmt(a.remaining)}개 남았습니다.`;
+      else if (a.totalInbound > 0) summary = a.totalDefect > 0 ? '검수 완료 · 확인된 불량의 조치 내용을 확인해 주세요.' : '선택한 로트의 검수가 모두 완료되었습니다.';
       else summary = '입고수량을 확인해 주세요.';
       const metric = (label,value,unit,note,tone = '',clickable = false) => `<div class="iu-metric ${tone}"><span>${label}</span>${clickable ? `<button type="button" onclick="openInspectionDefectDetail(event)" aria-label="${label} 사유 보기">${value}<small>${unit}</small></button>` : `<strong>${value}<small>${unit}</small></strong>`}<em>${note}</em></div>`;
       const metrics = periodMode
         ? metric('검수수량',fmt(a.periodInspected),'개','선택기간 검수 내역 합계') + metric('불량수량',fmt(a.periodDefect),'개','클릭하면 불량 사유 보기','is-defect',true) + metric('불량률',rate(a.periodDefect,a.periodInspected),'','불량수량 ÷ 검수수량') + metric('검수 진행일',fmt(a.periodDayCount),'일','검수 기록이 있는 날짜 수')
-        : metric('총 입고수량',fmt(a.totalInbound),'개',`${fmt(a.lots.length)}개 로트의 입고 합계`) + metric('검수 완료',fmt(a.totalInspected),'개',`입고 대비 ${rate(a.totalInspected,a.totalInbound)}`) + metric('잔여 검수',fmt(a.remaining),'개',pendingCount ? `${fmt(pendingCount)}개 로트 검수 필요` : a.totalInbound > 0 ? '선택 로트 검수 완료' : '입고수량 확인 필요',a.remaining ? 'is-remaining' : '') + metric('누적 불량',fmt(a.totalDefect),'개',`불량률 ${rate(a.totalDefect,a.totalInspected)} · 사유 보기 ↗`,a.totalDefect ? 'is-defect' : '',true);
-      const headers = periodMode ? ['제품 / 관리번호','검수 진행일','검수수량','불량수량 / 불량률','최근 검수일'] : ['제품 / 관리번호','입고수량','검수 완료','잔여 검수','검수 진행률','불량 / 불량률'];
+        : metric('입고수량',fmt(a.totalInbound),'개',`${fmt(a.lots.length)}개 로트 합계`) + metric('검수 완료',fmt(a.totalInspected),'개',`불량 포함 · 입고 대비 ${rate(a.totalInspected,a.totalInbound)}`,'is-inspected') + metric('잔여 검수',fmt(a.remaining),'개',pendingCount ? `${fmt(pendingCount)}개 로트 검수 필요` : a.totalInbound > 0 ? '선택 로트 검수 완료' : '입고수량 확인 필요',a.remaining ? 'is-remaining' : '') + metric('누적 불량',fmt(a.totalDefect),'개',`검수 대비 ${rate(a.totalDefect,a.totalInspected)} · 사유 보기 ↗`,a.totalDefect ? 'is-defect' : '',true);
+      const headers = periodMode ? ['제품 / 관리번호','검수 진행일','검수수량','불량수량 / 불량률','최근 검수일'] : ['제품 / 관리번호','입고수량','검수 완료 · 진행률','잔여 검수','불량수량 · 불량률'];
+      const renderLotDetail = lot => {
+        if (state.inspection.expandedLot !== lot.managementNo) return '';
+        const lotDetails = defectRows.filter(row => row.managementNo === lot.managementNo);
+        const reasonMap = new Map();
+        lotDetails.filter(row => row.defect > 0).forEach(row => {
+          const name = row.type || row.cause || '유형 미입력';
+          reasonMap.set(name,(reasonMap.get(name) || 0) + row.defect);
+        });
+        const reasons = [...reasonMap].sort((x,y) => y[1]-x[1]).map(([name,qty]) => `${safeHtml(name)} ${fmt(qty)}개`).join(' · ');
+        const actions = [...new Set(lotDetails.map(row => row.action).filter(Boolean))];
+        const lotPhotos = displayPhotos.filter(photo => photo.managementNo === lot.managementNo);
+        return `<tr class="iu-lot-detail"><td colspan="5"><div class="iu-lot-detail-body"><div><span>입고 / 공급사</span><strong>${dateStr(lot.inboundDate)} · ${safeHtml(lot.supplier || '공급사 미입력')}</strong></div><div><span>${periodMode ? '선택기간' : '누적'} 불량 사유</span><strong>${reasons || '등록된 불량 사유 없음'}</strong></div><div><span>기록된 조치</span><strong>${actions.map(safeHtml).join(' · ') || '조치 내용 미입력'}</strong></div>${lotPhotos.length ? `<div><span>불량 사진</span><div class="iu-lot-photos">${lotPhotos.map((photo,i) => `<button type="button" class="inspection-photo-table-button" onclick="openInspectionPhoto(${photo.index},event)">사진 ${i+1} 보기</button>`).join('')}</div></div>` : ''}</div></td></tr>`;
+      };
       const rows = lots.map(lot => {
         if (periodMode) {
           const item = periodByLot.get(lot.managementNo);
-          return `<tr><td>${productCell(lot)}</td><td>${item ? fmt(item.days.size) + '일' : '—'}</td><td>${fmt(item?.inspected || 0)}</td><td>${defectButton(item?.defect || 0,item?.inspected || 0,lot.managementNo)}</td><td>${item?.latest ? dateStr(item.latest) : '<span class="iu-number-note">기간 내 검수 없음</span>'}</td></tr>`;
+          return `<tr class="iu-lot-row"><td>${productCell(lot)}</td><td data-label="검수 진행일">${item ? fmt(item.days.size) + '일' : '—'}</td><td data-label="검수수량">${fmt(item?.inspected || 0)}</td><td data-label="불량 / 불량률">${defectButton(item?.defect || 0,item?.inspected || 0,lot.managementNo)}</td><td data-label="최근 검수일">${item?.latest ? dateStr(item.latest) : '<span class="iu-number-note">기간 내 검수 없음</span>'}</td></tr>${renderLotDetail(lot)}`;
         }
-        return `<tr><td>${productCell(lot)}</td><td>${fmt(lot.inboundQty)}</td><td>${fmt(lot.inspected)}</td><td class="${lot.remaining ? 'iu-remaining' : ''}">${fmt(lot.remaining)}</td><td><div class="iu-cell-progress"><strong>${rate(lot.inspected,lot.inboundQty)}</strong><div class="iu-track ${lot.inboundQty > 0 && lot.inspected >= lot.inboundQty ? 'is-complete' : ''}" role="progressbar" aria-label="${safeHtml(lot.managementNo)} 검수 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${width(lot.inspected,lot.inboundQty)}" aria-valuetext="${rate(lot.inspected,lot.inboundQty)}"><span style="width:${width(lot.inspected,lot.inboundQty)}%"></span></div></div></td><td>${defectButton(lot.defect,lot.inspected,lot.managementNo)}</td></tr>`;
+        return `<tr class="iu-lot-row"><td>${productCell(lot)}</td><td data-label="입고수량">${fmt(lot.inboundQty)}<small class="iu-unit">개</small></td><td data-label="검수 완료 / 진행률"><div class="iu-cell-progress"><div><strong>${fmt(lot.inspected)}<small class="iu-unit">개</small></strong><span>${rate(lot.inspected,lot.inboundQty)}</span></div><div class="iu-track ${lot.inboundQty > 0 && lot.inspected >= lot.inboundQty ? 'is-complete' : ''}" role="progressbar" aria-label="${safeHtml(lot.managementNo)} 검수 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${width(lot.inspected,lot.inboundQty)}" aria-valuetext="${rate(lot.inspected,lot.inboundQty)}"><span style="width:${width(lot.inspected,lot.inboundQty)}%"></span></div></div></td><td data-label="잔여 검수" class="${lot.remaining ? 'iu-remaining' : ''}">${fmt(lot.remaining)}<small class="iu-unit">개</small></td><td data-label="불량 / 불량률">${defectButton(lot.defect,lot.inspected,lot.managementNo)}</td></tr>${renderLotDetail(lot)}`;
       }).join('');
-      const totalRow = periodMode
-        ? `<td>선택 로트 합계</td><td>${fmt(a.periodDayCount)}일</td><td>${fmt(a.periodInspected)}</td><td>${defectButton(a.periodDefect,a.periodInspected)}</td><td>검수일 기준</td>`
-        : `<td>선택 로트 합계</td><td>${fmt(a.totalInbound)}</td><td>${fmt(a.totalInspected)}</td><td class="${a.remaining ? 'iu-remaining' : ''}">${fmt(a.remaining)}</td><td>${rate(a.totalInspected,a.totalInbound)}</td><td>${defectButton(a.totalDefect,a.totalInspected)}</td>`;
+      const pendingNames = lots.filter(lot => lot.remaining > 0).slice(0,2).map(lot => `${safeHtml(lot.sku || lot.managementNo)} ${fmt(lot.remaining)}개`).join(', ');
+      const mostDefect = lots.map(lot => ({lot, qty:periodMode ? (periodByLot.get(lot.managementNo)?.defect || 0) : lot.defect})).sort((x,y)=>y.qty-x.qty)[0];
+      const reportSummary = !a.lots.length ? '' : periodMode
+        ? (a.periodDetails.length ? `기간 내 ${fmt(a.periodDayCount)}일 검수 기록 · 불량률 ${rate(a.periodDefect,a.periodInspected)} (기간 검수수량 기준)` : '선택한 기간에는 검수 기록이 없습니다.')
+        : (pendingCount ? `검수할 물량: ${pendingNames}${pendingCount > 2 ? ` 외 ${fmt(pendingCount-2)}개 로트` : ''}` : a.totalInbound > 0 ? '선택 로트의 잔여 검수는 없습니다.' : '입고수량을 확인해 주세요.');
+      const defectReport = mostDefect?.qty > 0 ? `불량수량 최다: ${safeHtml(mostDefect.lot.sku || mostDefect.lot.managementNo)} · ${fmt(mostDefect.qty)}개` : '';
       const detailTable = `<div class="table-wrap"><table><thead><tr><th>검수일</th><th>관리번호</th><th>제품 / SKU</th><th class="right">검수수량</th><th class="right">불량수량</th><th class="right">불량률</th><th>불량유형</th><th>원인</th><th>조치</th><th>사진</th></tr></thead><tbody>${detailRows.map(row => `<tr><td>${safeHtml(row.dateText || dateStr(row.date))}</td><td>${safeHtml(row.managementNo)}</td><td>${safeHtml(a.lotById.get(row.managementNo)?.sku || '—')}</td><td class="right">${fmt(row.inspected)}</td><td class="right">${fmt(row.defect)}</td><td class="right">${rate(row.defect,row.inspected)}</td><td>${safeHtml(row.type || '—')}</td><td>${safeHtml(row.cause || '—')}</td><td>${safeHtml(row.action || '—')}</td><td>${row.photoIndexes.length ? `<button type="button" class="inspection-photo-table-button" onclick="openInspectionPhoto(${row.photoIndexes[0]},event)">사진 ${fmt(row.photoIndexes.length)}장</button>` : '—'}</td></tr>`).join('') || '<tr><td colspan="10" class="muted">표시할 검수 상세 내역이 없습니다.</td></tr>'}</tbody></table></div>`;
       const notice = a.mismatchLots.length || a.orphanDetails.length || quantityIssues.length
         ? `<details class="iu-notice"><summary>데이터 확인 필요${a.mismatchLots.length ? ` · 누적·상세 불일치 ${fmt(a.mismatchLots.length)}개 로트` : ''}${a.orphanDetails.length ? ` · 연결되지 않은 검수 ${fmt(a.orphanDetails.length)}행` : ''}${quantityIssues.length ? ` · 수량 범위 오류 ${fmt(quantityIssues.length)}개 로트` : ''}</summary>${a.mismatchLots.length ? `<p>생산입고의 검수완료·누적불량과 검수불량 상세 합계가 다릅니다: ${a.mismatchLots.map(lot => safeHtml(lot.managementNo)).join(', ')}. 누적 화면은 생산입고 값을, 선택기간 화면은 검수불량 상세 값을 표시합니다.</p>` : ''}${a.orphanDetails.length ? `<p>생산입고에 같은 관리번호가 없어 합계에서 제외된 검수 내역: ${[...new Set(a.orphanDetails.map(row => safeHtml(row.managementNo)))].join(', ')}.</p>` : ''}${quantityIssues.length ? `<p>검수수량이 입고보다 많거나, 불량이 검수보다 많거나, 음수인 로트: ${quantityIssues.map(lot => safeHtml(lot.managementNo)).join(', ')}. 원본 입력값을 확인해 주세요. 진행 막대는 최대 100%까지만 표시합니다.</p>` : ''}</details>` : '';
       grid(`
         <article class="card full inspection-unified" aria-label="생산입고 및 검수 통합 현황">
-          <div class="iu-head"><div><div class="iu-eyebrow">OPERATION / INSPECTION</div><h2>생산입고 · 검수 현황</h2><p>입고 · 검수 · 잔여 · 불량을 제품별로 한눈에 비교합니다.</p></div>
+          <div class="iu-head"><div><h2>생산입고 · 검수 현황</h2><p>${safeHtml(scopeLabel)}${allSelected ? ` · ${fmt(a.lots.length)}개 로트` : ''} <span class="iu-context-divider">/</span> ${periodMode ? safeHtml(periodLabel) + ' 검수일 기준' : '전체 누적 기준'}</p></div>
             <div class="inspection-lot-filter" data-inspection-lot-filter>
               <button type="button" class="inspection-lot-trigger" onclick="toggleInspectionLotMenu(event)" aria-expanded="${state.inspection.lotFilterOpen}" aria-haspopup="true"><span><strong>로트 선택</strong> <span>${safeHtml(selectionLabel)}</span></span><span class="inspection-lot-trigger-arrow">▾</span></button>
               <div class="inspection-lot-panel" ${state.inspection.lotFilterOpen ? '' : 'hidden'}>
@@ -5014,17 +5057,18 @@ html[data-theme="light"] .iu-defect-button.is-zero { color:var(--muted); }
               </div>
             </div>
           </div>
-          <div class="iu-basis"><div class="iu-tabs" role="group" aria-label="검수 집계 기준"><button type="button" aria-pressed="${!periodMode}" onclick="setInspectionBasis('cumulative')">누적 현황</button><button type="button" aria-pressed="${periodMode}" onclick="setInspectionBasis('period')">선택기간 검수</button></div><span class="iu-basis-note">${periodMode ? safeHtml(periodLabel) + ' · 검수일 기준' : '전체 누적 기준 · 상단 기간 필터와 무관'}</span></div>
-          <div class="iu-overview"><div class="iu-summary"><strong>${summary}</strong><span>${safeHtml(scopeLabel)} · ${fmt(a.lots.length)}건</span></div><div class="iu-metrics">${metrics}</div>
-            ${!periodMode && a.totalInbound > 0 ? `<div class="iu-progress-line"><span>전체 검수 진행률 <b>${rate(a.totalInspected,a.totalInbound)}</b></span><div class="iu-track ${a.remaining === 0 ? 'is-complete' : ''}"><span style="width:${width(a.totalInspected,a.totalInbound)}%"></span></div><span>검수 완료 ${fmt(a.totalInspected)} / 입고 ${fmt(a.totalInbound)}개</span></div>` : ''}
-          </div>
-          <div class="iu-table-head"><h3>${periodMode ? '로트별 기간 실적' : '로트별 비교'}</h3><span>${periodMode ? '검수수량 많은 순 · 단위: 개' : '잔여 검수 많은 순 · 진행 막대: 입고 대비 검수 완료 · 단위: 개'}</span></div>
-          <div class="iu-table-wrap"><table class="iu-table"><caption class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);">${periodMode ? '선택기간 검수 실적' : '누적 입고 및 검수 현황'} · ${safeHtml(scopeLabel)}</caption><thead><tr>${headers.map(label => `<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="${headers.length}" class="empty">${a.allLots.length ? '로트 선택에서 비교할 항목을 체크해 주세요.' : '등록된 생산입고 로트가 없습니다.'}</td></tr>`}</tbody>${lots.length ? `<tfoot><tr>${totalRow}</tr></tfoot>` : ''}</table></div>
-          <p class="iu-footnote">${periodMode ? '검수 진행일 합계는 중복 날짜를 제외합니다. 검수 기록이 없는 로트는 0개로 표시합니다.' : '잔여 검수 = 로트별 (입고 − 검수 완료, 최소 0) 합계 · 불량률 = 불량 ÷ 검수 완료. 불량은 검수 완료 수량에 포함됩니다.'} 불량 수량을 누르면 사유를 확인할 수 있습니다.${a.lots.some(lot => lot.inspected === 0) || (periodMode && !a.periodInspected) ? ' 검수수량이 0이면 비율은 —로 표시합니다.' : ''}</p>
+          <div class="iu-basis"><div class="iu-tabs" role="group" aria-label="검수 집계 기준"><button type="button" aria-pressed="${!periodMode}" onclick="setInspectionBasis('cumulative')">누적 현황</button><button type="button" aria-pressed="${periodMode}" onclick="setInspectionBasis('period')">선택기간 검수</button></div><span class="iu-basis-note">${periodMode ? '상단 기간 필터 적용' : '상단 기간 필터와 무관'}</span></div>
+          <div class="iu-overview"><div class="iu-metrics">${metrics}</div><div class="iu-summary"><span class="iu-summary-dot" aria-hidden="true"></span><strong>${summary}</strong></div></div>
+          <div class="iu-table-head"><h3>${periodMode ? '로트별 기간 실적' : '로트별 비교'}</h3><span>${periodMode ? '검수수량 많은 순' : '잔여 검수 많은 순 · 검수 완료는 불량 포함'}</span></div>
+          <div class="iu-table-wrap"><table class="iu-table"><caption class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);">${periodMode ? '선택기간 검수 실적' : '누적 입고 및 검수 현황'} · ${safeHtml(scopeLabel)}</caption><thead><tr>${headers.map(label => `<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="${headers.length}" class="empty">${a.allLots.length ? '로트 선택에서 비교할 항목을 체크해 주세요.' : '등록된 생산입고 로트가 없습니다.'}</td></tr>`}</tbody></table></div>
+          ${reportSummary ? `<div class="iu-report" aria-label="보고 요약"><span>확인할 내용</span><div><p>${reportSummary}</p>${defectReport ? `<p>${defectReport}</p>` : ''}</div></div>` : ''}
+          <div class="iu-footer-note"><span>불량률 = ${periodMode ? '기간 불량 ÷ 기간 검수' : '누적 불량 ÷ 검수 완료'} · 제품명 클릭: 로트 상세 · 불량수량 클릭: 사유</span><span>${safeHtml(syncLabel)}</span></div>
           ${notice}
+          <div class="iu-detail-sections">
           <details class="iu-fold" ${state.inspection.photosSectionOpen ? 'open' : ''} ontoggle="state.inspection.photosSectionOpen=this.open"><summary>불량 사진 <span>${fmt(displayPhotos.length)}장 · ${periodMode ? '선택기간' : '전체 누적'}</span></summary><div class="iu-fold-body">${renderInspectionPhotoGallery(photoAnalysis,scopeLabel,true)}</div></details>
           <details class="iu-fold" ${state.inspection.detailExpanded ? 'open' : ''} ontoggle="state.inspection.detailExpanded=this.open"><summary>검수 상세 내역 <span>${fmt(detailRows.length)}행 · ${periodMode ? '선택기간' : '전체 누적'}</span></summary><div class="iu-fold-body">${detailTable}</div></details>
           <details class="iu-fold"><summary>집계 기준 <span>데이터 출처 및 계산 방식</span></summary><div class="iu-fold-body iu-source"><p>누적 현황: 생산입고 시트의 입고수량 · 검수완료수량 · 누적불량을 사용합니다. 검수 진행률 = 검수 완료 ÷ 입고 × 100, 불량률 = 누적 불량 ÷ 검수 완료 × 100.</p><p>선택기간 검수: 검수불량 시트에서 상단 선택기간에 해당하는 검수일의 검수수량 · 불량수량을 합산합니다. 불량률 = 기간 불량수량 ÷ 기간 검수수량 × 100. 날짜가 없거나 해석되지 않는 검수 내역은 기간 집계에서 제외됩니다.</p><p>두 시트는 관리번호로 연결합니다. 사진과 상세 내역은 현재 선택한 로트와 집계 기준을 따릅니다. 전체 비율은 합계 수량으로 계산하며 로트별 비율을 평균하지 않습니다.</p></div></details>
+          </div>
         </article>
         ${renderInspectionDefectModal(a,scopeLabel)}
         ${renderInspectionPhotoViewer(a)}
