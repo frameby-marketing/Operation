@@ -1043,15 +1043,6 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
 .iu-summary { display:flex; align-items:center; gap:8px; margin-top:20px; padding:10px 12px; border-radius:9px; background:var(--ov035); }
 .iu-summary strong { font-size:12px; font-weight:600; color:var(--text2); line-height:1.6; }
 .iu-summary-dot { width:6px; height:6px; background:var(--cyan); border-radius:100%; flex:0 0 auto; }
-.iu-table-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:18px 0 10px; }
-.iu-table-head h3 { margin:0; font-size:13px; font-weight:700; }
-.iu-table-head > span { color:var(--muted); font-size:10px; }
-.iu-table-wrap { overflow-x:auto; }
-.iu-table { width:100%; min-width:720px; border-collapse:collapse; font-variant-numeric:tabular-nums; }
-.iu-table th { padding:10px 12px; font-size:11px; font-weight:600; text-align:right; color:var(--muted); background:var(--ov03); border-bottom:1px solid var(--panel-line); }
-.iu-table td { padding:17px 12px; font-size:15px; text-align:right; border-bottom:1px solid var(--panel-line); white-space:nowrap; vertical-align:middle; }
-.iu-table th:first-child,.iu-table td:first-child { width:31%; padding-left:12px; text-align:left; white-space:normal; }
-.iu-table .iu-lot-row:hover { background:var(--ov025); }
 .iu-product { display:inline-flex; align-items:baseline; gap:9px; padding:0; border:0; border-radius:3px; background:none; color:var(--text); font-size:14px; font-weight:700; text-align:left; line-height:1.6; overflow-wrap:anywhere; }
 .iu-product > span { color:var(--muted); font-size:12px; font-weight:400; }
 .iu-product:hover { color:var(--cyan); }
@@ -1060,30 +1051,11 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
 .iu-status.pending { color:var(--yellow); }
 .iu-status.complete { color:var(--green); }
 .iu-status.check { color:var(--red); }
-.iu-unit { font-size:10px; font-weight:400; color:var(--muted); margin-left:3px; }
-.iu-cell-progress { min-width:170px; }
-.iu-cell-progress > div:first-child { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; }
-.iu-cell-progress strong { font-size:15px; font-weight:650; }
-.iu-cell-progress > div:first-child > span { font-size:11px; color:var(--muted); }
-.iu-track { height:5px; background:var(--ov08); border-radius:99px; overflow:hidden; }
-.iu-track > span { display:block; height:100%; border-radius:inherit; background:var(--cyan); }
-.iu-track.is-complete > span { background:var(--green); }
-.iu-remaining { color:var(--yellow); font-weight:800; }
-.iu-defect-button { background:none; border:0; border-radius:3px; color:var(--red); font-size:16px; font-weight:800; text-align:right; padding:0; }
-.iu-defect-button:hover { text-decoration:underline; text-underline-offset:4px; }
-.iu-defect-rate { display:block; color:var(--muted); font-size:10px; font-weight:400; margin-top:5px; }
-.iu-defect-button.is-zero { color:var(--muted); font-weight:500; }
-.iu-number-note { color:var(--muted); font-size:11px; }
-.iu-report { display:flex; gap:16px; align-items:flex-start; padding:14px 12px; background:var(--ov025); border-bottom:1px solid var(--panel-line); }
-.iu-report > span { color:var(--text2); font-size:11px; font-weight:700; white-space:nowrap; line-height:1.7; }
-.iu-report p { color:var(--text2); font-size:11px; line-height:1.7; margin:0; overflow-wrap:anywhere; }
-.iu-report p + p { color:var(--muted); margin-top:3px; }
 .iu-footer-note { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px 20px; padding:12px 0 15px; color:var(--muted); font-size:10px; line-height:1.65; }
 .iu-notice { margin:0 0 15px; padding:10px 12px; border-left:3px solid var(--yellow); background:var(--ov035); color:var(--text2); font-size:11px; line-height:1.7; }
 .iu-notice summary { cursor:pointer; color:var(--yellow); font-weight:650; }
 .iu-notice p { color:var(--muted); margin:7px 0 0; overflow-wrap:anywhere; }
-.iu-table .iu-lot-detail td { width:auto; padding:0; white-space:normal; }
-.iu-lot-detail-body { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; padding:16px 18px; background:var(--ov035); border-left:2px solid var(--cyan); }
+.iu-lot-detail-body { display:grid; grid-template-columns:1fr; gap:16px; padding:16px 18px; background:var(--ov035); border-left:2px solid var(--cyan); }
 .iu-lot-detail-body > div > span { display:block; margin-bottom:6px; font-size:10px; color:var(--muted); }
 .iu-lot-detail-body strong { color:var(--text2); font-size:11px; font-weight:500; line-height:1.7; overflow-wrap:anywhere; }
 .iu-lot-photos { display:flex; flex-wrap:wrap; gap:5px; }
@@ -1113,24 +1085,6 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
  .iu-metric:nth-child(odd) { padding-left:0; border-left:0; }
  .iu-metric > strong,.iu-metric > button { font-size:27px; }
  .iu-metric > em { font-size:10px; }
- .iu-table-head { align-items:flex-start; flex-direction:column; gap:5px; }
- .iu-table-wrap { overflow:visible; }
- .iu-table { display:block; min-width:0; }
- .iu-table caption { display:none; }
- .iu-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
- .iu-table tbody { display:block; }
- .iu-table .iu-lot-row { display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; padding:15px 0; border-bottom:1px solid var(--panel-line); }
- .iu-table .iu-lot-row td { display:block; width:auto; padding:0; border:0; text-align:left; font-size:16px; min-width:0; }
- .iu-table .iu-lot-row td:first-child { grid-column:1/-1; width:auto; padding:0; }
- .iu-table td[data-label]:before { content:attr(data-label); display:block; margin-bottom:6px; font-size:10px; color:var(--muted); font-weight:400; }
- .iu-product { font-size:14px; }
- .iu-cell-progress { min-width:0; }
- .iu-cell-progress > div:first-child { margin-bottom:7px; gap:6px; }
- .iu-cell-progress > div:first-child > span { font-size:10px; }
- .iu-defect-button { text-align:left; }
- .iu-report { flex-direction:column; gap:5px; }
- .iu-lot-detail,.iu-table .iu-lot-detail td { display:block; }
- .iu-lot-detail-body { grid-template-columns:1fr; gap:12px; }
  .iu-fold > summary { flex-wrap:wrap; }
 }
 
@@ -1139,6 +1093,69 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
 .iu-detail-sections > .iu-fold { border-top:0; min-width:0; }
 .iu-detail-sections > .iu-fold[open] { grid-column:1/-1; }
 @media(max-width:650px) { .iu-detail-sections { grid-template-columns:1fr; column-gap:0; } .iu-detail-sections > .iu-fold + .iu-fold { border-top:1px solid var(--panel-line); } }
+/* 제품별 그래프 카드: 입고·검수·잔여는 동일한 수량 축, 불량률은 별도 백분율 축 */
+.ig-section-heading { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:17px 0 12px; }
+.ig-section-heading h3 { margin:0; font-size:14px; }
+.ig-section-heading > span { color:var(--muted); font-size:11px; }
+.ig-card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.ig-lot { padding:18px; border:1px solid var(--panel-line); border-radius:18px; background:var(--ov025); min-width:0; }
+.ig-lot-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:15px; }
+.ig-lot-name { min-width:0; }
+.ig-lot .iu-product { font-size:16px; line-height:1.45; }
+.ig-lot .iu-product-meta { margin-top:7px; font-size:10px; }
+.ig-lot-rate { text-align:right; flex:0 0 auto; }
+.ig-lot-rate strong { display:block; font-size:22px; font-weight:800; color:var(--green); letter-spacing:-.6px; line-height:1.2; font-variant-numeric:tabular-nums; }
+.ig-lot-rate span { display:block; color:var(--muted); font-size:10px; margin-top:5px; }
+.ig-lot-rate.defect strong { color:var(--red); }
+.ig-chart-axis,.ig-bar-row { display:grid; grid-template-columns:64px minmax(0,1fr) 84px; align-items:center; gap:10px; }
+.ig-chart-axis { margin-bottom:10px; color:var(--muted); font-size:9px; }
+.ig-chart-axis > div { display:flex; justify-content:space-between; }
+.ig-bars { display:grid; gap:14px; }
+.ig-bar-label { font-size:12px; font-weight:600; color:var(--text2); }
+.ig-bar-track { height:15px; border-radius:5px; background:var(--ov04); position:relative; overflow:hidden; }
+.ig-bar-track:after { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,transparent 49.7%,var(--ov06) 49.7%,var(--ov06) 50.3%,transparent 50.3%); }
+.ig-bar-fill { display:block; height:100%; border-radius:5px; background:var(--cyan); }
+.ig-bar-row.complete .ig-bar-fill { background:var(--green); }
+.ig-bar-row.remaining .ig-bar-fill { background:var(--yellow); }
+.ig-bar-row.defect .ig-bar-fill { background:var(--red); }
+.ig-bar-number { text-align:right; white-space:nowrap; color:var(--text); font-size:18px; font-weight:750; letter-spacing:-.3px; line-height:1.1; font-variant-numeric:tabular-nums; }
+.ig-bar-number small { font-size:10px; font-weight:400; color:var(--muted); margin-left:3px; }
+.ig-bar-row.remaining .ig-bar-number { color:var(--yellow); }
+.ig-bar-row.defect .ig-bar-number { color:var(--red); }
+.ig-number-button { border:0; border-radius:3px; background:none; padding:0; }
+.ig-number-button:hover { text-decoration:underline; text-underline-offset:4px; }
+.ig-defect { display:block; width:100%; padding:13px 0 0; margin-top:17px; border:0; border-top:1px solid var(--panel-line); border-radius:0; background:none; text-align:left; }
+.ig-defect-title { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:9px; }
+.ig-defect-title > span { font-size:12px; font-weight:600; color:var(--text2); }
+.ig-defect-title > span small { display:block; font-size:10px; color:var(--muted); font-weight:400; margin-top:4px; }
+.ig-defect-title strong { color:var(--red); font-size:22px; white-space:nowrap; font-weight:800; font-variant-numeric:tabular-nums; }
+.ig-defect-title strong small { color:var(--muted); font-size:10px; font-weight:400; margin-left:3px; }
+.ig-defect-title em { font-size:12px; font-style:normal; font-weight:500; padding-left:10px; }
+.ig-defect-title strong > span { padding-left:8px; font-size:12px; font-weight:400; }
+.ig-defect-track { height:5px; background:var(--ov06); border-radius:99px; overflow:hidden; }
+.ig-defect-track > span { display:block; height:100%; background:var(--red); border-radius:inherit; }
+.ig-defect:hover .ig-defect-title > span { color:var(--red); }
+.ig-defect.is-zero .ig-defect-title strong { color:var(--muted); }
+.ig-lot .iu-lot-detail { margin-top:14px; border-top:1px solid var(--panel-line); }
+.ig-lot .iu-lot-detail-body { padding:13px 0 0; gap:10px; border:0; background:none; }
+.ig-lot .iu-lot-detail-body > div > span { margin-bottom:3px; }
+.ig-period-foot { display:flex; justify-content:space-between; gap:8px; margin-top:18px; padding-top:12px; border-top:1px solid var(--panel-line); color:var(--muted); font-size:11px; }
+.ig-empty { grid-column:1/-1; padding:36px 20px; text-align:center; color:var(--muted); font-size:13px; }
+@media(max-width:1100px) { .ig-chart-axis,.ig-bar-row { grid-template-columns:58px minmax(0,1fr) 73px; gap:7px; } .ig-lot { padding:16px; } .ig-lot .iu-product { font-size:14px; } .ig-bar-number { font-size:17px; } }
+@media(max-width:850px) { .ig-card-grid { grid-template-columns:1fr; } }
+@media(max-width:650px) {
+ .ig-section-heading { flex-direction:column; gap:6px; }
+ .ig-section-heading > span { font-size:10px; }
+ .ig-lot { padding:15px 13px; }
+ .ig-lot-heading { gap:10px; }
+ .ig-lot-rate strong { font-size:20px; }
+ .ig-chart-axis,.ig-bar-row { grid-template-columns:56px minmax(0,1fr) 66px; gap:6px; }
+ .ig-bar-label { font-size:11px; }
+ .ig-bar-number { font-size:17px; }
+ .ig-bar-track { height:14px; }
+ .ig-bars { gap:15px; }
+ .ig-defect-title em { padding-left:8px; font-size:11px; }
+}
 
 </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
@@ -4994,10 +5011,6 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
       const periodPhotoSources = new Set(a.periodDetails.map(row => row.sourceIndex));
       const displayPhotos = periodMode ? a.photos.filter(photo => periodPhotoSources.has(photo.sourceIndex)) : a.photos;
       const photoAnalysis = { ...a, photos:displayPhotos };
-      const defectButton = (qty, inspected, lotId = '') => {
-        const action = lotId ? 'openInspectionDefectDetail(event,this.dataset.lot)' : 'openInspectionDefectDetail(event)';
-        return `<button type="button" class="iu-defect-button ${qty === 0 ? 'is-zero' : ''}" data-lot="${safeHtml(lotId)}" onclick="${action}" aria-label="${safeHtml(lotId || scopeLabel)} 불량 ${fmt(qty)}개 사유 보기">${fmt(qty)}<span class="iu-defect-rate">${rate(qty,inspected)}${qty > 0 ? ' · 사유 보기 ↗' : ''}</span></button>`;
-      };
       const productCell = lot => {
         let label = hasQuantityIssue(lot) || !lot.linked ? '수량 확인' : lot.remaining > 0 ? (lot.inspected > 0 ? '검수중' : '검수 대기') : lot.inboundQty > 0 ? '검수 완료' : '입고 확인';
         let tone = hasQuantityIssue(lot) || !lot.linked ? 'check' : lot.remaining > 0 ? 'pending' : lot.inboundQty > 0 ? 'complete' : '';
@@ -5015,7 +5028,6 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
       const metrics = periodMode
         ? metric('검수수량',fmt(a.periodInspected),'개','선택기간 검수 내역 합계') + metric('불량수량',fmt(a.periodDefect),'개','클릭하면 불량 사유 보기','is-defect',true) + metric('불량률',rate(a.periodDefect,a.periodInspected),'','불량수량 ÷ 검수수량') + metric('검수 진행일',fmt(a.periodDayCount),'일','검수 기록이 있는 날짜 수')
         : metric('입고수량',fmt(a.totalInbound),'개',`${fmt(a.lots.length)}개 로트 합계`) + metric('검수 완료',fmt(a.totalInspected),'개',`불량 포함 · 입고 대비 ${rate(a.totalInspected,a.totalInbound)}`,'is-inspected') + metric('잔여 검수',fmt(a.remaining),'개',pendingCount ? `${fmt(pendingCount)}개 로트 검수 필요` : a.totalInbound > 0 ? '선택 로트 검수 완료' : '입고수량 확인 필요',a.remaining ? 'is-remaining' : '') + metric('누적 불량',fmt(a.totalDefect),'개',`검수 대비 ${rate(a.totalDefect,a.totalInspected)} · 사유 보기 ↗`,a.totalDefect ? 'is-defect' : '',true);
-      const headers = periodMode ? ['제품 / 관리번호','검수 진행일','검수수량','불량수량 / 불량률','최근 검수일'] : ['제품 / 관리번호','입고수량','검수 완료 · 진행률','잔여 검수','불량수량 · 불량률'];
       const renderLotDetail = lot => {
         if (state.inspection.expandedLot !== lot.managementNo) return '';
         const lotDetails = defectRows.filter(row => row.managementNo === lot.managementNo);
@@ -5027,24 +5039,35 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
         const reasons = [...reasonMap].sort((x,y) => y[1]-x[1]).map(([name,qty]) => `${safeHtml(name)} ${fmt(qty)}개`).join(' · ');
         const actions = [...new Set(lotDetails.map(row => row.action).filter(Boolean))];
         const lotPhotos = displayPhotos.filter(photo => photo.managementNo === lot.managementNo);
-        return `<tr class="iu-lot-detail"><td colspan="5"><div class="iu-lot-detail-body"><div><span>입고 / 공급사</span><strong>${dateStr(lot.inboundDate)} · ${safeHtml(lot.supplier || '공급사 미입력')}</strong></div><div><span>${periodMode ? '선택기간' : '누적'} 불량 사유</span><strong>${reasons || '등록된 불량 사유 없음'}</strong></div><div><span>기록된 조치</span><strong>${actions.map(safeHtml).join(' · ') || '조치 내용 미입력'}</strong></div>${lotPhotos.length ? `<div><span>불량 사진</span><div class="iu-lot-photos">${lotPhotos.map((photo,i) => `<button type="button" class="inspection-photo-table-button" onclick="openInspectionPhoto(${photo.index},event)">사진 ${i+1} 보기</button>`).join('')}</div></div>` : ''}</div></td></tr>`;
+        return `<div class="iu-lot-detail"><div class="iu-lot-detail-body"><div><span>입고 / 공급사</span><strong>${dateStr(lot.inboundDate)} · ${safeHtml(lot.supplier || '공급사 미입력')}</strong></div><div><span>${periodMode ? '선택기간' : '누적'} 불량 사유</span><strong>${reasons || '등록된 불량 사유 없음'}</strong></div><div><span>기록된 조치</span><strong>${actions.map(safeHtml).join(' · ') || '조치 내용 미입력'}</strong></div>${lotPhotos.length ? `<div><span>불량 사진</span><div class="iu-lot-photos">${lotPhotos.map((photo,i) => `<button type="button" class="inspection-photo-table-button" onclick="openInspectionPhoto(${photo.index},event)">사진 ${i+1} 보기</button>`).join('')}</div></div>` : ''}</div></div>`;
       };
-      const rows = lots.map(lot => {
-        if (periodMode) {
-          const item = periodByLot.get(lot.managementNo);
-          return `<tr class="iu-lot-row"><td>${productCell(lot)}</td><td data-label="검수 진행일">${item ? fmt(item.days.size) + '일' : '—'}</td><td data-label="검수수량">${fmt(item?.inspected || 0)}</td><td data-label="불량 / 불량률">${defectButton(item?.defect || 0,item?.inspected || 0,lot.managementNo)}</td><td data-label="최근 검수일">${item?.latest ? dateStr(item.latest) : '<span class="iu-number-note">기간 내 검수 없음</span>'}</td></tr>${renderLotDetail(lot)}`;
-        }
-        return `<tr class="iu-lot-row"><td>${productCell(lot)}</td><td data-label="입고수량">${fmt(lot.inboundQty)}<small class="iu-unit">개</small></td><td data-label="검수 완료 / 진행률"><div class="iu-cell-progress"><div><strong>${fmt(lot.inspected)}<small class="iu-unit">개</small></strong><span>${rate(lot.inspected,lot.inboundQty)}</span></div><div class="iu-track ${lot.inboundQty > 0 && lot.inspected >= lot.inboundQty ? 'is-complete' : ''}" role="progressbar" aria-label="${safeHtml(lot.managementNo)} 검수 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${width(lot.inspected,lot.inboundQty)}" aria-valuetext="${rate(lot.inspected,lot.inboundQty)}"><span style="width:${width(lot.inspected,lot.inboundQty)}%"></span></div></div></td><td data-label="잔여 검수" class="${lot.remaining ? 'iu-remaining' : ''}">${fmt(lot.remaining)}<small class="iu-unit">개</small></td><td data-label="불량 / 불량률">${defectButton(lot.defect,lot.inspected,lot.managementNo)}</td></tr>${renderLotDetail(lot)}`;
+      const maxQty = Math.max(1,...lots.flatMap(lot => periodMode
+        ? [periodByLot.get(lot.managementNo)?.inspected || 0,periodByLot.get(lot.managementNo)?.defect || 0]
+        : [lot.inboundQty,lot.inspected,lot.remaining]));
+      const scaleStep = Math.pow(10,Math.floor(Math.log10(maxQty))) / 2;
+      const chartMax = Math.ceil(maxQty / scaleStep) * scaleStep;
+      const renderBar = (label,amount,tone,lot,defectAction = false) => {
+        const number = `${fmt(amount)}<small>개</small>`;
+        return `<div class="ig-bar-row ${tone}" data-kind="${tone}" data-amount="${amount}" data-max="${chartMax}" aria-label="${safeHtml(lot.sku || lot.managementNo)} ${label} ${fmt(amount)}개"><span class="ig-bar-label">${label}</span><div class="ig-bar-track"><span class="ig-bar-fill" style="width:${width(amount,chartMax)}%"></span></div>${defectAction ? `<button type="button" class="ig-bar-number ig-number-button" data-lot="${safeHtml(lot.managementNo)}" onclick="openInspectionDefectDetail(event,this.dataset.lot)" aria-label="${safeHtml(lot.managementNo)} 불량 사유 보기">${number}</button>` : `<strong class="ig-bar-number">${number}</strong>`}</div>`;
+      };
+      const chartCards = lots.map(lot => {
+        const period = periodByLot.get(lot.managementNo);
+        const inspected = periodMode ? period?.inspected || 0 : lot.inspected;
+        const defect = periodMode ? period?.defect || 0 : lot.defect;
+        const progressText = periodMode ? rate(defect,inspected) : rate(inspected,lot.inboundQty);
+        return `<section class="ig-lot" data-lot="${safeHtml(lot.managementNo)}" aria-label="${safeHtml(lot.sku || lot.managementNo)} 수량 비교 카드">
+          <div class="ig-lot-heading"><div class="ig-lot-name">${productCell(lot)}</div><div class="ig-lot-rate ${periodMode && defect > 0 ? 'defect' : ''}"><strong>${progressText}</strong><span>${periodMode ? '불량률' : '검수 진행'}</span></div></div>
+          <div class="ig-chart-axis" aria-hidden="true"><span>수량</span><div><span>0</span><span>${fmt(chartMax / 2)}</span><span>${fmt(chartMax)}개</span></div><span></span></div>
+          <div class="ig-bars">${periodMode
+            ? renderBar('검수수량',inspected,'complete',lot) + renderBar('불량수량',defect,'defect',lot,true)
+            : renderBar('입고',lot.inboundQty,'inbound',lot) + renderBar('검수 완료',inspected,'complete',lot) + renderBar('잔여 검수',lot.remaining,'remaining',lot)}</div>
+          ${periodMode ? `<div class="ig-period-foot"><span>검수 ${period ? period.days.size : 0}일</span><span>최근 검수 ${period?.latest ? dateStr(period.latest) : '기록 없음'}</span></div>` : `<button type="button" class="ig-defect ${defect === 0 ? 'is-zero' : ''}" data-lot="${safeHtml(lot.managementNo)}" onclick="openInspectionDefectDetail(event,this.dataset.lot)" aria-label="${safeHtml(lot.managementNo)} 불량 ${fmt(defect)}개 사유 보기"><div class="ig-defect-title"><span>검수 중 불량 <small>검수 완료에 포함</small></span><strong>${fmt(defect)}<small>개</small><em>${rate(defect,inspected)}</em><span aria-hidden="true">↗</span></strong></div><div class="ig-defect-track"><span style="width:${width(defect,inspected)}%"></span></div></button>`}
+          ${renderLotDetail(lot)}
+        </section>`;
       }).join('');
-      const pendingNames = lots.filter(lot => lot.remaining > 0).slice(0,2).map(lot => `${safeHtml(lot.sku || lot.managementNo)} ${fmt(lot.remaining)}개`).join(', ');
-      const mostDefect = lots.map(lot => ({lot, qty:periodMode ? (periodByLot.get(lot.managementNo)?.defect || 0) : lot.defect})).sort((x,y)=>y.qty-x.qty)[0];
-      const reportSummary = !a.lots.length ? '' : periodMode
-        ? (a.periodDetails.length ? `기간 내 ${fmt(a.periodDayCount)}일 검수 기록 · 불량률 ${rate(a.periodDefect,a.periodInspected)} (기간 검수수량 기준)` : '선택한 기간에는 검수 기록이 없습니다.')
-        : (pendingCount ? `검수할 물량: ${pendingNames}${pendingCount > 2 ? ` 외 ${fmt(pendingCount-2)}개 로트` : ''}` : a.totalInbound > 0 ? '선택 로트의 잔여 검수는 없습니다.' : '입고수량을 확인해 주세요.');
-      const defectReport = mostDefect?.qty > 0 ? `불량수량 최다: ${safeHtml(mostDefect.lot.sku || mostDefect.lot.managementNo)} · ${fmt(mostDefect.qty)}개` : '';
       const detailTable = `<div class="table-wrap"><table><thead><tr><th>검수일</th><th>관리번호</th><th>제품 / SKU</th><th class="right">검수수량</th><th class="right">불량수량</th><th class="right">불량률</th><th>불량유형</th><th>원인</th><th>조치</th><th>사진</th></tr></thead><tbody>${detailRows.map(row => `<tr><td>${safeHtml(row.dateText || dateStr(row.date))}</td><td>${safeHtml(row.managementNo)}</td><td>${safeHtml(a.lotById.get(row.managementNo)?.sku || '—')}</td><td class="right">${fmt(row.inspected)}</td><td class="right">${fmt(row.defect)}</td><td class="right">${rate(row.defect,row.inspected)}</td><td>${safeHtml(row.type || '—')}</td><td>${safeHtml(row.cause || '—')}</td><td>${safeHtml(row.action || '—')}</td><td>${row.photoIndexes.length ? `<button type="button" class="inspection-photo-table-button" onclick="openInspectionPhoto(${row.photoIndexes[0]},event)">사진 ${fmt(row.photoIndexes.length)}장</button>` : '—'}</td></tr>`).join('') || '<tr><td colspan="10" class="muted">표시할 검수 상세 내역이 없습니다.</td></tr>'}</tbody></table></div>`;
       const notice = a.mismatchLots.length || a.orphanDetails.length || quantityIssues.length
-        ? `<details class="iu-notice"><summary>데이터 확인 필요${a.mismatchLots.length ? ` · 누적·상세 불일치 ${fmt(a.mismatchLots.length)}개 로트` : ''}${a.orphanDetails.length ? ` · 연결되지 않은 검수 ${fmt(a.orphanDetails.length)}행` : ''}${quantityIssues.length ? ` · 수량 범위 오류 ${fmt(quantityIssues.length)}개 로트` : ''}</summary>${a.mismatchLots.length ? `<p>생산입고의 검수완료·누적불량과 검수불량 상세 합계가 다릅니다: ${a.mismatchLots.map(lot => safeHtml(lot.managementNo)).join(', ')}. 누적 화면은 생산입고 값을, 선택기간 화면은 검수불량 상세 값을 표시합니다.</p>` : ''}${a.orphanDetails.length ? `<p>생산입고에 같은 관리번호가 없어 합계에서 제외된 검수 내역: ${[...new Set(a.orphanDetails.map(row => safeHtml(row.managementNo)))].join(', ')}.</p>` : ''}${quantityIssues.length ? `<p>검수수량이 입고보다 많거나, 불량이 검수보다 많거나, 음수인 로트: ${quantityIssues.map(lot => safeHtml(lot.managementNo)).join(', ')}. 원본 입력값을 확인해 주세요. 진행 막대는 최대 100%까지만 표시합니다.</p>` : ''}</details>` : '';
+        ? `<details class="iu-notice"><summary>데이터 확인 필요${a.mismatchLots.length ? ` · 누적·상세 불일치 ${fmt(a.mismatchLots.length)}개 로트` : ''}${a.orphanDetails.length ? ` · 연결되지 않은 검수 ${fmt(a.orphanDetails.length)}행` : ''}${quantityIssues.length ? ` · 수량 범위 오류 ${fmt(quantityIssues.length)}개 로트` : ''}</summary>${a.mismatchLots.length ? `<p>생산입고의 검수완료·누적불량과 검수불량 상세 합계가 다릅니다: ${a.mismatchLots.map(lot => safeHtml(lot.managementNo)).join(', ')}. 누적 화면은 생산입고 값을, 선택기간 화면은 검수불량 상세 값을 표시합니다.</p>` : ''}${a.orphanDetails.length ? `<p>생산입고에 같은 관리번호가 없어 합계에서 제외된 검수 내역: ${[...new Set(a.orphanDetails.map(row => safeHtml(row.managementNo)))].join(', ')}.</p>` : ''}${quantityIssues.length ? `<p>검수수량이 입고보다 많거나, 불량이 검수보다 많거나, 음수인 로트: ${quantityIssues.map(lot => safeHtml(lot.managementNo)).join(', ')}. 원본 입력값을 확인해 주세요.</p>` : ''}</details>` : '';
       grid(`
         <article class="card full inspection-unified" aria-label="생산입고 및 검수 통합 현황">
           <div class="iu-head"><div><h2>생산입고 · 검수 현황</h2><p>${safeHtml(scopeLabel)}${allSelected ? ` · ${fmt(a.lots.length)}개 로트` : ''} <span class="iu-context-divider">/</span> ${periodMode ? safeHtml(periodLabel) + ' 검수일 기준' : '전체 누적 기준'}</p></div>
@@ -5053,16 +5076,15 @@ html[data-theme="light"] .inv-china-options strong:not(.has-stock){color:#64748b
               <div class="inspection-lot-panel" ${state.inspection.lotFilterOpen ? '' : 'hidden'}>
                 <div class="inspection-lot-panel-head"><strong>비교할 로트 선택</strong><div class="inspection-lot-actions"><button type="button" onclick="setAllInspectionLots(true)">전체 선택</button><button type="button" onclick="setAllInspectionLots(false)">선택 해제</button></div></div>
                 <div class="inspection-lot-checks"><label class="inspection-lot-check"><input id="inspectionAllLots" type="checkbox" ${allSelected ? 'checked' : ''} onchange="setAllInspectionLots(this.checked)"><span class="inspection-lot-check-copy"><strong>전체 로트</strong><span>모든 관리번호</span></span><span class="inspection-lot-check-qty">${fmt(a.allLots.length)}건</span></label>${lotChecks || '<div class="empty">선택 가능한 로트가 없습니다.</div>'}</div>
-                <div class="inspection-lot-selection-note">선택한 로트가 요약 · 비교표 · 사진 · 상세 내역에 함께 반영됩니다.</div>
+                <div class="inspection-lot-selection-note">선택한 로트가 카드 · 그래프 · 사진 · 상세 내역에 함께 반영됩니다.</div>
               </div>
             </div>
           </div>
           <div class="iu-basis"><div class="iu-tabs" role="group" aria-label="검수 집계 기준"><button type="button" aria-pressed="${!periodMode}" onclick="setInspectionBasis('cumulative')">누적 현황</button><button type="button" aria-pressed="${periodMode}" onclick="setInspectionBasis('period')">선택기간 검수</button></div><span class="iu-basis-note">${periodMode ? '상단 기간 필터 적용' : '상단 기간 필터와 무관'}</span></div>
           <div class="iu-overview"><div class="iu-metrics">${metrics}</div><div class="iu-summary"><span class="iu-summary-dot" aria-hidden="true"></span><strong>${summary}</strong></div></div>
-          <div class="iu-table-head"><h3>${periodMode ? '로트별 기간 실적' : '로트별 비교'}</h3><span>${periodMode ? '검수수량 많은 순' : '잔여 검수 많은 순 · 검수 완료는 불량 포함'}</span></div>
-          <div class="iu-table-wrap"><table class="iu-table"><caption class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);">${periodMode ? '선택기간 검수 실적' : '누적 입고 및 검수 현황'} · ${safeHtml(scopeLabel)}</caption><thead><tr>${headers.map(label => `<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="${headers.length}" class="empty">${a.allLots.length ? '로트 선택에서 비교할 항목을 체크해 주세요.' : '등록된 생산입고 로트가 없습니다.'}</td></tr>`}</tbody></table></div>
-          ${reportSummary ? `<div class="iu-report" aria-label="보고 요약"><span>확인할 내용</span><div><p>${reportSummary}</p>${defectReport ? `<p>${defectReport}</p>` : ''}</div></div>` : ''}
-          <div class="iu-footer-note"><span>불량률 = ${periodMode ? '기간 불량 ÷ 기간 검수' : '누적 불량 ÷ 검수 완료'} · 제품명 클릭: 로트 상세 · 불량수량 클릭: 사유</span><span>${safeHtml(syncLabel)}</span></div>
+          <div class="ig-section-heading"><h3>제품별 ${periodMode ? '검수 실적' : '입고 · 검수 비교'}</h3><span>모든 카드가 같은 수량 축 · ${periodMode ? '검수수량' : '잔여 검수'} 많은 순</span></div>
+          <div class="ig-card-grid">${chartCards || `<div class="ig-empty">${a.allLots.length ? '로트 선택에서 비교할 제품을 체크해 주세요.' : '등록된 생산입고 로트가 없습니다.'}</div>`}</div>
+          <div class="iu-footer-note"><span>${periodMode ? '불량수량을 누르면 사유를 확인할 수 있습니다.' : '막대 길이 = 수량 · 불량은 검수 완료에 포함 · 빨간 막대 = 불량률 (0~100%)'} · 제품명 클릭: 상세</span><span>${safeHtml(syncLabel)}</span></div>
           ${notice}
           <div class="iu-detail-sections">
           <details class="iu-fold" ${state.inspection.photosSectionOpen ? 'open' : ''} ontoggle="state.inspection.photosSectionOpen=this.open"><summary>불량 사진 <span>${fmt(displayPhotos.length)}장 · ${periodMode ? '선택기간' : '전체 누적'}</span></summary><div class="iu-fold-body">${renderInspectionPhotoGallery(photoAnalysis,scopeLabel,true)}</div></details>
